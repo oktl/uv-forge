@@ -1,0 +1,44 @@
+{
+  "folders": [
+    {
+      "name": "core",
+      "create_init": true,
+      "files": [
+        "app.py",
+        "config.py"
+      ]
+    },
+    {
+      "name": "handlers",
+      "create_init": true,
+      "files": []
+    },
+    {
+      "name": "services",
+      "create_init": true,
+      "files": []
+    },
+    {
+      "name": "middleware",
+      "create_init": true,
+      "files": []
+    },
+    {
+      "name": "utils",
+      "create_init": true,
+      "files": [
+        "async_helpers.py",
+        "tasks.py"
+      ]
+    },
+    {
+      "name": "tests",
+      "create_init": true,
+      "root_level": true,
+      "files": [
+        "conftest.py",
+        "test_app.py"
+      ]
+    }
+  ]
+}

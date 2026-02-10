@@ -1,0 +1,23 @@
+{
+  "folders": [
+    "core",
+    "handlers",
+    {
+      "name": "scenes",
+      "subfolders": [
+        "menu",
+        "game"
+      ]
+    },
+    {
+      "name": "assets",
+      "create_init": false,
+      "subfolders": [
+        "images",
+        "sounds",
+        "fonts"
+      ]
+    },
+    "utils"
+  ]
+}

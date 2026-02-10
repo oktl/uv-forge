@@ -1,0 +1,48 @@
+{
+  "folders": [
+    {
+      "name": "cli",
+      "create_init": true,
+      "files": [
+        "main.py",
+        "config.py",
+        "utils.py"
+      ],
+      "subfolders": [
+        {
+          "name": "commands",
+          "files": []
+        }
+      ]
+    },
+    {
+      "name": "core",
+      "create_init": true,
+      "files": [
+        "models.py",
+        "validators.py"
+      ]
+    },
+    {
+      "name": "utils",
+      "create_init": true,
+      "files": [
+        "formatting.py",
+        "helpers.py"
+      ]
+    },
+    {
+      "name": "tests",
+      "create_init": true,
+      "root_level": true,
+      "files": [
+        "conftest.py",
+        "test_app.py"
+      ],
+      "subfolders": [
+        "commands",
+        "unit"
+      ]
+    }
+  ]
+}

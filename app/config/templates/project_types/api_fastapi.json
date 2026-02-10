@@ -1,0 +1,67 @@
+{
+  "folders": [
+    {
+      "name": "api",
+      "create_init": true,
+      "subfolders": [
+        {
+          "name": "routes",
+          "create_init": true,
+          "files": []
+        },
+        {
+          "name": "middleware",
+          "create_init": true,
+          "files": []
+        }
+      ],
+      "files": [
+        "dependencies.py"
+      ]
+    },
+    {
+      "name": "core",
+      "create_init": true,
+      "files": [
+        "config.py",
+        "security.py",
+        "logging.py"
+      ]
+    },
+    {
+      "name": "models",
+      "create_init": true,
+      "files": []
+    },
+    {
+      "name": "schemas",
+      "create_init": true,
+      "files": []
+    },
+    {
+      "name": "services",
+      "create_init": true,
+      "files": []
+    },
+    {
+      "name": "db",
+      "create_init": true,
+      "files": [
+        "database.py"
+      ]
+    },
+    {
+      "name": "tests",
+      "create_init": true,
+      "root_level": true,
+      "files": [
+        "conftest.py",
+        "test_app.py"
+      ],
+      "subfolders": [
+        "api",
+        "unit"
+      ]
+    }
+  ]
+}

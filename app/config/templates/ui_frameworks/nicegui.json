@@ -1,0 +1,30 @@
+{
+  "folders": [
+    "core",
+    "handlers",
+    "ui",
+    {
+      "name": "pages",
+      "subfolders": [
+        "home",
+        "dashboard"
+      ]
+    },
+    {
+      "name": "components",
+      "subfolders": [
+        "cards",
+        "forms"
+      ]
+    },
+    {
+      "name": "static",
+      "create_init": false,
+      "subfolders": [
+        "css",
+        "images"
+      ]
+    },
+    "utils"
+  ]
+}

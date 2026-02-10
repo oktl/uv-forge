@@ -1,0 +1,75 @@
+{
+  "folders": [
+    {
+      "name": "data",
+      "create_init": false,
+      "subfolders": [
+        "raw",
+        "processed",
+        "tfrecords"
+      ]
+    },
+    {
+      "name": "models",
+      "create_init": true,
+      "files": [
+        "model.py",
+        "layers.py"
+      ]
+    },
+    {
+      "name": "training",
+      "create_init": true,
+      "files": [
+        "train.py",
+        "callbacks.py",
+        "losses.py"
+      ]
+    },
+    {
+      "name": "inference",
+      "create_init": true,
+      "files": [
+        "predict.py",
+        "serving.py"
+      ]
+    },
+    {
+      "name": "utils",
+      "create_init": true,
+      "files": [
+        "data_pipeline.py",
+        "preprocessing.py",
+        "metrics.py"
+      ]
+    },
+    {
+      "name": "notebooks",
+      "create_init": false,
+      "files": [
+        "exploration.ipynb"
+      ]
+    },
+    {
+      "name": "configs",
+      "create_init": false,
+      "files": [
+        "config.yaml"
+      ]
+    },
+    {
+      "name": "tests",
+      "create_init": true,
+      "root_level": true,
+      "files": [
+        "conftest.py",
+        "test_app.py"
+      ]
+    },
+    {
+      "name": "saved_models",
+      "create_init": false,
+      "root_level": true
+    }
+  ]
+}

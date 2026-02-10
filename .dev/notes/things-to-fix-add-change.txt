@@ -1,0 +1,41 @@
+Things to fix
+
+
+Things to add:
+See if when in the help file a link is clicked it opens the url
+Not working now but is it possible?
+
+
+Things to change:
+Use haiku to update documentation
+    remove Python 3.9 - it reached end-of-life in October 2025
+
+    current state of app in:
+        CODE_READING_GUIDE.md
+        FINAL_SUMMARY.md
+
+
+Things we did yesterday 8 Feb 2026:
+enhanced UI
+    checkbox labels turn green if checked
+    added folder/file count to App Subfolders label
+    added checkmark icons to project path and name imputs if valid
+    disabled Build Project button until path and name are valid
+    added a dialog to cancel or confirm build project
+        includes info about the new project 
+    added a SnackBar to show build result status
+    added keyboard shortcut to build button - Ctrl+Enter / Cmd+Enter
+    updated tooltips for most UI controls
+
+Made it so we can create both a framework UI and other project type
+instead of being mutually exclusive
+
+Made it so a new project can have templates - complete or shell .py files
+    located in /config/templates/boilerplate/
+    some template files are common
+    each framework / other project type should have a folder
+    there is a recursive check to see if they exist
+    the default uv init main.py is replaced with the project's 
+        main.py if one exists in the boilerplate templates
+    added a test.py and conftest.py to tests folder
+    added a template for pyproject.toml that

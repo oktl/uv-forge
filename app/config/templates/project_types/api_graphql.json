@@ -1,0 +1,59 @@
+{
+  "folders": [
+    {
+      "name": "schema",
+      "create_init": true,
+      "files": [
+        "query.py",
+        "mutation.py",
+        "subscription.py"
+      ]
+    },
+    {
+      "name": "types",
+      "create_init": true,
+      "files": []
+    },
+    {
+      "name": "resolvers",
+      "create_init": true,
+      "files": []
+    },
+    {
+      "name": "loaders",
+      "create_init": true,
+      "files": [
+        "dataloader.py"
+      ]
+    },
+    {
+      "name": "core",
+      "create_init": true,
+      "files": [
+        "config.py",
+        "context.py"
+      ]
+    },
+    {
+      "name": "db",
+      "create_init": true,
+      "files": [
+        "database.py",
+        "models.py"
+      ]
+    },
+    {
+      "name": "tests",
+      "create_init": true,
+      "root_level": true,
+      "files": [
+        "conftest.py",
+        "test_app.py"
+      ],
+      "subfolders": [
+        "schema",
+        "resolvers"
+      ]
+    }
+  ]
+}

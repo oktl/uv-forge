@@ -1,0 +1,60 @@
+{
+  "folders": [
+    {
+      "name": "apps",
+      "create_init": true,
+      "subfolders": []
+    },
+    {
+      "name": "config",
+      "create_init": true,
+      "files": [
+        "settings.py",
+        "urls.py",
+        "wsgi.py",
+        "asgi.py"
+      ]
+    },
+    {
+      "name": "static",
+      "create_init": false,
+      "subfolders": [
+        "css",
+        "js",
+        "images"
+      ]
+    },
+    {
+      "name": "media",
+      "create_init": false,
+      "subfolders": []
+    },
+    {
+      "name": "templates",
+      "create_init": false,
+      "subfolders": [
+        "base",
+        "includes"
+      ]
+    },
+    {
+      "name": "tests",
+      "create_init": true,
+      "root_level": true,
+      "files": [
+        "conftest.py",
+        "test_app.py"
+      ]
+    },
+    {
+      "name": "requirements",
+      "create_init": false,
+      "root_level": true,
+      "files": [
+        "base.txt",
+        "dev.txt",
+        "prod.txt"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "folders": [
+    {
+      "name": "data",
+      "create_init": false,
+      "root_level": true,
+      "subfolders": [
+        "raw",
+        "processed",
+        "external"
+      ]
+    },
+    {
+      "name": "notebooks",
+      "create_init": false,
+      "root_level": true,
+      "subfolders": [
+        "exploratory",
+        "reports"
+      ]
+    },
+    {
+      "name": "src",
+      "create_init": true,
+      "root_level": true,
+      "subfolders": [
+        {
+          "name": "data",
+          "files": [
+            "make_dataset.py"
+          ]
+        },
+        {
+          "name": "features",
+          "files": [
+            "build_features.py"
+          ]
+        },
+        {
+          "name": "visualization",
+          "files": [
+            "visualize.py"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "reports",
+      "create_init": false,
+      "root_level": true,
+      "subfolders": [
+        "figures"
+      ]
+    },
+    {
+      "name": "models",
+      "create_init": false,
+      "root_level": true,
+      "subfolders": []
+    }
+  ]
+}

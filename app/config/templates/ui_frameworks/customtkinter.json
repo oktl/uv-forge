@@ -1,0 +1,25 @@
+{
+  "folders": [
+    "core",
+    "handlers",
+    "ui",
+    {
+      "name": "views",
+      "subfolders": [
+        "frames",
+        "dialogs",
+        "widgets"
+      ]
+    },
+    {
+      "name": "assets",
+      "create_init": false,
+      "subfolders": [
+        "images",
+        "icons",
+        "themes"
+      ]
+    },
+    "utils"
+  ]
+}

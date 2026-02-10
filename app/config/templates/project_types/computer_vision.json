@@ -1,0 +1,79 @@
+{
+  "folders": [
+    {
+      "name": "data",
+      "create_init": false,
+      "subfolders": [
+        "images",
+        "annotations",
+        "processed"
+      ]
+    },
+    {
+      "name": "models",
+      "create_init": true,
+      "files": [
+        "detector.py",
+        "classifier.py"
+      ]
+    },
+    {
+      "name": "preprocessing",
+      "create_init": true,
+      "files": [
+        "augmentation.py",
+        "transforms.py"
+      ]
+    },
+    {
+      "name": "training",
+      "create_init": true,
+      "files": [
+        "train.py",
+        "trainer.py"
+      ]
+    },
+    {
+      "name": "inference",
+      "create_init": true,
+      "files": [
+        "predict.py",
+        "visualize.py"
+      ]
+    },
+    {
+      "name": "utils",
+      "create_init": true,
+      "files": [
+        "image_utils.py",
+        "metrics.py",
+        "bbox.py"
+      ]
+    },
+    {
+      "name": "notebooks",
+      "create_init": false,
+      "files": [
+        "visualization.ipynb"
+      ]
+    },
+    {
+      "name": "tests",
+      "create_init": true,
+      "root_level": true,
+      "files": [
+        "conftest.py",
+        "test_app.py"
+      ]
+    },
+    {
+      "name": "outputs",
+      "create_init": false,
+      "root_level": true,
+      "subfolders": [
+        "predictions",
+        "checkpoints"
+      ]
+    }
+  ]
+}

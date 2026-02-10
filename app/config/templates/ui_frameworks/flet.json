@@ -1,0 +1,77 @@
+{
+  "folders": [
+      {
+      "name": ".dev",
+      "create_init": false,
+      "root_level": true,
+      "subfolders": [
+        "experiments",
+        "notes",
+        "scratch",
+        "screens"
+      ]
+    },
+      {
+      "name": "assets",
+      "create_init": false,
+      "subfolders": [
+        "icons",
+        "images",
+        "themes",
+        "docs"
+      ]
+    },
+    {
+      "name": "config",
+      "files": [
+        "config.py",
+        "constants.py" ,
+        "logger.py"
+      ]
+    },
+    {
+      "name": "core",
+      "files": [
+        "state.py",
+        "state_validator.py",
+        "ui_state_sync.py"
+      ]
+      },
+    {
+      "name": "handlers",
+      "files": [
+        "button_state.py",
+        "event_handlers.py",
+        "handler_factory.py"
+      ]
+    },
+    {
+      "name": "services",
+      "files": [
+      ]
+    },
+    {
+      "name": "ui",
+      "files": [
+        "components.py",
+        "dialogs.py",
+        "theme_manager.py",
+        "ui_config.py"
+      ]
+    },
+    {
+      "name": "utils",
+      "files": [
+        "async_executor.py"     
+      ]
+    },
+    {
+      "name": "tests",
+      "root_level": true,
+      "files": [
+        "conftest.py",
+        "test_app.py"
+      ]
+    }
+  ]
+}

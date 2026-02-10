@@ -1,0 +1,42 @@
+{
+  "folders": [
+    {
+      "name": "views",
+      "create_init": true,
+      "files": [
+        "index.py"
+      ]
+    },
+    {
+      "name": "static",
+      "create_init": false,
+      "subfolders": [
+        "css",
+        "js",
+        "images"
+      ]
+    },
+    {
+      "name": "templates",
+      "create_init": false,
+      "files": [
+        "base.html",
+        "index.html"
+      ]
+    },
+    {
+      "name": "utils",
+      "create_init": true,
+      "files": []
+    },
+    {
+      "name": "tests",
+      "create_init": true,
+      "root_level": true,
+      "files": [
+        "conftest.py",
+        "test_app.py"
+      ]
+    }
+  ]
+}

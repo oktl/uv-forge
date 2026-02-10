@@ -1,0 +1,24 @@
+{
+  "folders": [
+    "core",
+    "handlers",
+    "ui",
+    {
+      "name": "widgets",
+      "subfolders": [
+        "custom",
+        "dialogs"
+      ]
+    },
+    {
+      "name": "resources",
+      "create_init": false,
+      "subfolders": [
+        "icons",
+        "qml",
+        "qss"
+      ]
+    },
+    "utils"
+  ]
+}

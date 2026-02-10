@@ -1,0 +1,29 @@
+{
+  "folders": [
+    "core",
+    "handlers",
+    {
+      "name": "pages",
+      "subfolders": [
+        "home",
+        "dashboard"
+      ]
+    },
+    {
+      "name": "components",
+      "subfolders": [
+        "charts",
+        "widgets"
+      ]
+    },
+    {
+      "name": "assets",
+      "create_init": false,
+      "subfolders": [
+        "images",
+        "data"
+      ]
+    },
+    "utils"
+  ]
+}

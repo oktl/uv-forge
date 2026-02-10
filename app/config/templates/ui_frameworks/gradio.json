@@ -1,0 +1,23 @@
+{
+  "folders": [
+    "core",
+    "handlers",
+    "ui",
+    {
+      "name": "interfaces",
+      "subfolders": [
+        "demos",
+        "components"
+      ]
+    },
+    {
+      "name": "assets",
+      "create_init": false,
+      "subfolders": [
+        "images",
+        "examples"
+      ]
+    },
+    "utils"
+  ]
+}

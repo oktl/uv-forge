@@ -1,0 +1,62 @@
+{
+  "folders": [
+    {
+      "name": "data",
+      "create_init": false,
+      "subfolders": [
+        "raw",
+        "processed",
+        "external"
+      ]
+    },
+    {
+      "name": "models",
+      "create_init": true,
+      "files": [
+        "train.py",
+        "predict.py"
+      ]
+    },
+    {
+      "name": "features",
+      "create_init": true,
+      "files": [
+        "build_features.py",
+        "engineering.py"
+      ]
+    },
+    {
+      "name": "notebooks",
+      "create_init": false,
+      "files": [
+        "exploratory.ipynb"
+      ]
+    },
+    {
+      "name": "utils",
+      "create_init": true,
+      "files": [
+        "preprocessing.py",
+        "evaluation.py"
+      ]
+    },
+    {
+      "name": "tests",
+      "create_init": true,
+      "root_level": true,
+      "files": [
+        "conftest.py",
+        "test_app.py"
+      ]
+    },
+    {
+      "name": "outputs",
+      "create_init": false,
+      "root_level": true,
+      "subfolders": [
+        "models",
+        "figures"
+      ]
+    }
+  ]
+}

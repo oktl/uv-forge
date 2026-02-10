@@ -1,0 +1,60 @@
+{
+  "folders": [
+    {
+      "name": "app",
+      "create_init": true,
+      "subfolders": [
+        {
+          "name": "blueprints",
+          "create_init": true,
+          "subfolders": []
+        },
+        {
+          "name": "models",
+          "create_init": true,
+          "files": []
+        },
+        {
+          "name": "static",
+          "create_init": false,
+          "subfolders": [
+            "css",
+            "js",
+            "images"
+          ]
+        },
+        {
+          "name": "templates",
+          "create_init": false,
+          "subfolders": [
+            "base",
+            "includes"
+          ]
+        }
+      ],
+      "files": [
+        "config.py",
+        "extensions.py"
+      ]
+    },
+    {
+      "name": "migrations",
+      "create_init": false,
+      "root_level": true,
+      "subfolders": []
+    },
+    {
+      "name": "tests",
+      "create_init": true,
+      "root_level": true,
+      "files": [
+        "conftest.py",
+        "test_app.py"
+      ],
+      "subfolders": [
+        "unit",
+        "functional"
+      ]
+    }
+  ]
+}

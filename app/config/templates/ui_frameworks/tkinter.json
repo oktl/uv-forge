@@ -1,0 +1,16 @@
+{
+  "folders": [
+    "core",
+    "handlers",
+    "ui",
+    {
+      "name": "views",
+      "subfolders": [
+        "frames",
+        "dialogs",
+        "windows"
+      ]
+    },
+    "utils"
+  ]
+}

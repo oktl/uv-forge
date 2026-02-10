@@ -1,0 +1,56 @@
+{
+  "folders": [
+    {
+      "name": "pages",
+      "create_init": true,
+      "files": [
+        "base_page.py"
+      ]
+    },
+    {
+      "name": "scripts",
+      "create_init": true,
+      "files": [
+        "main.py"
+      ]
+    },
+    {
+      "name": "selectors",
+      "create_init": true,
+      "files": []
+    },
+    {
+      "name": "utils",
+      "create_init": true,
+      "files": [
+        "browser.py",
+        "helpers.py",
+        "waits.py"
+      ]
+    },
+    {
+      "name": "config",
+      "create_init": true,
+      "files": [
+        "settings.py"
+      ]
+    },
+    {
+      "name": "data",
+      "create_init": false,
+      "subfolders": [
+        "inputs",
+        "outputs"
+      ]
+    },
+    {
+      "name": "tests",
+      "create_init": true,
+      "root_level": true,
+      "files": [
+        "conftest.py",
+        "test_app.py"
+      ]
+    }
+  ]
+}

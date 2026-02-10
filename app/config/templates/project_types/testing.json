@@ -1,0 +1,46 @@
+{
+  "folders": [
+    {
+      "name": "tests",
+      "create_init": true,
+      "files": [
+        "conftest.py",
+        "test_app.py"
+      ],
+      "subfolders": [
+        {
+          "name": "unit",
+          "create_init": true,
+          "files": []
+        },
+        {
+          "name": "integration",
+          "create_init": true,
+          "files": []
+        },
+        {
+          "name": "e2e",
+          "create_init": true,
+          "files": []
+        }
+      ]
+    },
+    {
+      "name": "fixtures",
+      "create_init": true,
+      "files": []
+    },
+    {
+      "name": "mocks",
+      "create_init": true,
+      "files": []
+    },
+    {
+      "name": "utils",
+      "create_init": true,
+      "files": [
+        "helpers.py"
+      ]
+    }
+  ]
+}

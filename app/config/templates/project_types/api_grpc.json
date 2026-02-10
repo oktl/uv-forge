@@ -1,0 +1,63 @@
+{
+  "folders": [
+    {
+      "name": "protos",
+      "create_init": false,
+      "files": [
+        "service.proto"
+      ]
+    },
+    {
+      "name": "generated",
+      "create_init": true,
+      "files": []
+    },
+    {
+      "name": "services",
+      "create_init": true,
+      "files": [
+        "server.py"
+      ]
+    },
+    {
+      "name": "handlers",
+      "create_init": true,
+      "files": []
+    },
+    {
+      "name": "interceptors",
+      "create_init": true,
+      "files": [
+        "auth.py",
+        "logging.py"
+      ]
+    },
+    {
+      "name": "core",
+      "create_init": true,
+      "files": [
+        "config.py"
+      ]
+    },
+    {
+      "name": "utils",
+      "create_init": true,
+      "files": [
+        "validators.py"
+      ]
+    },
+    {
+      "name": "tests",
+      "create_init": true,
+      "root_level": true,
+      "files": [
+        "conftest.py",
+        "test_app.py"
+      ],
+      "subfolders": [
+        "integration",
+        "unit"
+      ]
+    }
+  ]
+}

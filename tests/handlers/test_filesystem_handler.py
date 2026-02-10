@@ -1,0 +1,474 @@
+"""Test suite for filesystem_handler.py"""
+
+import tempfile
+from pathlib import Path
+import pytest
+
+from app.handlers.filesystem_handler import (
+    flatten_folders_for_display,
+    flatten_folders_with_paths,
+    create_folders,
+    setup_app_structure,
+)
+
+
+class TestFlattenFoldersForDisplay:
+    """Tests for flatten_folders_for_display function"""
+
+    def test_simple_string_folders(self):
+        """Test simple string folders"""
+        folders = ["core", "utils", "handlers"]
+        result = flatten_folders_for_display(folders)
+        assert result == ["core", "utils", "handlers"]
+
+    def test_folder_no_init_marker(self):
+        """Test folder with no __init__ marker"""
+        folders = [{"name": "assets", "create_init": False}]
+        result = flatten_folders_for_display(folders)
+        assert result == ["assets [no __init__]"]
+
+    def test_folder_root_marker(self):
+        """Test folder with root marker"""
+        folders = [{"name": "tests", "root_level": True}]
+        result = flatten_folders_for_display(folders)
+        assert result == ["tests [root]"]
+
+    def test_folder_both_markers(self):
+        """Test folder with both markers"""
+        folders = [{"name": "docs", "create_init": False, "root_level": True}]
+        result = flatten_folders_for_display(folders)
+        assert result == ["docs [no __init__, root]"]
+
+    def test_folder_with_files(self):
+        """Test folder with files"""
+        folders = [{"name": "models", "files": ["user.py", "post.py"]}]
+        result = flatten_folders_for_display(folders)
+        expected = ["models", "  user.py", "  post.py"]
+        assert result == expected
+
+    def test_nested_subfolders(self):
+        """Test nested subfolders"""
+        folders = [
+            {
+                "name": "app",
+                "subfolders": ["core", {"name": "utils", "subfolders": ["helpers"]}]
+            }
+        ]
+        result = flatten_folders_for_display(folders)
+        expected = ["app", "  core", "  utils", "    helpers"]
+        assert result == expected
+
+    def test_mixed_folder_types(self):
+        """Test mixed folder types"""
+        folders = [
+            "simple",
+            {"name": "complex", "create_init": False, "files": ["test.py"]},
+            "another_simple"
+        ]
+        result = flatten_folders_for_display(folders)
+        expected = ["simple", "complex [no __init__]", "  test.py", "another_simple"]
+        assert result == expected
+
+
+class TestFlattenFoldersWithPaths:
+    """Tests for flatten_folders_with_paths function"""
+
+    def test_simple_folders_with_paths(self):
+        """Test simple folders with paths"""
+        folders = ["core", "utils"]
+        result = flatten_folders_with_paths(folders)
+        expected = [("core", [0]), ("utils", [1])]
+        assert result == expected
+
+    def test_folder_with_files_and_paths(self):
+        """Test folder with files and paths"""
+        folders = [{"name": "models", "files": ["user.py"]}]
+        result = flatten_folders_with_paths(folders)
+        expected = [("models", [0]), ("  user.py", [0, "files", 0])]
+        assert result == expected
+
+    def test_nested_subfolders_with_paths(self):
+        """Test nested subfolders with paths"""
+        folders = [{"name": "app", "subfolders": ["core"]}]
+        result = flatten_folders_with_paths(folders)
+        expected = [("app", [0]), ("  core", [0, "subfolders", 0])]
+        assert result == expected
+
+
+class TestCreateFolders:
+    """Tests for create_folders function"""
+
+    def test_create_simple_string_folders(self):
+        """Test create simple string folders"""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            parent = Path(tmpdir)
+            folders = ["core", "utils"]
+            create_folders(parent, folders)
+
+            assert (parent / "core").exists()
+            assert (parent / "core" / "__init__.py").exists()
+            assert (parent / "utils").exists()
+            assert (parent / "utils" / "__init__.py").exists()
+
+    def test_create_folder_without_init(self):
+        """Test create folder without __init__.py"""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            parent = Path(tmpdir)
+            folders = [{"name": "assets", "create_init": False}]
+            create_folders(parent, folders)
+
+            assert (parent / "assets").exists()
+            assert not (parent / "assets" / "__init__.py").exists()
+
+    def test_create_folder_with_files(self):
+        """Test create folder with files"""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            parent = Path(tmpdir)
+            folders = [
+                {
+                    "name": "handlers",
+                    "files": ["git_handler.py", "uv_handler.py"]
+                }
+            ]
+            create_folders(parent, folders)
+
+            assert (parent / "handlers" / "git_handler.py").exists()
+            assert (parent / "handlers" / "uv_handler.py").exists()
+
+    def test_create_nested_subfolders(self):
+        """Test create nested subfolders"""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            parent = Path(tmpdir)
+            folders = [
+                {
+                    "name": "app",
+                    "subfolders": [
+                        "core",
+                        {"name": "utils", "subfolders": ["helpers"]}
+                    ]
+                }
+            ]
+            create_folders(parent, folders)
+
+            assert (parent / "app").exists()
+            assert (parent / "app" / "core").exists()
+            assert (parent / "app" / "core" / "__init__.py").exists()
+            assert (parent / "app" / "utils").exists()
+            assert (parent / "app" / "utils" / "helpers").exists()
+
+    def test_parent_create_init_propagation(self):
+        """Test parent create_init propagation"""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            parent = Path(tmpdir)
+            folders = [
+                {
+                    "name": "no_init",
+                    "create_init": False,
+                    "subfolders": ["child"]
+                }
+            ]
+            create_folders(parent, folders)
+
+            assert (parent / "no_init").exists()
+            assert not (parent / "no_init" / "__init__.py").exists()
+            assert (parent / "no_init" / "child").exists()
+            assert not (parent / "no_init" / "child" / "__init__.py").exists()
+
+
+class TestSetupAppStructure:
+    """Tests for setup_app_structure function"""
+
+    def test_basic_app_structure(self):
+        """Test basic app structure creation"""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            project_path = Path(tmpdir)
+            folders = ["core", "utils"]
+            setup_app_structure(project_path, folders)
+
+            assert (project_path / "app").exists()
+            assert (project_path / "app" / "__init__.py").exists()
+            assert (project_path / "app" / "core").exists()
+            assert (project_path / "app" / "utils").exists()
+
+    def test_root_level_folders(self):
+        """Test root-level folders"""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            project_path = Path(tmpdir)
+            folders = [
+                {"name": "tests", "root_level": True},
+                "core"
+            ]
+            setup_app_structure(project_path, folders)
+
+            assert (project_path / "tests").exists()
+            assert (project_path / "app" / "core").exists()
+            assert not (project_path / "app" / "tests").exists()
+
+    def test_main_py_moved_to_app(self):
+        """Test main.py moved to app/main.py"""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            project_path = Path(tmpdir)
+            (project_path / "main.py").write_text("# main file")
+
+            setup_app_structure(project_path, [])
+
+            assert not (project_path / "main.py").exists()
+            assert (project_path / "app" / "main.py").exists()
+            assert (project_path / "app" / "main.py").read_text() == "# main file"
+
+    def test_works_without_main_py(self):
+        """Test works without main.py"""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            project_path = Path(tmpdir)
+            setup_app_structure(project_path, [])
+
+            assert (project_path / "app").exists()
+
+
+class TestCreateFoldersSkipFiles:
+    """Tests for create_folders with skip_files=True."""
+
+    def test_skip_files_skips_template_files(self):
+        """When skip_files=True, template files in 'files' lists are not created."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            parent = Path(tmpdir)
+            folders = [
+                {
+                    "name": "core",
+                    "files": ["state.py", "models.py"],
+                }
+            ]
+            create_folders(parent, folders, skip_files=True)
+
+            assert (parent / "core").exists()
+            assert (parent / "core" / "__init__.py").exists()
+            assert not (parent / "core" / "state.py").exists()
+            assert not (parent / "core" / "models.py").exists()
+
+    def test_skip_files_still_creates_init(self):
+        """When skip_files=True, __init__.py is still created (it's directory infrastructure)."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            parent = Path(tmpdir)
+            folders = [
+                {
+                    "name": "handlers",
+                    "create_init": True,
+                    "files": ["event_handlers.py"],
+                    "subfolders": ["utils"],
+                }
+            ]
+            create_folders(parent, folders, skip_files=True)
+
+            assert (parent / "handlers" / "__init__.py").exists()
+            assert (parent / "handlers" / "utils" / "__init__.py").exists()
+            assert not (parent / "handlers" / "event_handlers.py").exists()
+
+    def test_skip_files_propagates_to_subfolders(self):
+        """skip_files is passed through to nested subfolder creation."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            parent = Path(tmpdir)
+            folders = [
+                {
+                    "name": "core",
+                    "subfolders": [
+                        {"name": "utils", "files": ["helper.py"]}
+                    ],
+                }
+            ]
+            create_folders(parent, folders, skip_files=True)
+
+            assert (parent / "core" / "utils").exists()
+            assert not (parent / "core" / "utils" / "helper.py").exists()
+
+    def test_setup_app_structure_skip_files(self):
+        """setup_app_structure passes skip_files through to create_folders."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            project_path = Path(tmpdir)
+            folders = [{"name": "utils", "files": ["constants.py"]}]
+            setup_app_structure(project_path, folders, skip_files=True)
+
+            assert (project_path / "app" / "utils").exists()
+            assert (project_path / "app" / "utils" / "__init__.py").exists()
+            assert not (project_path / "app" / "utils" / "constants.py").exists()
+
+
+class TestCreateFoldersWithResolver:
+    """Tests for create_folders with a BoilerplateResolver."""
+
+    def _make_resolver(self, tmpdir, files=None):
+        """Create a BoilerplateResolver with common boilerplate files."""
+        from app.core.boilerplate_resolver import BoilerplateResolver
+
+        bp = Path(tmpdir) / "bp" / "common"
+        bp.mkdir(parents=True)
+        for name, content in (files or {}).items():
+            (bp / name).write_text(content)
+        return BoilerplateResolver(
+            "testproj", boilerplate_dir=Path(tmpdir) / "bp"
+        )
+
+    def test_file_gets_boilerplate_content(self):
+        """Files with matching boilerplate get their content populated."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            resolver = self._make_resolver(
+                tmpdir, {"state.py": "# boilerplate for {{project_name}}"}
+            )
+            parent = Path(tmpdir) / "project"
+            parent.mkdir()
+            folders = [{"name": "core", "files": ["state.py"]}]
+            create_folders(parent, folders, resolver=resolver)
+
+            created = parent / "core" / "state.py"
+            assert created.exists()
+            assert created.read_text() == "# boilerplate for testproj"
+
+    def test_file_empty_when_resolver_returns_none(self):
+        """Files without matching boilerplate are created empty."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            resolver = self._make_resolver(tmpdir)
+            parent = Path(tmpdir) / "project"
+            parent.mkdir()
+            folders = [{"name": "core", "files": ["unknown.py"]}]
+            create_folders(parent, folders, resolver=resolver)
+
+            created = parent / "core" / "unknown.py"
+            assert created.exists()
+            assert created.read_text() == ""
+
+    def test_backward_compatible_without_resolver(self):
+        """create_folders works unchanged when resolver is not passed."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            parent = Path(tmpdir)
+            folders = [{"name": "core", "files": ["models.py"]}]
+            create_folders(parent, folders)
+
+            created = parent / "core" / "models.py"
+            assert created.exists()
+            assert created.read_text() == ""
+
+    def test_resolver_propagates_to_subfolders(self):
+        """Resolver is passed through to nested subfolder creation."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            resolver = self._make_resolver(
+                tmpdir, {"helper.py": "# helper"}
+            )
+            parent = Path(tmpdir) / "project"
+            parent.mkdir()
+            folders = [
+                {
+                    "name": "core",
+                    "subfolders": [
+                        {"name": "utils", "files": ["helper.py"]}
+                    ],
+                }
+            ]
+            create_folders(parent, folders, resolver=resolver)
+
+            created = parent / "core" / "utils" / "helper.py"
+            assert created.exists()
+            assert created.read_text() == "# helper"
+
+    def test_setup_app_structure_with_resolver(self):
+        """setup_app_structure passes resolver through to create_folders."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            resolver = self._make_resolver(
+                tmpdir, {"constants.py": "APP = '{{project_name}}'"}
+            )
+            project_path = Path(tmpdir) / "project"
+            project_path.mkdir()
+            folders = [{"name": "utils", "files": ["constants.py"]}]
+            setup_app_structure(project_path, folders, resolver=resolver)
+
+            created = project_path / "app" / "utils" / "constants.py"
+            assert created.exists()
+            assert created.read_text() == "APP = 'testproj'"
+
+    def test_setup_app_structure_replaces_uv_main_with_boilerplate(self):
+        """UV's default main.py is replaced by boilerplate main.py if available."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            resolver = self._make_resolver(
+                tmpdir, {"main.py": "# {{project_name}} app entry point"}
+            )
+            project_path = Path(tmpdir) / "project"
+            project_path.mkdir()
+            # Simulate uv init creating a default main.py
+            (project_path / "main.py").write_text('print("Hello")')
+            setup_app_structure(project_path, [], resolver=resolver)
+
+            app_main = project_path / "app" / "main.py"
+            assert app_main.exists()
+            assert app_main.read_text() == "# testproj app entry point"
+
+    def test_setup_app_structure_keeps_uv_main_without_boilerplate(self):
+        """UV's default main.py is kept when no boilerplate main.py exists."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            resolver = self._make_resolver(tmpdir)  # no main.py boilerplate
+            project_path = Path(tmpdir) / "project"
+            project_path.mkdir()
+            (project_path / "main.py").write_text('print("Hello")')
+            setup_app_structure(project_path, [], resolver=resolver)
+
+            app_main = project_path / "app" / "main.py"
+            assert app_main.exists()
+            assert app_main.read_text() == 'print("Hello")'
+
+    def test_setup_app_structure_no_replace_when_skip_files(self):
+        """main.py is not replaced when skip_files=True."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            resolver = self._make_resolver(
+                tmpdir, {"main.py": "# boilerplate"}
+            )
+            project_path = Path(tmpdir) / "project"
+            project_path.mkdir()
+            (project_path / "main.py").write_text('print("Hello")')
+            setup_app_structure(
+                project_path, [], resolver=resolver, skip_files=True,
+            )
+
+            app_main = project_path / "app" / "main.py"
+            assert app_main.exists()
+            assert app_main.read_text() == 'print("Hello")'
+
+    def test_setup_app_structure_replaces_readme_with_boilerplate(self):
+        """UV's empty README.md is replaced by boilerplate if available."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            resolver = self._make_resolver(
+                tmpdir, {"README.md": "# {{project_name}}\n\nA great project."}
+            )
+            project_path = Path(tmpdir) / "project"
+            project_path.mkdir()
+            # Simulate uv init creating an empty README.md
+            (project_path / "README.md").touch()
+            setup_app_structure(project_path, [], resolver=resolver)
+
+            readme = project_path / "README.md"
+            assert readme.exists()
+            assert readme.read_text() == "# testproj\n\nA great project."
+
+    def test_setup_app_structure_keeps_readme_without_boilerplate(self):
+        """UV's README.md is kept when no boilerplate README exists."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            resolver = self._make_resolver(tmpdir)  # no README boilerplate
+            project_path = Path(tmpdir) / "project"
+            project_path.mkdir()
+            (project_path / "README.md").write_text("# existing")
+            setup_app_structure(project_path, [], resolver=resolver)
+
+            readme = project_path / "README.md"
+            assert readme.read_text() == "# existing"
+
+    def test_setup_app_structure_no_readme_replace_when_skip_files(self):
+        """README.md is not replaced when skip_files=True."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            resolver = self._make_resolver(
+                tmpdir, {"README.md": "# boilerplate readme"}
+            )
+            project_path = Path(tmpdir) / "project"
+            project_path.mkdir()
+            (project_path / "README.md").touch()
+            setup_app_structure(
+                project_path, [], resolver=resolver, skip_files=True,
+            )
+
+            readme = project_path / "README.md"
+            assert readme.read_text() == ""

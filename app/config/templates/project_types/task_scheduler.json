@@ -1,0 +1,49 @@
+{
+  "folders": [
+    {
+      "name": "jobs",
+      "create_init": true,
+      "files": [
+        "base_job.py"
+      ]
+    },
+    {
+      "name": "scheduler",
+      "create_init": true,
+      "files": [
+        "manager.py",
+        "triggers.py"
+      ]
+    },
+    {
+      "name": "config",
+      "create_init": true,
+      "files": [
+        "settings.py",
+        "jobs_config.py"
+      ]
+    },
+    {
+      "name": "utils",
+      "create_init": true,
+      "files": [
+        "logging.py",
+        "notifications.py"
+      ]
+    },
+    {
+      "name": "logs",
+      "create_init": false,
+      "root_level": true
+    },
+    {
+      "name": "tests",
+      "create_init": true,
+      "root_level": true,
+      "files": [
+        "conftest.py",
+        "test_app.py"
+      ]
+    }
+  ]
+}

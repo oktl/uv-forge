@@ -1,0 +1,65 @@
+{
+  "folders": [
+    {
+      "name": "scrapers",
+      "create_init": true,
+      "files": [
+        "base_scraper.py"
+      ],
+      "subfolders": []
+    },
+    {
+      "name": "parsers",
+      "create_init": true,
+      "files": [
+        "html_parser.py",
+        "json_parser.py"
+      ]
+    },
+    {
+      "name": "models",
+      "create_init": true,
+      "files": [
+        "items.py"
+      ]
+    },
+    {
+      "name": "utils",
+      "create_init": true,
+      "files": [
+        "helpers.py",
+        "validators.py"
+      ]
+    },
+    {
+      "name": "data",
+      "create_init": false,
+      "root_level": true,
+      "subfolders": [
+        "raw",
+        "processed"
+      ]
+    },
+    {
+      "name": "config",
+      "create_init": true,
+      "files": [
+        "settings.py",
+        "urls.py"
+      ]
+    },
+    {
+      "name": "tests",
+      "create_init": true,
+      "root_level": true,
+      "files": [
+        "conftest.py",
+        "test_app.py"
+      ],
+      "subfolders": [
+        "scrapers",
+        "parsers"
+      ]
+    }
+  ]
+}
