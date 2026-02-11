@@ -154,7 +154,6 @@ def build_main_view(page: ft.Page, state: "AppState") -> ft.Control:
     controls.project_path_input = ft.TextField(
         value=state.project_path,
         hint_text="Project Root Directory",
-        # bgcolor=ft.Colors.GREY_800,
         expand=True,
     )
 
@@ -172,7 +171,6 @@ def build_main_view(page: ft.Page, state: "AppState") -> ft.Control:
     controls.project_name_input = ft.TextField(
         hint_text="Enter project name...",
         expand=True,
-        # bgcolor=ft.Colors.GREY_800,
         border_color=ft.Colors.BLUE,
         border_width=1,
     )
@@ -182,10 +180,8 @@ def build_main_view(page: ft.Page, state: "AppState") -> ft.Control:
         value=state.selected_python_version,
         options=[ft.dropdown.Option(v) for v in PYTHON_VERSIONS],
         tooltip="Choose a version, default is 3.14",
-        # bgcolor=ft.Colors.GREY_800,
         expand=True,
         border_color=ft.Colors.BLUE,
-        width=300,
     )
 
     controls.create_git_checkbox = ft.Checkbox(
@@ -247,7 +243,6 @@ def build_main_view(page: ft.Page, state: "AppState") -> ft.Control:
 
     controls.build_project_button = ft.Button(
         content="Build Project",
-        # icon=ft.Icons.
         tooltip="Enter a valid path and project name to enable.",
         bgcolor=ft.Colors.GREEN,
         color=ft.Colors.WHITE,
@@ -359,7 +354,6 @@ def build_main_view(page: ft.Page, state: "AppState") -> ft.Control:
     # Put it all together
     layout = ft.Column(
         controls=[
-            # controls.main_title,
             ft.Container(height=10),  # Spacer
             project_name_container,  # Set Project Path and Name
             options_container,  # Set Options
