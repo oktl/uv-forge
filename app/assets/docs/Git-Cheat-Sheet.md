@@ -16,6 +16,9 @@
 
 ```bash
 git log --oneline          # compact list of commits
+# Example output:
+# 1315bf0 Add Git cheat sheet to docs
+# 699db39 Initial commit: Full project structure
 git diff                   # what changed since last commit (unstaged)
 git diff --staged          # what's staged and ready to commit
 git show abc1234           # see exactly what one commit changed
