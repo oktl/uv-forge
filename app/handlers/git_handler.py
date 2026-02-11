@@ -26,6 +26,10 @@ from loguru import logger
 from app.utils.constants import DEFAULT_GIT_HUB_ROOT
 
 
+def _run_git(cmd: list[str], cwd: Path, *, check: bool = True) -> subprocess.CompletedProcess:
+    return subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, check=check)
+
+
 def handle_git_init(project_path: Path, use_git: bool) -> None:
     """Phase 1: Create local and bare repositories and connect them.
 
@@ -60,13 +64,7 @@ def handle_git_init(project_path: Path, use_git: bool) -> None:
     # Initialize local repo (idempotent)
     git_dir = project_path / ".git"
     if not git_dir.exists():
-        result = subprocess.run(
-            ["git", "init", "--initial-branch=main"],
-            cwd=project_path,
-            capture_output=True,
-            text=True,
-            check=True,
-        )
+        result = _run_git(["git", "init", "--initial-branch=main"], cwd=project_path)
         logger.debug("git init: {}", result.stdout.strip())
     else:
         logger.debug("Local .git already exists, skipping git init")
@@ -76,36 +74,18 @@ def handle_git_init(project_path: Path, use_git: bool) -> None:
     logger.debug("Bare repo path: {}", bare_repo_path)
     bare_repo_path.mkdir(parents=True, exist_ok=True)
     if not (bare_repo_path / "HEAD").exists():
-        result = subprocess.run(
-            ["git", "init", "--bare"],
-            cwd=bare_repo_path,
-            capture_output=True,
-            text=True,
-            check=True,
-        )
+        result = _run_git(["git", "init", "--bare"], cwd=bare_repo_path)
         logger.debug("git init --bare: {}", result.stdout.strip())
     else:
         logger.debug("Bare repo already exists, skipping bare init")
 
     # Add remote origin (update URL if it already exists)
     try:
-        subprocess.run(
-            ["git", "remote", "add", "origin", str(bare_repo_path)],
-            cwd=project_path,
-            capture_output=True,
-            text=True,
-            check=True,
-        )
+        _run_git(["git", "remote", "add", "origin", str(bare_repo_path)], cwd=project_path)
         logger.debug("Added remote origin: {}", bare_repo_path)
     except subprocess.CalledProcessError:
         logger.debug("Remote origin exists, updating URL to: {}", bare_repo_path)
-        subprocess.run(
-            ["git", "remote", "set-url", "origin", str(bare_repo_path)],
-            cwd=project_path,
-            capture_output=True,
-            text=True,
-            check=True,
-        )
+        _run_git(["git", "remote", "set-url", "origin", str(bare_repo_path)], cwd=project_path)
 
     logger.info("Git initialized successfully for: {}", project_path.name)
 
@@ -134,29 +114,13 @@ def finalize_git_setup(project_path: Path, use_git: bool) -> None:
     logger.info("Finalizing git setup for: {}", project_path.name)
 
     # Stage all files created during the build process
-    subprocess.run(
-        ["git", "add", "."],
-        cwd=project_path,
-        capture_output=True,
-        text=True,
-        check=True,
-    )
+    _run_git(["git", "add", "."], cwd=project_path)
 
     # Only commit if there are staged changes (prevents errors on empty projects)
-    status = subprocess.run(
-        ["git", "status", "--porcelain"],
-        cwd=project_path,
-        capture_output=True,
-        text=True,
-    )
+    status = _run_git(["git", "status", "--porcelain"], cwd=project_path, check=False)
     if status.stdout:
         # Verify git identity is configured before attempting to commit
-        identity = subprocess.run(
-            ["git", "config", "user.email"],
-            cwd=project_path,
-            capture_output=True,
-            text=True,
-        )
+        identity = _run_git(["git", "config", "user.email"], cwd=project_path, check=False)
         if not identity.stdout.strip():
             raise RuntimeError(
                 "Git identity not configured — commit would fail.\n"
@@ -165,22 +129,10 @@ def finalize_git_setup(project_path: Path, use_git: bool) -> None:
                 "  git config --global user.email \"you@example.com\""
             )
 
-        result = subprocess.run(
-            ["git", "commit", "-m", "Initial commit: Full project structure"],
-            cwd=project_path,
-            capture_output=True,
-            text=True,
-            check=True,
-        )
+        result = _run_git(["git", "commit", "-m", "Initial commit: Full project structure"], cwd=project_path)
         logger.debug("git commit: {}", result.stdout.strip())
 
-        result = subprocess.run(
-            ["git", "push", "-u", "origin", "HEAD"],
-            cwd=project_path,
-            capture_output=True,
-            text=True,
-            check=True,
-        )
+        result = _run_git(["git", "push", "-u", "origin", "HEAD"], cwd=project_path)
         logger.debug("git push: {}", result.stdout.strip())
         logger.info("Initial commit pushed to hub for: {}", project_path.name)
     else:
