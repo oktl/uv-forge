@@ -57,19 +57,15 @@ def validate_folder_name(name: str) -> tuple[bool, str]:
     if not name:
         return False, "Name cannot be empty."
 
-    # Check for invalid filesystem characters (allow dots for file extensions)
+    # Check for invalid filesystem characters (allow dots for file extensions and dotfiles)
     if not re.match(r"^[a-zA-Z0-9_.-]+$", name):
         return (
             False,
             "Name can only contain letters, numbers, hyphens, underscores, and periods.",
         )
 
-    # Check if it starts with a letter or underscore (Python package requirement)
-    if not re.match(r"^[a-zA-Z_]", name):
-        return False, "Name must start with a letter or underscore."
-
-    # Check for reserved names
-    if name in (".", "..", "~"):
+    # Check for reserved names (must come before any start-character checks)
+    if name in (".", ".."):
         return False, f"'{name}' is a reserved name and cannot be used."
 
     return True, ""
