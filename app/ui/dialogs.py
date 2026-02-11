@@ -62,7 +62,9 @@ def _create_dialog_title(
         return ft.Row(
             [
                 ft.Icon(icon, size=icon_size, color=colors["main_title"]),
-                ft.Text(text, size=UIConfig.DIALOG_TITLE_SIZE, color=colors["main_title"]),
+                ft.Text(
+                    text, size=UIConfig.DIALOG_TITLE_SIZE, color=colors["main_title"]
+                ),
             ],
             spacing=8,
         )
@@ -285,7 +287,7 @@ def create_edit_file_dialog(
     # Extract filename from path for display - add safety check
     try:
         filename = Path(file_path).name
-    except (ValueError, TypeError):
+    except ValueError, TypeError:
         filename = str(file_path)
 
     # Create editable text field
@@ -397,7 +399,9 @@ def create_project_type_dialog(
     # Iterate through categories from constants
     for category_name, category_data in PROJECT_TYPE_CATEGORIES.items():
         # Get color attribute from ft.Colors dynamically
-        light_color = getattr(ft.Colors, category_data["light_color"], ft.Colors.GREY_50)
+        light_color = getattr(
+            ft.Colors, category_data["light_color"], ft.Colors.GREY_50
+        )
         dark_color = getattr(ft.Colors, category_data["dark_color"], ft.Colors.GREY_900)
         bg_color = light_color if not is_dark_mode else dark_color
 
@@ -447,7 +451,9 @@ def create_project_type_dialog(
                 ft.Divider(
                     height=1,
                     thickness=1,
-                    color=ft.Colors.GREY_300 if not is_dark_mode else ft.Colors.GREY_700,
+                    color=ft.Colors.GREY_300
+                    if not is_dark_mode
+                    else ft.Colors.GREY_700,
                 )
             )
 
@@ -694,7 +700,7 @@ def create_add_item_dialog(
         else:
             try:
                 parent_path = ast.literal_eval(parent_value)
-            except (ValueError, SyntaxError):
+            except ValueError, SyntaxError:
                 parent_path = None
 
         on_add_callback(name, item_type, parent_path)

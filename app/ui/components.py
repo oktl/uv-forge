@@ -110,7 +110,7 @@ def create_section_box(
         border=ft.Border.all(1, colors["section_border"]),
         border_radius=8,
         padding=15,
-        width=550,
+        width=700,
     )
     return container, title_text
 
@@ -171,6 +171,7 @@ def build_main_view(page: ft.Page, state: "AppState") -> ft.Control:
 
     controls.project_name_input = ft.TextField(
         hint_text="Enter project name...",
+        expand=True,
         # bgcolor=ft.Colors.GREY_800,
         border_color=ft.Colors.BLUE,
         border_width=1,
@@ -182,6 +183,7 @@ def build_main_view(page: ft.Page, state: "AppState") -> ft.Control:
         options=[ft.dropdown.Option(v) for v in PYTHON_VERSIONS],
         tooltip="Choose a version, default is 3.14",
         # bgcolor=ft.Colors.GREY_800,
+        expand=True,
         border_color=ft.Colors.BLUE,
         width=300,
     )
@@ -222,7 +224,7 @@ def build_main_view(page: ft.Page, state: "AppState") -> ft.Control:
         border_radius=4,
         padding=10,
         height=200,
-        width=540,
+        width=700,
     )
 
     controls.auto_save_folder_changes = ft.Checkbox(
@@ -385,7 +387,11 @@ def build_main_view(page: ft.Page, state: "AppState") -> ft.Control:
             color=colors["main_title"],
         ),
         bgcolor=ft.Colors.TRANSPARENT,
-        actions=[controls.git_cheat_sheet_button, controls.help_button, controls.theme_toggle_button],
+        actions=[
+            controls.git_cheat_sheet_button,
+            controls.help_button,
+            controls.theme_toggle_button,
+        ],
         toolbar_height=30,
     )
 

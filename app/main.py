@@ -37,7 +37,7 @@ async def main(page: ft.Page) -> None:
 
         # Configure page-level settings including window size, colors, and title.
         page.title = "UV Project Creator"
-        page.window.width = 600
+        page.window.width = 750
         page.window.height = 1320
         page.padding = 30
 
