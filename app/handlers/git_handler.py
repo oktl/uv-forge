@@ -23,10 +23,12 @@ from pathlib import Path
 
 from loguru import logger
 
-from app.utils.constants import DEFAULT_GIT_HUB_ROOT
+from app.core.constants import DEFAULT_GIT_HUB_ROOT
 
 
-def _run_git(cmd: list[str], cwd: Path, *, check: bool = True) -> subprocess.CompletedProcess:
+def _run_git(
+    cmd: list[str], cwd: Path, *, check: bool = True
+) -> subprocess.CompletedProcess:
     return subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, check=check)
 
 
@@ -81,11 +83,16 @@ def handle_git_init(project_path: Path, use_git: bool) -> None:
 
     # Add remote origin (update URL if it already exists)
     try:
-        _run_git(["git", "remote", "add", "origin", str(bare_repo_path)], cwd=project_path)
+        _run_git(
+            ["git", "remote", "add", "origin", str(bare_repo_path)], cwd=project_path
+        )
         logger.debug("Added remote origin: {}", bare_repo_path)
     except subprocess.CalledProcessError:
         logger.debug("Remote origin exists, updating URL to: {}", bare_repo_path)
-        _run_git(["git", "remote", "set-url", "origin", str(bare_repo_path)], cwd=project_path)
+        _run_git(
+            ["git", "remote", "set-url", "origin", str(bare_repo_path)],
+            cwd=project_path,
+        )
 
     logger.info("Git initialized successfully for: {}", project_path.name)
 
@@ -120,16 +127,21 @@ def finalize_git_setup(project_path: Path, use_git: bool) -> None:
     status = _run_git(["git", "status", "--porcelain"], cwd=project_path, check=False)
     if status.stdout:
         # Verify git identity is configured before attempting to commit
-        identity = _run_git(["git", "config", "user.email"], cwd=project_path, check=False)
+        identity = _run_git(
+            ["git", "config", "user.email"], cwd=project_path, check=False
+        )
         if not identity.stdout.strip():
             raise RuntimeError(
                 "Git identity not configured — commit would fail.\n"
                 "Run these commands to fix it:\n"
-                "  git config --global user.name \"Your Name\"\n"
-                "  git config --global user.email \"you@example.com\""
+                '  git config --global user.name "Your Name"\n'
+                '  git config --global user.email "you@example.com"'
             )
 
-        result = _run_git(["git", "commit", "-m", "Initial commit: Full project structure"], cwd=project_path)
+        result = _run_git(
+            ["git", "commit", "-m", "Initial commit: Full project structure"],
+            cwd=project_path,
+        )
         logger.debug("git commit: {}", result.stdout.strip())
 
         result = _run_git(["git", "push", "-u", "origin", "HEAD"], cwd=project_path)

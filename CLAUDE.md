@@ -136,7 +136,7 @@ Files use `{{project_name}}` placeholders, substituted at build time. Adding new
 ## Key Architecture Decisions
 
 - **All imports use absolute `app.*` paths** (e.g., `from app.core.state import AppState`)
-- **Constants centralized in `app/utils/constants.py`** — do not create duplicate constant files
+- **Constants centralized in `app/core/constants.py`** — do not create duplicate constant files
 - **AppState is the single mutable state object** — passed to UI builder and handlers, never duplicated
 - **`page.controls_ref` and `page.state_ref`** store references for cross-module access
 - **Async pattern**: sync handlers wrapped via `HandlerFactory` / `AsyncExecutor.run()` to keep UI responsive

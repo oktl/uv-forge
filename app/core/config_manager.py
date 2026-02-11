@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Any, Optional
 
 from app.core.boilerplate_resolver import normalize_framework_name
-from app.utils.constants import (
+from app.core.constants import (
     TEMPLATES_DIR,
     UI_TEMPLATES_DIR,
     PROJECT_TYPE_TEMPLATES_DIR,

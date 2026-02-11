@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 
 import flet as ft
 
-from app.utils.constants import PYTHON_VERSIONS
+from app.core.constants import PYTHON_VERSIONS
 from app.ui.theme_manager import get_theme_colors
 from app.ui.ui_config import UIConfig
 

@@ -140,7 +140,7 @@ def _resolve_entry_point(
     Returns:
         Entry point string like "app.main:main", or None if no scripts section needed.
     """
-    from app.utils.constants import (
+    from app.core.constants import (
         DEFAULT_ENTRY_POINT,
         FRAMEWORK_ENTRY_POINT_MAP,
         PROJECT_TYPE_ENTRY_POINT_MAP,

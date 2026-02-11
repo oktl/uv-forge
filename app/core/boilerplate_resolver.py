@@ -7,7 +7,7 @@ Uses a fallback chain: framework-specific → project-type-specific → common �
 from pathlib import Path
 from typing import Optional
 
-from app.utils.constants import BOILERPLATE_DIR
+from app.core.constants import BOILERPLATE_DIR
 
 
 def normalize_framework_name(framework: str) -> str:

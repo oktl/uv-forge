@@ -7,7 +7,7 @@ state, including project configuration, UI state, and validation status.
 from dataclasses import dataclass, field
 from typing import Optional
 
-from app.utils.constants import DEFAULT_PROJECT_ROOT, DEFAULT_PYTHON_VERSION
+from app.core.constants import DEFAULT_PROJECT_ROOT, DEFAULT_PYTHON_VERSION
 
 
 @dataclass

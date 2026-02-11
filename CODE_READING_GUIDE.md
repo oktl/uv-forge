@@ -45,7 +45,7 @@
 **How the UI dialog works:**
 
 1. `app/ui/dialogs.py` - Dialog creation
-2. `app/utils/constants.py` - Project types & packages
+2. `app/core/constants.py` - Project types & packages
 3. `app/handlers/event_handlers.py` - Dialog handlers
 
 ---
@@ -1366,7 +1366,7 @@ ft.Container(bgcolor=colors["section_bg"])
 
 ### 📁 Utils (`app/utils/`)
 
-#### `app/utils/constants.py` (~310 lines)
+#### `app/core/constants.py` (~310 lines)
 
 **Purpose:** Application constants — single source of truth for everything
 
@@ -1790,7 +1790,7 @@ else:
 
 **Day 1: Foundation**
 
-1. `app/utils/constants.py` - Understand constants
+1. `app/core/constants.py` - Understand constants
 2. `app/core/models.py` - Understand data structures
 3. `app/core/state.py` - Understand state management
 4. `app/main.py` - See how it all starts
@@ -1836,12 +1836,12 @@ else:
 **"How does the enhanced dialog work?"**
 
 1. `app/ui/dialogs.py` - create_project_type_dialog()
-2. `app/utils/constants.py` - PROJECT_TYPE_PACKAGE_MAP
+2. `app/core/constants.py` - PROJECT_TYPE_PACKAGE_MAP
 3. `app/handlers/event_handlers.py` - _show_project_type_dialog()
 
 **"How does package installation work?"**
 
-1. `app/utils/constants.py` - Package maps
+1. `app/core/constants.py` - Package maps
 2. `app/core/project_builder.py` - Install logic
 3. `app/handlers/uv_handler.py` - install_package()
 
@@ -1905,7 +1905,7 @@ The codebase is well-organized, thoroughly tested, and a great example of:
 │     app/core/state.py → AppState                    │
 │                                                     │
 │  🎯 Constants:                                      │
-│     app/utils/constants.py → Everything!            │
+│     app/core/constants.py → Everything!            │
 │                                                     │
 │  🧪 Tests:                                          │
 │     tests/ → 370 tests, 100% passing!               │
@@ -1925,7 +1925,7 @@ The codebase is well-organized, thoroughly tested, and a great example of:
 | 📦 Package Install  | `app/handlers/uv_handler.py` → `install_package()`                             |
 | 📋 Templates        | `app/config/templates/ui_frameworks/`<br>`app/config/templates/project_types/` |
 | 💾 State            | `app/core/state.py` → `AppState`                                               |
-| 🎯 Constants        | `app/utils/constants.py` → Everything                                          |
+| 🎯 Constants        | `app/core/constants.py` → Everything                                          |
 | 📝 Boilerplate       | `app/core/boilerplate_resolver.py` → `BoilerplateResolver`                      |
 | 🧪 Tests            | `tests/` → 370 tests, 100% passing                                             |
 

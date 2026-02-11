@@ -8,7 +8,7 @@ import tempfile
 
 from app.handlers.event_handlers import Handlers
 from app.core.state import AppState
-from app.utils.constants import DEFAULT_PYTHON_VERSION
+from app.core.constants import DEFAULT_PYTHON_VERSION
 
 
 class MockControl:

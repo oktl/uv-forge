@@ -3,7 +3,7 @@
 
 import pytest
 from app.core.state import AppState
-from app.utils.constants import DEFAULT_PROJECT_ROOT, DEFAULT_PYTHON_VERSION
+from app.core.constants import DEFAULT_PROJECT_ROOT, DEFAULT_PYTHON_VERSION
 
 
 def test_appstate_initialization():

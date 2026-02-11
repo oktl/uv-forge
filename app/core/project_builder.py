@@ -20,7 +20,7 @@ from app.handlers.uv_handler import (
     run_uv_init,
     setup_virtual_env,
 )
-from app.utils.constants import (
+from app.core.constants import (
     DEFAULT_GIT_HUB_ROOT,
     FRAMEWORK_PACKAGE_MAP,
     PROJECT_TYPE_PACKAGE_MAP,

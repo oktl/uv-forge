@@ -30,7 +30,7 @@ from app.ui.dialogs import (
 )
 from app.ui.theme_manager import get_theme_colors
 from app.utils.async_executor import AsyncExecutor
-from app.utils.constants import DEFAULT_FOLDERS, DEFAULT_PYTHON_VERSION, GIT_CHEAT_SHEET_FILE, HELP_FILE
+from app.core.constants import DEFAULT_FOLDERS, DEFAULT_PYTHON_VERSION, GIT_CHEAT_SHEET_FILE, HELP_FILE
 
 
 def wrap_async(coro_func):

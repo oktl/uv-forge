@@ -386,7 +386,7 @@ def create_project_type_dialog(
     Returns:
         Configured AlertDialog for project type selection
     """
-    from app.utils.constants import PROJECT_TYPE_CATEGORIES, PROJECT_TYPE_PACKAGE_MAP
+    from app.core.constants import PROJECT_TYPE_CATEGORIES, PROJECT_TYPE_PACKAGE_MAP
 
     colors = get_theme_colors(is_dark_mode)
 
@@ -516,7 +516,7 @@ def create_framework_dialog(
     Returns:
         Configured AlertDialog for framework selection.
     """
-    from app.utils.constants import FRAMEWORK_PACKAGE_MAP, UI_FRAMEWORK_DETAILS
+    from app.core.constants import FRAMEWORK_PACKAGE_MAP, UI_FRAMEWORK_DETAILS
 
     colors = get_theme_colors(is_dark_mode)
 
