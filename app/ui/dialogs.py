@@ -218,6 +218,53 @@ def create_help_dialog(
     )
 
 
+def create_git_cheat_sheet_dialog(
+    content: str, on_close, page: ft.Page, is_dark_mode: bool
+) -> ft.AlertDialog:
+    """Create theme-aware dialog displaying the Git cheat sheet.
+
+    Args:
+        content: Markdown content of the cheat sheet
+        on_close: Close button callback
+        page: The Flet page instance (needed to launch URLs)
+        is_dark_mode: Whether dark mode is active
+
+    Returns:
+        Configured AlertDialog
+    """
+    colors = get_theme_colors(is_dark_mode)
+
+    async def handle_link_click(e):
+        await page.launch_url(e.data)
+
+    return ft.AlertDialog(
+        modal=True,
+        title=ft.Text(
+            "Git Cheat Sheet",
+            size=UIConfig.DIALOG_TITLE_SIZE,
+            color=colors["main_title"],
+        ),
+        content=ft.Container(
+            content=ft.Column(
+                controls=[
+                    ft.Markdown(
+                        content,
+                        selectable=True,
+                        extension_set=ft.MarkdownExtensionSet.GITHUB_WEB,
+                        on_tap_link=handle_link_click,
+                    )
+                ],
+                scroll=ft.ScrollMode.AUTO,
+            ),
+            width=900,
+            height=UIConfig.DIALOG_HEIGHT,
+            padding=UIConfig.DIALOG_CONTENT_PADDING,
+        ),
+        actions=[ft.TextButton("Close", on_click=on_close)],
+        actions_alignment=ft.MainAxisAlignment.END,
+    )
+
+
 def create_edit_file_dialog(
     content: str, file_path: str, on_save, on_close, is_dark_mode: bool
 ) -> ft.AlertDialog:

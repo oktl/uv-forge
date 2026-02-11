@@ -45,6 +45,7 @@ class Controls:
         exit_button: Button to exit the application.
         progress_ring: Progress indicator for async operations.
         help_button: Button to show help dialog.
+        git_cheat_sheet_button: Button to show Git cheat sheet dialog.
         theme_toggle_button: Button to toggle theme.
         main_title: Main title text.
         section_titles: List of section title texts.
@@ -75,6 +76,7 @@ class Controls:
         self.exit_button: ft.Button
         self.progress_ring: ft.ProgressRing
         self.help_button: ft.IconButton
+        self.git_cheat_sheet_button: ft.IconButton
         self.theme_toggle_button: ft.IconButton
         self.main_title: ft.Text
         self.section_titles: list[ft.Text]
@@ -134,6 +136,12 @@ def build_main_view(page: ft.Page, state: "AppState") -> ft.Control:
         icon=ft.Icons.LIGHT_MODE if state.is_dark_mode else ft.Icons.DARK_MODE,
         icon_size=18,
         tooltip="Toggle dark/light mode",
+    )
+
+    controls.git_cheat_sheet_button = ft.IconButton(
+        icon=ft.Icons.MENU_BOOK,
+        icon_size=18,
+        tooltip="Git Cheat Sheet",
     )
 
     controls.help_button = ft.IconButton(
@@ -377,7 +385,7 @@ def build_main_view(page: ft.Page, state: "AppState") -> ft.Control:
             color=colors["main_title"],
         ),
         bgcolor=ft.Colors.TRANSPARENT,
-        actions=[controls.help_button, controls.theme_toggle_button],
+        actions=[controls.git_cheat_sheet_button, controls.help_button, controls.theme_toggle_button],
         toolbar_height=30,
     )
 

@@ -125,6 +125,7 @@ PROJECT_TYPE_TEMPLATES_DIR = TEMPLATES_DIR / "project_types"
 BOILERPLATE_DIR = TEMPLATES_DIR / "boilerplate"
 DOCS_DIR = Path(__file__).parent.parent / "assets" / "docs"
 HELP_FILE = DOCS_DIR / "HELP.md"
+GIT_CHEAT_SHEET_FILE = DOCS_DIR / "Git-Cheat-Sheet.md"
 
 # Default paths
 DEFAULT_PROJECT_ROOT = str(Path.home() / "Projects")

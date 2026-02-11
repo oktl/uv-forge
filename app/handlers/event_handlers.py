@@ -22,6 +22,7 @@ from app.core.validator import (
 )
 from app.ui.components import Controls
 from app.ui.dialogs import (
+    create_git_cheat_sheet_dialog,
     create_help_dialog,
     create_add_item_dialog,
     create_build_summary_dialog,
@@ -29,7 +30,7 @@ from app.ui.dialogs import (
 )
 from app.ui.theme_manager import get_theme_colors
 from app.utils.async_executor import AsyncExecutor
-from app.utils.constants import DEFAULT_FOLDERS, DEFAULT_PYTHON_VERSION, HELP_FILE
+from app.utils.constants import DEFAULT_FOLDERS, DEFAULT_PYTHON_VERSION, GIT_CHEAT_SHEET_FILE, HELP_FILE
 
 
 def wrap_async(coro_func):
@@ -1150,6 +1151,29 @@ For more information, visit: https://docs.astral.sh/uv/
         self.page.update()
 
 
+    async def on_git_cheat_sheet_click(self, _: ft.ControlEvent) -> None:
+        """Handle Git Cheat Sheet button click."""
+        try:
+            content = GIT_CHEAT_SHEET_FILE.read_text(encoding="utf-8")
+        except (FileNotFoundError, OSError) as e:
+            content = "# Git Cheat Sheet\n\nError: Could not load cheat sheet file."
+            self._set_status(
+                f"Warning: Cheat sheet file not found ({e})", "error", update=False
+            )
+
+        def close_dialog(_):
+            cheat_sheet_dialog.open = False
+            self.page.update()
+
+        cheat_sheet_dialog = create_git_cheat_sheet_dialog(
+            content, close_dialog, self.page, self.state.is_dark_mode
+        )
+
+        self.page.overlay.append(cheat_sheet_dialog)
+        cheat_sheet_dialog.open = True
+        self.page.update()
+
+
 def attach_handlers(page: ft.Page, state: AppState) -> None:
     """Attach event handlers to UI controls.
 
@@ -1208,6 +1232,7 @@ def attach_handlers(page: ft.Page, state: AppState) -> None:
     controls.exit_button.on_click = wrap_async(handlers.on_exit)
 
     # --- UI Feature Handlers ---
+    controls.git_cheat_sheet_button.on_click = wrap_async(handlers.on_git_cheat_sheet_click)
     controls.help_button.on_click = wrap_async(handlers.on_help_click)
     controls.theme_toggle_button.on_click = wrap_async(handlers.on_theme_toggle)
 
