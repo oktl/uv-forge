@@ -150,11 +150,10 @@ Files use `{{project_name}}` placeholders, substituted at build time. Adding new
 
 ## Known Issues & Cleanup Needed
 
-- `app/core/ui_state_sync.py` — legacy YouTube Transcript Downloader code, unused
-- `app/handlers/button_state.py` — empty placeholder
-- `app/core/state_validator.py` — empty placeholder
-- `app/config/config.py`, `app/config/logger.py` — empty files
-- 6 pre-existing test failures in `test_validator.py` / `test_validator_folders.py` (folder name validation edge cases)
+- `app/core/state_validator.py` — empty placeholder (file not yet created)
+- `app/core/ui_state_sync.py` was removed (legacy YouTube Transcript Downloader code)
+- `app/handlers/button_state.py` was removed (empty placeholder)
+- `app/config/config.py` was removed (empty file)
 
 ---
 
