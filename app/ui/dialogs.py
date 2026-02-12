@@ -780,11 +780,42 @@ def create_build_summary_dialog(
         )
     )
 
-    return ft.AlertDialog(
+    def on_checkbox_change(e):
+        e.control.label_style = (
+            ft.TextStyle(color=ft.Colors.GREEN) if e.control.value else None
+        )
+        e.page.update()
+
+    green = ft.TextStyle(color=ft.Colors.GREEN)
+
+    open_folder_checkbox = ft.Checkbox(
+        label="Open project folder after build",
+        value=True,
+        label_style=green,
+        on_change=on_checkbox_change,
+    )
+
+    open_vscode_checkbox = ft.Checkbox(
+        label="Open in VS Code",
+        value=True,
+        label_style=green,
+        on_change=on_checkbox_change,
+    )
+
+    dialog = ft.AlertDialog(
         modal=True,
         title=_create_dialog_title("Confirm Build", colors, ft.Icons.BUILD_CIRCLE),
         content=ft.Container(
-            content=ft.Column(rows, tight=True, spacing=8),
+            content=ft.Column(
+                rows
+                + [
+                    ft.Divider(height=16, thickness=1),
+                    open_folder_checkbox,
+                    open_vscode_checkbox,
+                ],
+                tight=True,
+                spacing=8,
+            ),
             width=420,
             padding=20,
         ),
@@ -793,3 +824,7 @@ def create_build_summary_dialog(
         ),
         actions_alignment=ft.MainAxisAlignment.END,
     )
+
+    dialog.open_folder_checkbox = open_folder_checkbox
+    dialog.open_vscode_checkbox = open_vscode_checkbox
+    return dialog

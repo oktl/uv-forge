@@ -1191,8 +1191,8 @@ def test_create_build_summary_dialog_with_framework():
     )
 
     # Check that the dialog content includes the framework info
-    rows = dialog.content.content.controls
-    labels = [r.controls[0].value for r in rows]
+    controls = dialog.content.content.controls
+    labels = [r.controls[0].value for r in controls if hasattr(r, "controls")]
     assert "UI Framework:" in labels
 
 
@@ -1220,8 +1220,8 @@ def test_create_build_summary_dialog_with_project_type():
         is_dark_mode=True,
     )
 
-    rows = dialog.content.content.controls
-    labels = [r.controls[0].value for r in rows]
+    controls = dialog.content.content.controls
+    labels = [r.controls[0].value for r in controls if hasattr(r, "controls")]
     assert "Project Type:" in labels
 
 

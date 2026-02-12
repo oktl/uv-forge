@@ -6,6 +6,8 @@ Handlers are attached to UI controls via the attach_handlers function.
 """
 
 import asyncio
+import subprocess
+import sys
 from pathlib import Path
 
 import flet as ft
@@ -939,7 +941,7 @@ class Handlers:
 
     # --- Main Actions ---
 
-    async def _execute_build(self) -> None:
+    async def _execute_build(self, open_folder: bool = False, open_vscode: bool = False) -> None:
         """Execute the project build after confirmation.
 
         Creates project configuration and runs the build asynchronously.
@@ -974,6 +976,24 @@ class Handlers:
         if result.success:
             self._set_status(result.message, "success", update=False)
             self._show_snackbar(result.message, is_error=False)
+            project_path = config.path / config.name
+            if open_folder:
+                if sys.platform == "darwin":
+                    subprocess.Popen(["open", str(project_path)])
+                elif sys.platform == "win32":
+                    subprocess.Popen(["explorer", str(project_path)])
+                else:
+                    subprocess.Popen(["xdg-open", str(project_path)])
+            if open_vscode:
+                try:
+                    if sys.platform == "darwin":
+                        subprocess.Popen(
+                            ["open", "-a", "Visual Studio Code", str(project_path)]
+                        )
+                    else:
+                        subprocess.Popen(["code", str(project_path)])
+                except FileNotFoundError:
+                    self._show_snackbar("VS Code not found", is_error=True)
         else:
             self._set_status(result.message, "error", update=False)
             self._show_snackbar(result.message, is_error=True)
@@ -993,9 +1013,11 @@ class Handlers:
         fc, fic = self._count_folders_and_files(self.state.folders)
 
         async def on_confirm(_):
+            open_folder = dialog.open_folder_checkbox.value
+            open_vscode = dialog.open_vscode_checkbox.value
             dialog.open = False
             self.page.update()
-            await self._execute_build()
+            await self._execute_build(open_folder=open_folder, open_vscode=open_vscode)
 
         def on_cancel(_):
             dialog.open = False
