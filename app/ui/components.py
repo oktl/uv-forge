@@ -115,23 +115,19 @@ def create_section_box(
     return container, title_text
 
 
-def build_main_view(page: ft.Page, state: "AppState") -> ft.Control:
-    """Build and return the main application UI layout.
-
-    Creates all UI controls, arranges them in a column layout, and stores
-    references on the page object for cross-module access.
+def create_controls(state: "AppState", colors: dict) -> Controls:
+    """Create all UI controls for the application.
 
     Args:
-        page: The Flet page to attach controls and state references to.
-        state: The application state instance to store on the page.
+        state: The application state instance.
+        colors: Theme colors dictionary.
 
     Returns:
-        The root Column control containing the complete UI layout.
+        Controls instance with all UI elements initialized.
     """
-    colors = get_theme_colors(state.is_dark_mode)
     controls = Controls()
 
-    # Define all the controls
+    # Icon buttons
     controls.theme_toggle_button = ft.IconButton(
         icon=ft.Icons.LIGHT_MODE if state.is_dark_mode else ft.Icons.DARK_MODE,
         icon_size=18,
@@ -150,6 +146,7 @@ def build_main_view(page: ft.Page, state: "AppState") -> ft.Control:
         tooltip="Help & Documentation",
     )
 
+    # Project path controls
     controls.project_path_label = ft.Text("Create Project In")
     controls.project_path_input = ft.TextField(
         value=state.project_path,
@@ -166,6 +163,7 @@ def build_main_view(page: ft.Page, state: "AppState") -> ft.Control:
         size=14,
     )
 
+    # Project name controls
     controls.project_name_label = ft.Text("New Project Name")
 
     controls.project_name_input = ft.TextField(
@@ -175,6 +173,7 @@ def build_main_view(page: ft.Page, state: "AppState") -> ft.Control:
         border_width=1,
     )
 
+    # Python version controls
     controls.python_version_label = ft.Text("Python Version")
     controls.python_version_dropdown = ft.Dropdown(
         value=state.selected_python_version,
@@ -184,6 +183,7 @@ def build_main_view(page: ft.Page, state: "AppState") -> ft.Control:
         border_color=ft.Colors.BLUE,
     )
 
+    # Checkbox controls
     controls.create_git_checkbox = ft.Checkbox(
         label="Initialize Git Repository",
         value=state.initialize_git,
@@ -196,7 +196,7 @@ def build_main_view(page: ft.Page, state: "AppState") -> ft.Control:
         label_style=ft.TextStyle(color=ft.Colors.GREEN)
         if state.include_starter_files
         else None,
-        tooltip="Create template files with boilerplate starter content.\nDefault is no — only folders and __init__.py are created.",
+        tooltip="Create template files with boilerplate starter content.\nDefault is no – only folders and __init__.py are created.",
     )
 
     controls.create_ui_project_checkbox = ft.Checkbox(
@@ -209,6 +209,7 @@ def build_main_view(page: ft.Page, state: "AppState") -> ft.Control:
         tooltip="Create other project types\nlike Django, data science, web scraping, etc...\nOpens a scrolling dialog to choose options.\nCan be combined with UI Project",
     )
 
+    # Folder management controls
     controls.app_subfolders_label = ft.Text("App Subfolders:")
     controls.subfolders_container = ft.Container(
         content=ft.Column(
@@ -239,6 +240,7 @@ def build_main_view(page: ft.Page, state: "AppState") -> ft.Control:
         tooltip="To remove folder or file from the displayed template\n click the folder or file in the display\nand then click this button.",
     )
 
+    # Status and action controls
     controls.status_text = ft.Text("")
 
     controls.build_project_button = ft.Button(
@@ -275,6 +277,7 @@ def build_main_view(page: ft.Page, state: "AppState") -> ft.Control:
         stroke_width=UIConfig.PROGRESS_RING_STROKE_WIDTH,
     )
 
+    # Title and container lists
     controls.main_title = ft.Text(
         "UV Project Creator",
         size=24,
@@ -285,7 +288,17 @@ def build_main_view(page: ft.Page, state: "AppState") -> ft.Control:
     controls.section_titles = []
     controls.section_containers = []
 
-    # Put all the pieces together
+    return controls
+
+
+def create_sections(controls: Controls, state: "AppState") -> None:
+    """Create section containers and organize controls into sections.
+
+    Args:
+        controls: Controls instance containing all UI elements.
+        state: The application state instance.
+    """
+    # Project path and name section
     project_name_container, project_name_title = create_section_box(
         "Set Project Path and Name",
         [
@@ -309,6 +322,7 @@ def build_main_view(page: ft.Page, state: "AppState") -> ft.Control:
     controls.section_containers.append(project_name_container)
     controls.section_titles.append(project_name_title)
 
+    # Options section
     options_container, options_title = create_section_box(
         "Set Options",
         [
@@ -329,6 +343,7 @@ def build_main_view(page: ft.Page, state: "AppState") -> ft.Control:
     controls.section_containers.append(options_container)
     controls.section_titles.append(options_title)
 
+    # Folders section
     folders_container, folders_title = create_section_box(
         "Add or Remove Project Folders",
         [
@@ -351,29 +366,15 @@ def build_main_view(page: ft.Page, state: "AppState") -> ft.Control:
     controls.section_containers.append(folders_container)
     controls.section_titles.append(folders_title)
 
-    # Put it all together
-    layout = ft.Column(
-        controls=[
-            ft.Container(height=10),  # Spacer
-            project_name_container,  # Set Project Path and Name
-            options_container,  # Set Options
-            folders_container,  # Add or Remove Folders
-            ft.Container(
-                content=ft.Row(
-                    controls=[controls.progress_ring, controls.status_text],
-                    alignment=ft.MainAxisAlignment.CENTER,
-                    spacing=8,
-                )
-            ),
-            ft.Row(
-                controls=[controls.build_project_button],
-                alignment=ft.CrossAxisAlignment.CENTER,
-            ),
-            ft.Divider(height=20),
-        ],
-        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-    )
 
+def create_app_bars(page: ft.Page, controls: Controls, colors: dict) -> None:
+    """Create and configure the app bar and bottom app bar.
+
+    Args:
+        page: The Flet page to attach app bars to.
+        controls: Controls instance containing UI elements.
+        colors: Theme colors dictionary.
+    """
     page.appbar = ft.AppBar(
         title=ft.Text(
             "Create New Project with UV",
@@ -401,6 +402,67 @@ def build_main_view(page: ft.Page, state: "AppState") -> ft.Control:
         ),
     )
 
+
+def create_layout(controls: Controls) -> ft.Column:
+    """Create the main layout column with all sections.
+
+    Args:
+        controls: Controls instance containing UI elements.
+
+    Returns:
+        The root Column control containing the complete UI layout.
+    """
+    return ft.Column(
+        controls=[
+            ft.Container(height=10),  # Spacer
+            controls.section_containers[0],  # Set Project Path and Name
+            controls.section_containers[1],  # Set Options
+            controls.section_containers[2],  # Add or Remove Folders
+            ft.Container(
+                content=ft.Row(
+                    controls=[controls.progress_ring, controls.status_text],
+                    alignment=ft.MainAxisAlignment.CENTER,
+                    spacing=8,
+                )
+            ),
+            ft.Row(
+                controls=[controls.build_project_button],
+                alignment=ft.CrossAxisAlignment.CENTER,
+            ),
+            ft.Divider(height=20),
+        ],
+        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+    )
+
+
+def build_main_view(page: ft.Page, state: "AppState") -> ft.Control:
+    """Build and return the main application UI layout.
+
+    Creates all UI controls, arranges them in a column layout, and stores
+    references on the page object for cross-module access.
+
+    Args:
+        page: The Flet page to attach controls and state references to.
+        state: The application state instance to store on the page.
+
+    Returns:
+        The root Column control containing the complete UI layout.
+    """
+    colors = get_theme_colors(state.is_dark_mode)
+
+    # Create all controls
+    controls = create_controls(state, colors)
+
+    # Organize controls into sections
+    create_sections(controls, state)
+
+    # Create app bars
+    create_app_bars(page, controls, colors)
+
+    # Create main layout
+    layout = create_layout(controls)
+
+    # Store references on page
     page.controls_ref = controls
     page.state_ref = state
 
