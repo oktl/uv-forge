@@ -320,7 +320,7 @@ class TestCreateFoldersWithResolver:
 
             created = parent / "core" / "state.py"
             assert created.exists()
-            assert created.read_text() == "# boilerplate for testproj"
+            assert created.read_text() == "# boilerplate for Testproj"
 
     def test_file_empty_when_resolver_returns_none(self):
         """Files without matching boilerplate are created empty."""
@@ -381,7 +381,7 @@ class TestCreateFoldersWithResolver:
 
             created = project_path / "app" / "utils" / "constants.py"
             assert created.exists()
-            assert created.read_text() == "APP = 'testproj'"
+            assert created.read_text() == "APP = 'Testproj'"
 
     def test_setup_app_structure_replaces_uv_main_with_boilerplate(self):
         """UV's default main.py is replaced by boilerplate main.py if available."""
@@ -397,7 +397,7 @@ class TestCreateFoldersWithResolver:
 
             app_main = project_path / "app" / "main.py"
             assert app_main.exists()
-            assert app_main.read_text() == "# testproj app entry point"
+            assert app_main.read_text() == "# Testproj app entry point"
 
     def test_setup_app_structure_keeps_uv_main_without_boilerplate(self):
         """UV's default main.py is kept when no boilerplate main.py exists."""
@@ -443,7 +443,7 @@ class TestCreateFoldersWithResolver:
 
             readme = project_path / "README.md"
             assert readme.exists()
-            assert readme.read_text() == "# testproj\n\nA great project."
+            assert readme.read_text() == "# Testproj\n\nA great project."
 
     def test_setup_app_structure_keeps_readme_without_boilerplate(self):
         """UV's README.md is kept when no boilerplate README exists."""

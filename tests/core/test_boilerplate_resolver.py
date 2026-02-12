@@ -97,7 +97,7 @@ class TestBoilerplateResolverResolve:
             (bp / "common" / "constants.py").write_text("APP = '{{project_name}}'")
             resolver = BoilerplateResolver("demo", boilerplate_dir=bp)
             result = resolver.resolve("constants.py")
-            assert result == "APP = 'demo'"
+            assert result == "APP = 'Demo'"
 
     def test_resolve_from_framework(self):
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -168,7 +168,7 @@ class TestBoilerplateResolverSubstitute:
             (bp / "common").mkdir()
             (bp / "common" / "cfg.py").write_text('NAME = "{{project_name}}"')
             resolver = BoilerplateResolver("my_app", boilerplate_dir=bp)
-            assert resolver.resolve("cfg.py") == 'NAME = "my_app"'
+            assert resolver.resolve("cfg.py") == 'NAME = "My App"'
 
     def test_no_placeholder_passthrough(self):
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -185,4 +185,4 @@ class TestBoilerplateResolverSubstitute:
             content = "a={{project_name}} b={{project_name}}"
             (bp / "common" / "multi.py").write_text(content)
             resolver = BoilerplateResolver("demo", boilerplate_dir=bp)
-            assert resolver.resolve("multi.py") == "a=demo b=demo"
+            assert resolver.resolve("multi.py") == "a=Demo b=Demo"

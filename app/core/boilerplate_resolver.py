@@ -10,6 +10,25 @@ from typing import Optional
 from app.core.constants import BOILERPLATE_DIR
 
 
+def normalize_project_name(project_name: str) -> str:
+    """Convert dash/underscore-separated project name to title case with spaces.
+
+    Args:
+        project_name: Project name with dashes or underscores
+                        e.g., "create-a-project", "my_app").
+
+    Returns:
+        Title-cased name with spaces (e.g., "Create A Project", "My App").
+    """
+    if not project_name:
+        return ""
+
+    # Replace both dashes and underscores with spaces
+    normalized = project_name.replace("-", " ").replace("_", " ")
+    # Title case each word
+    return normalized.title()
+
+
 def normalize_framework_name(framework: str) -> str:
     """Convert framework display name to a normalized directory/file name.
 
@@ -23,6 +42,7 @@ def normalize_framework_name(framework: str) -> str:
     name = name.replace(" (built-in)", "")
     name = name.replace(" ", "_")
     return name
+
 
 
 class BoilerplateResolver:
@@ -48,6 +68,9 @@ class BoilerplateResolver:
         project_type: Optional[str] = None,
         boilerplate_dir: Optional[Path] = None,
     ):
+        if not project_name:
+            raise ValueError("project_name cannot be empty")
+
         self.project_name = project_name
         base = boilerplate_dir or BOILERPLATE_DIR
 
@@ -86,6 +109,14 @@ class BoilerplateResolver:
             content: Raw boilerplate template content.
 
         Returns:
-            Content with ``{{project_name}}`` replaced by the actual project name.
+            Content with placeholders replaced by actual values.
+            Currently supports: {{project_name}}
         """
-        return content.replace("{{project_name}}", self.project_name)
+        replacements = {
+            "{{project_name}}": normalize_project_name(self.project_name),
+        }
+
+        for placeholder, value in replacements.items():
+            content = content.replace(placeholder, value)
+
+        return content
