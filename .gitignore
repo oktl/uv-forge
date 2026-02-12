@@ -16,3 +16,11 @@ htmlcov/
 
 # Runtime logs
 logs/
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+
