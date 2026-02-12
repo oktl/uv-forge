@@ -148,7 +148,7 @@ uv init my_project
 - 32 total templates + boilerplate file scaffolding
 - Complete package management
 - Professional UI
-- Comprehensive testing (370 tests)
+- Comprehensive testing (387 tests)
 
 ---
 
@@ -517,6 +517,10 @@ Re-enable build button
 Set status: "Project created successfully!"
   ↓
 User sees success message
+  ↓
+Post-Build Actions (based on confirmation dialog selections)
+  ├─ If "Open project folder": open Finder/Explorer at project path
+  └─ If "Open in VS Code": open project in VS Code via system launcher
   ↓
 DONE! 🎉
 ```
@@ -1323,6 +1327,8 @@ _create_none_option_container(is_dark_mode)   # "None (Clear Selection)" + divid
 
 **`create_build_summary_dialog(config: BuildSummaryConfig, on_build, on_cancel, is_dark_mode)`**
 - Confirmation dialog before build; uses `BuildSummaryConfig` dataclass
+- Includes "Open project folder" and "Open in VS Code" checkboxes (both checked by default; labels turn green when checked)
+- Exposes `dialog.open_folder_checkbox` and `dialog.open_vscode_checkbox` for the `on_confirm` handler
 
 **Read this:** To understand dialogs. Data for framework/project type options lives in `constants.py`.
 
@@ -1855,7 +1861,7 @@ You've built something **amazing** here! From a simple idea ("let's try uv init"
 - **Automatic package installation** with UV
 - **Beautiful, professional UI** with Flet
 - **Template merging** for combined UI framework + project type selections
-- **Comprehensive testing** (370 tests!)
+- **Comprehensive testing** (387 tests!)
 - **Clean architecture** with clear separation of concerns
 - **Modern patterns** (async, dataclasses, type hints)
 
@@ -1908,7 +1914,7 @@ The codebase is well-organized, thoroughly tested, and a great example of:
 │     app/core/constants.py → Everything!            │
 │                                                     │
 │  🧪 Tests:                                          │
-│     tests/ → 370 tests, 100% passing!               │
+│     tests/ → 387 tests, 100% passing!               │
 │                                                     │
 └────────────────────────────────────────────────────┘
 ```
@@ -1927,6 +1933,6 @@ The codebase is well-organized, thoroughly tested, and a great example of:
 | 💾 State            | `app/core/state.py` → `AppState`                                               |
 | 🎯 Constants        | `app/core/constants.py` → Everything                                          |
 | 📝 Boilerplate       | `app/core/boilerplate_resolver.py` → `BoilerplateResolver`                      |
-| 🧪 Tests            | `tests/` → 370 tests, 100% passing                                             |
+| 🧪 Tests            | `tests/` → 387 tests, 100% passing                                             |
 
 **Happy reading!** 📚✨

@@ -22,7 +22,7 @@ Key capabilities:
 ```bash
 uv run create_project        # Via entry point
 python app/main.py            # Direct execution
-uv run pytest                 # Run 370 tests (coverage automatic)
+uv run pytest                 # Run 387 tests (coverage automatic)
 ```
 
 ---
@@ -33,6 +33,7 @@ uv run pytest                 # Run 370 tests (coverage automatic)
 app/
 ├── main.py                   # Entry point: creates page, state, UI, attaches handlers
 ├── core/
+│   ├── constants.py          # Single source of truth: versions, frameworks, package maps, paths, dialog data
 │   ├── state.py              # AppState dataclass — single source of truth for all mutable state
 │   ├── models.py             # FolderSpec, ProjectConfig, BuildResult, BuildSummaryConfig dataclasses
 │   ├── validator.py          # validate_project_name(), validate_folder_name(), validate_path()
@@ -40,22 +41,19 @@ app/
 │   ├── config_manager.py     # ConfigManager: loads JSON templates, fallback chain
 │   ├── boilerplate_resolver.py # BoilerplateResolver: populates files with starter content
 │   ├── template_merger.py    # normalize_folder(), merge_folder_lists(), _merge_files()
-│   ├── ui_state_sync.py      # LEGACY — contains YouTube app methods, unused
 │   └── state_validator.py    # EMPTY placeholder
 ├── handlers/
 │   ├── event_handlers.py     # Handlers class + attach_handlers() — all UI event wiring
 │   ├── filesystem_handler.py # setup_app_structure(), folder creation, cleanup_on_error()
 │   ├── uv_handler.py         # run_uv_init(), install_package(), setup_virtual_env()
 │   ├── git_handler.py        # handle_git_init(), finalize_git_setup() — two-phase git setup
-│   ├── handler_factory.py    # HandlerFactory.create_handler() — async wrappers
-│   └── button_state.py       # EMPTY placeholder
+│   └── handler_factory.py    # HandlerFactory.create_handler() — async wrappers
 ├── ui/
 │   ├── components.py         # Controls class + build_main_view(page, state)
 │   ├── dialogs.py            # 8 dialog functions + 5 shared helpers; all theme-aware via is_dark_mode
 │   ├── theme_manager.py      # get_theme_colors() singleton
 │   └── ui_config.py          # UI constants (colors, sizes)
 ├── utils/
-│   ├── constants.py          # SINGLE SOURCE OF TRUTH: versions, frameworks, package maps, paths, dialog data
 │   └── async_executor.py     # AsyncExecutor.run() — ThreadPoolExecutor wrapper
 └── config/templates/
     ├── ui_frameworks/        # 11 templates: flet.json, pyqt6.json, default.json, etc.
@@ -151,15 +149,12 @@ Files use `{{project_name}}` placeholders, substituted at build time. Adding new
 ## Known Issues & Cleanup Needed
 
 - `app/core/state_validator.py` — empty placeholder (file not yet created)
-- `app/core/ui_state_sync.py` was removed (legacy YouTube Transcript Downloader code)
-- `app/handlers/button_state.py` was removed (empty placeholder)
-- `app/config/config.py` was removed (empty file)
 
 ---
 
 ## Development Guidelines
 
-- **Run `uv run pytest` before committing** — 370 tests, coverage automatic
+- **Run `uv run pytest` before committing** — 387 tests, coverage automatic
 - **Add tests** in `tests/core/`, `tests/handlers/`, or `tests/utils/` for new functionality
 - **Use `handler_factory` for new async handlers** wrapping blocking code
 - **Use `uv add <package>`** for dependencies, never pip

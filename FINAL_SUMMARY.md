@@ -135,6 +135,7 @@ Example: Selecting "Data Analysis" automatically installs:
 - ✅ Virtual environment creation
 - ✅ Automatic package installation
 - ✅ Error handling with rollback
+- ✅ Post-build actions: open project folder and/or VS Code from the confirmation dialog
 
 **Folder Management:**
 
@@ -165,8 +166,8 @@ Example: Selecting "Data Analysis" automatically installs:
 
 ### 7. **Quality & Testing**
 
-- **370 tests** - Comprehensive test coverage
-- **98% pass rate** - 364 passing (6 pre-existing validator edge case failures)
+- **387 tests** - Comprehensive test coverage
+- **98% pass rate** - 380 passing (7 pre-existing failures in boilerplate resolver)
 - **Pytest-based** - Modern testing framework
 - **Async support** - pytest-asyncio integration
 - **Code coverage** - 60% overall, 80-100% on core logic
@@ -202,7 +203,7 @@ Example: Selecting "Data Analysis" automatically installs:
 ```
 Files Created:      47 Python files
 Templates:          32 JSON templates + 5 boilerplate starter files
-Tests:              370 tests (364 passing, 6 pre-existing validator failures)
+Tests:              387 tests (380 passing, 7 pre-existing failures)
 Lines of Code:      ~12,500+ lines
 Test Coverage:      61% overall (core: 80-100%)
 Dependencies:       flet, pytest, pytest-cov
@@ -228,7 +229,7 @@ uv init my_project
 - Smart scaffolding with boilerplate starter files
 - Automatic dependency installation
 - Beautiful, professional UI
-- Comprehensive testing (370 tests)
+- Comprehensive testing (387 tests)
 - Production-ready application
 
 ### Key Milestones
@@ -241,11 +242,12 @@ uv init my_project
 6. **Package Installation** - Automatic dependency management
 7. **Enhanced Dialog** - Rich tooltips and beautiful design
 8. **Template Merging** - Combined UI framework + project type with merged folder structures
-9. **Polish & Testing** - Comprehensive test suite (370 tests)
+9. **Polish & Testing** - Comprehensive test suite (387 tests)
 10. **Smart Scaffolding** - Boilerplate resolver populates files with starter content
 11. **Dialog Symmetry** - Converted framework dropdown to dialog, added "None" option to both dialogs, click-to-reopen behavior
 12. **Dialogs Refactor** - Extracted 5 shared helpers, moved dialog data to constants.py, `BuildSummaryConfig` dataclass, all dialogs theme-aware
 13. **Enhanced Git Integration** - Two-phase git setup with local hub repo, idempotent operations, comprehensive logging, auto-push capability
+14. **Post-Build Actions** - Open project folder and/or VS Code automatically from the build confirmation dialog
 
 ---
 
@@ -626,7 +628,7 @@ CMD ["python", "manage.py", "runserver"]
 ### Testing
 
 - `pytest.ini` - Test configuration
-- `tests/` - 370 tests organized by module
+- `tests/` - 387 tests organized by module
 - `htmlcov/` - Code coverage reports
 
 ### Templates
@@ -680,7 +682,7 @@ CMD ["python", "manage.py", "runserver"]
 ## 🏆 Achievements
 
 ✅ **Feature Complete** - All planned features implemented  
-✅ **Well Tested** - 370 tests, 100% pass rate  
+✅ **Well Tested** - 387 tests, 98% pass rate  
 ✅ **Beautiful UI** - Professional, polished interface  
 ✅ **Comprehensive** - 32 templates + smart scaffolding covering many use cases  
 ✅ **Well Documented** - Code guide, CLAUDE.md, inline docs  
@@ -697,7 +699,7 @@ From a simple idea to explore `uv init` to a comprehensive project creation tool
 - **Smart scaffolding** with boilerplate starter content for key files
 - **Automatic package installation** making setup effortless
 - **Beautiful Flet UI** showcasing modern Python UI capabilities with symmetrical dialog-based selection
-- **Robust architecture** with clean code and comprehensive testing (370 tests)
+- **Robust architecture** with clean code and comprehensive testing (387 tests)
 - **Polished UX** with click-to-reopen dialogs and clear selection clearing via "None" option
 
 This project demonstrates:

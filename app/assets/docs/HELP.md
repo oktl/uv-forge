@@ -115,6 +115,10 @@ Click "Build Project" to create your project with all configured settings. The b
 9. Install selected project type packages (if any)
 10. Finalize Git Phase 2 (if enabled): Stage, commit, and push to hub
 
+A **confirmation dialog** will appear showing a summary of your project settings. Before confirming, you can choose post-build actions:
+- **Open project folder after build** — Opens the created project in Finder/Explorer (checked by default)
+- **Open in VS Code** — Opens the project in VS Code immediately after creation (checked by default; requires VS Code to be installed)
+
 **Keyboard Shortcut:** Press `Ctrl+Enter` (or `Cmd+Enter` on Mac) to build when inputs are valid.
 
 ## Tips & Tricks
