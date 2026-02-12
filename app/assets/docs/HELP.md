@@ -87,7 +87,7 @@ Features:
 The folder and file structure is automatically loaded from templates based on your selections:
 - **Folders** - Displayed with "/" suffix in default color
 - **Files** - Displayed in grey color
-- **Starter Content** - Key files come pre-populated with boilerplate starter code (e.g., `main.py`, `state.py`, `components.py`) instead of being empty, with `{{project_name}}` placeholders automatically replaced
+- **Starter Content** - Key files come pre-populated with boilerplate starter code (e.g., `main.py`, `state.py`, `components.py`) instead of being empty, with `{{project_name}}` placeholders automatically replaced as a formatted title (e.g. `my_app` → `My App`)
 
 **Smart Scaffolding Fallback Chain:**
 Files are populated from boilerplate in this priority order:

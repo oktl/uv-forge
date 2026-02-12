@@ -857,6 +857,13 @@ def __init__(self):
 # "PyQt6" → "pyqt6", "tkinter (built-in)" → "tkinter"
 ```
 
+**Module Function: `normalize_project_name(project_name) -> str`**
+
+```python
+# Converts project names to title case with spaces for {{project_name}} substitution
+# "my_app" → "My App", "create-a-project" → "Create A Project"
+```
+
 **Key Class: `BoilerplateResolver`**
 
 ```python
@@ -869,7 +876,7 @@ resolver = BoilerplateResolver(
 
 # Search fallback chain for starter content
 content = resolver.resolve("main.py")
-# Returns file content with {{project_name}} replaced, or None
+# Returns file content with {{project_name}} replaced (title-cased), or None
 ```
 
 **Fallback chain:**

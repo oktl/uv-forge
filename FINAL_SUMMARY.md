@@ -117,7 +117,7 @@ Example: Selecting "Data Analysis" automatically installs:
 
 - **BoilerplateResolver** with fallback chain: framework-specific → project-type-specific → common → empty
 - **Starter content** for key files: `main.py`, `state.py`, `components.py`, `async_executor.py`, `constants.py`
-- **`{{project_name}}` placeholders** automatically replaced at build time
+- **`{{project_name}}` placeholders** automatically replaced at build time with a title-cased display name (e.g. `my_app` → `My App`)
 - **Extensible** — add new boilerplate files without code changes (just drop in the directory)
 - **Zero breakage risk** — files without boilerplate gracefully fall back to empty `.touch()`
 

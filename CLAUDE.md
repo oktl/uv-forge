@@ -127,7 +127,7 @@ When files are created during project scaffolding, the `BoilerplateResolver` loo
 3. `boilerplate/common/{filename}` (universal utilities like `async_executor.py`)
 4. `None` → falls back to empty `.touch()` (zero breakage risk)
 
-Files use `{{project_name}}` placeholders, substituted at build time. Adding new boilerplate is just dropping a file into the right directory — no code changes needed.
+Files use `{{project_name}}` placeholders, substituted at build time with a normalized title-case value (e.g. `my_app` → `My App`, `create-a-project` → `Create A Project`). Adding new boilerplate is just dropping a file into the right directory — no code changes needed.
 
 ---
 
@@ -139,7 +139,8 @@ Files use `{{project_name}}` placeholders, substituted at build time. Adding new
 - **`page.controls_ref` and `page.state_ref`** store references for cross-module access
 - **Async pattern**: sync handlers wrapped via `HandlerFactory` / `AsyncExecutor.run()` to keep UI responsive
 - **`_reload_and_merge_templates()`** is the single entry point for all template loading — framework change, project type change, reset, toggle off
-- **`normalize_framework_name()`** in `boilerplate_resolver.py` is the shared function for name normalization — used by both `ConfigManager` and `BoilerplateResolver`
+- **`normalize_framework_name()`** in `boilerplate_resolver.py` is the shared function for framework name normalization — used by both `ConfigManager` and `BoilerplateResolver`
+- **`normalize_project_name()`** in `boilerplate_resolver.py` converts project names to title case with spaces for `{{project_name}}` substitution (e.g. `my_app` → `My App`)
 - **Two-phase git setup** (if git enabled):
   - Phase 1 (`handle_git_init`): Creates local repo + bare hub at `~/Projects/git-repos/<name>.git`, connects via remote origin
   - Phase 2 (`finalize_git_setup`): Called after all files created; stages, commits, and pushes to hub automatically
