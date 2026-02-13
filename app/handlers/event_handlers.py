@@ -960,8 +960,8 @@ class Handlers:
 
         # Create project configuration
         config = ProjectConfig(
-            name=self.state.project_name,
-            path=Path(self.state.project_path),
+            project_name=self.state.project_name,
+            project_path=Path(self.state.project_path),
             python_version=self.state.selected_python_version,
             git_enabled=self.state.initialize_git,
             ui_project_enabled=self.state.create_ui_project,
@@ -984,7 +984,7 @@ class Handlers:
         if result.success:
             self._set_status(result.message, "success", update=False)
             self._show_snackbar(result.message, is_error=False)
-            project_path = config.path / config.name
+            project_path = config.project_path / config.project_name
             if open_folder:
                 if sys.platform == "darwin":
                     subprocess.Popen(["open", str(project_path)])

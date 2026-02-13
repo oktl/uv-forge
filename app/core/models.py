@@ -100,8 +100,8 @@ class ProjectConfig:
     including validation, directory setup, package installation, and git initialization.
 
     Attributes:
-        name: Project name (must be non-empty and pass normalize_project_name validation).
-        path: Base path where project will be created (must be an existing directory).
+        project_name: Project name (must be non-empty and pass normalize_project_name validation).
+        project_path: Base path where project will be created (must be an existing directory).
         python_version: Python version to use (e.g., "3.14").
         git_enabled: Whether to initialize a git repository (default: True).
         ui_project_enabled: Whether this is a UI project (default: False).
@@ -119,8 +119,8 @@ class ProjectConfig:
             if empty (default: []).
     """
 
-    name: str
-    path: Path
+    project_name: str
+    project_path: Path
     python_version: str
     git_enabled: bool = True
     ui_project_enabled: bool = False
@@ -137,7 +137,7 @@ class ProjectConfig:
         Returns:
             Full path to the project directory.
         """
-        return self.path / self.name
+        return self.project_path / self.project_name
 
 
 @dataclass

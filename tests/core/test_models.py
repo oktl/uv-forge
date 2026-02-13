@@ -98,15 +98,15 @@ def test_folder_spec_to_dict_nested():
 def test_project_config_basic_creation():
     """Test basic ProjectConfig creation"""
     config = ProjectConfig(
-        name="my_project",
-        path=Path("/tmp"),
+        project_name="my_project",
+        project_path=Path("/tmp"),
         python_version="3.14",
         git_enabled=True,
         ui_project_enabled=False,
         framework="",
     )
-    assert config.name == "my_project"
-    assert config.path == Path("/tmp")
+    assert config.project_name == "my_project"
+    assert config.project_path == Path("/tmp")
     assert config.python_version == "3.14"
     assert config.git_enabled == True
 
@@ -114,8 +114,8 @@ def test_project_config_basic_creation():
 def test_project_config_full_path():
     """Test ProjectConfig.full_path property"""
     config = ProjectConfig(
-        name="test_app",
-        path=Path("/home/user/projects"),
+        project_name="test_app",
+        project_path=Path("/home/user/projects"),
         python_version="3.14",
         git_enabled=True,
         ui_project_enabled=True,
@@ -130,8 +130,8 @@ def test_project_config_mixed_folder_types():
     """Test ProjectConfig with mixed folder types"""
     folder_spec = FolderSpec(name="models")
     config = ProjectConfig(
-        name="test",
-        path=Path("/tmp"),
+        project_name="test",
+        project_path=Path("/tmp"),
         python_version="3.14",
         git_enabled=False,
         ui_project_enabled=False,

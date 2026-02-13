@@ -64,7 +64,7 @@ def build_project(config: ProjectConfig) -> BuildResult:
         BuildResult indicating success or failure with message.
     """
     # Validate project name
-    is_valid, error_msg = validate_project_name(config.name)
+    is_valid, error_msg = validate_project_name(config.project_name)
     if not is_valid:
         return BuildResult(success=False, message=error_msg)
 
@@ -74,9 +74,9 @@ def build_project(config: ProjectConfig) -> BuildResult:
     )
 
     # Ensure the base directory exists
-    if not config.path.exists():
+    if not config.project_path.exists():
         try:
-            config.path.mkdir(parents=True)
+            config.project_path.mkdir(parents=True)
         except OSError as e:
             return BuildResult(
                 success=False,
@@ -93,7 +93,7 @@ def build_project(config: ProjectConfig) -> BuildResult:
         handle_git_init(full_path, config.git_enabled)
         if config.include_starter_files:
             resolver = BoilerplateResolver(
-                project_name=config.name,
+                project_name=config.project_name,
                 framework=config.framework if config.ui_project_enabled else None,
                 project_type=config.project_type,
             )
@@ -107,7 +107,7 @@ def build_project(config: ProjectConfig) -> BuildResult:
         )
         configure_pyproject(
             full_path,
-            config.name,
+            config.project_name,
             framework=config.framework if config.ui_project_enabled else None,
             project_type=config.project_type,
         )
