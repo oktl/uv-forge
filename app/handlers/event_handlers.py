@@ -32,7 +32,12 @@ from app.ui.dialogs import (
 )
 from app.ui.theme_manager import get_theme_colors
 from app.utils.async_executor import AsyncExecutor
-from app.core.constants import DEFAULT_FOLDERS, DEFAULT_PYTHON_VERSION, GIT_CHEAT_SHEET_FILE, HELP_FILE
+from app.core.constants import (
+    DEFAULT_FOLDERS,
+    DEFAULT_PYTHON_VERSION,
+    GIT_CHEAT_SHEET_FILE,
+    HELP_FILE,
+)
 
 
 def wrap_async(coro_func):
@@ -77,7 +82,7 @@ class Handlers:
         self.config_manager = ConfigManager()
 
     @staticmethod
-    def _style_checkbox(checkbox: ft.Checkbox) -> None:
+    def _style_selected_checkbox(checkbox: ft.Checkbox) -> None:
         """Set checkbox label green when checked, default when unchecked."""
         checkbox.label_style = (
             ft.TextStyle(color=ft.Colors.GREEN) if checkbox.value else None
@@ -540,14 +545,14 @@ class Handlers:
     async def on_git_toggle(self, e: ft.ControlEvent) -> None:
         """Handle git initialization checkbox toggle."""
         self.state.initialize_git = e.control.value
-        self._style_checkbox(e.control)
+        self._style_selected_checkbox(e.control)
         status = "enabled" if self.state.initialize_git else "disabled"
         self._set_status(f"Git initialization {status}.", "info", update=True)
 
     async def on_boilerplate_toggle(self, e: ft.ControlEvent) -> None:
         """Handle include starter files checkbox toggle."""
         self.state.include_starter_files = e.control.value
-        self._style_checkbox(e.control)
+        self._style_selected_checkbox(e.control)
         status = "enabled" if self.state.include_starter_files else "disabled"
         self._set_status(f"Starter files {status}.", "info", update=True)
 
@@ -560,7 +565,7 @@ class Handlers:
         """
         e.control.value = True
         self.state.create_ui_project = True
-        self._style_checkbox(e.control)
+        self._style_selected_checkbox(e.control)
         self._show_framework_dialog()
         self.page.update()
 
@@ -575,7 +580,7 @@ class Handlers:
                 self.state.create_ui_project = False
                 self.controls.create_ui_project_checkbox.value = False
                 self.controls.create_ui_project_checkbox.label = "Create UI Project"
-                self._style_checkbox(self.controls.create_ui_project_checkbox)
+                self._style_selected_checkbox(self.controls.create_ui_project_checkbox)
                 self._reload_and_merge_templates()
                 self._set_status("UI framework cleared.", "info", update=False)
             else:
@@ -599,7 +604,7 @@ class Handlers:
                 self.state.create_ui_project = False
                 self.controls.create_ui_project_checkbox.value = False
                 self.controls.create_ui_project_checkbox.label = "Create UI Project"
-                self._style_checkbox(self.controls.create_ui_project_checkbox)
+                self._style_selected_checkbox(self.controls.create_ui_project_checkbox)
                 self._set_status("No framework selected.", "info", update=False)
 
             dialog.open = False
@@ -625,7 +630,7 @@ class Handlers:
         """
         e.control.value = True
         self.state.create_other_project = True
-        self._style_checkbox(e.control)
+        self._style_selected_checkbox(e.control)
         self._show_project_type_dialog()
         self.page.update()
 
@@ -643,7 +648,7 @@ class Handlers:
                 self.controls.other_projects_checkbox.label = (
                     "Create Other Project Type"
                 )
-                self._style_checkbox(self.controls.other_projects_checkbox)
+                self._style_selected_checkbox(self.controls.other_projects_checkbox)
                 self._reload_and_merge_templates()
                 self._set_status("Project type cleared.", "info", update=False)
             else:
@@ -672,7 +677,7 @@ class Handlers:
                 self.controls.other_projects_checkbox.label = (
                     "Create Other Project Type"
                 )
-                self._style_checkbox(self.controls.other_projects_checkbox)
+                self._style_selected_checkbox(self.controls.other_projects_checkbox)
                 self._set_status("No project type selected.", "info", update=False)
 
             dialog.open = False
@@ -935,13 +940,15 @@ class Handlers:
     async def on_auto_save_toggle(self, e: ft.ControlEvent) -> None:
         """Handle auto-save folder changes checkbox toggle."""
         self.state.auto_save_folders = e.control.value
-        self._style_checkbox(e.control)
+        self._style_selected_checkbox(e.control)
         status = "enabled" if self.state.auto_save_folders else "disabled"
         self._set_status(f"Auto-save folder changes {status}.", "info", update=True)
 
     # --- Main Actions ---
 
-    async def _execute_build(self, open_folder: bool = False, open_vscode: bool = False) -> None:
+    async def _execute_build(
+        self, open_folder: bool = False, open_vscode: bool = False
+    ) -> None:
         """Execute the project build after confirmation.
 
         Creates project configuration and runs the build asynchronously.
@@ -1063,7 +1070,7 @@ class Handlers:
         self.controls.project_path_input.value = self.state.project_path
         self.controls.project_name_input.value = ""
         self.controls.python_version_dropdown.value = self.state.selected_python_version
-        self.controls.create_git_checkbox.value = False
+        self.controls.create_git_checkbox.value = True
         self.controls.include_starter_files_checkbox.value = True
         self.controls.create_ui_project_checkbox.value = False
         self.controls.create_ui_project_checkbox.label = "Create UI Project"
@@ -1079,9 +1086,8 @@ class Handlers:
             self.controls.auto_save_folder_changes,
         ):
             cb.label_style = None
-        self.controls.include_starter_files_checkbox.label_style = ft.TextStyle(
-            color=ft.Colors.GREEN
-        )
+        self._style_selected_checkbox(self.controls.include_starter_files_checkbox)
+        self._style_selected_checkbox(self.controls.create_git_checkbox)
         self.controls.warning_banner.value = ""
         self.controls.progress_ring.visible = False
 
@@ -1172,7 +1178,6 @@ For more information, visit: https://docs.astral.sh/uv/
         help_dialog.open = True
         self.page.update()
 
-
     async def on_git_cheat_sheet_click(self, _: ft.ControlEvent) -> None:
         """Handle Git Cheat Sheet button click."""
         try:
@@ -1219,7 +1224,7 @@ def attach_handlers(page: ft.Page, state: AppState) -> None:
         controls.create_git_checkbox,
         controls.include_starter_files_checkbox,
     ):
-        Handlers._style_checkbox(checkbox)
+        Handlers._style_selected_checkbox(checkbox)
 
     # --- Path & Name Handlers ---
     controls.browse_button.on_click = wrap_async(handlers.on_browse_click)
@@ -1254,7 +1259,9 @@ def attach_handlers(page: ft.Page, state: AppState) -> None:
     controls.exit_button.on_click = wrap_async(handlers.on_exit)
 
     # --- UI Feature Handlers ---
-    controls.git_cheat_sheet_button.on_click = wrap_async(handlers.on_git_cheat_sheet_click)
+    controls.git_cheat_sheet_button.on_click = wrap_async(
+        handlers.on_git_cheat_sheet_click
+    )
     controls.help_button.on_click = wrap_async(handlers.on_help_click)
     controls.theme_toggle_button.on_click = wrap_async(handlers.on_theme_toggle)
 
