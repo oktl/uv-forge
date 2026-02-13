@@ -3,11 +3,11 @@
 import tempfile
 from pathlib import Path
 
-from app.core.project_builder import cleanup_on_error
+from app.core.project_builder import remove_partial_project
 
 
-class TestCleanupOnError:
-    """Tests for the cleanup_on_error rollback function"""
+class TestRemovePartialProject:
+    """Tests for the remove_partial_project rollback function"""
 
     def test_removes_project_directory(self):
         """Test that the project directory is removed on cleanup"""
@@ -16,7 +16,7 @@ class TestCleanupOnError:
             project_path.mkdir()
             assert project_path.exists()
 
-            cleanup_on_error(project_path)
+            remove_partial_project(project_path)
 
             assert not project_path.exists()
 
@@ -28,7 +28,7 @@ class TestCleanupOnError:
             bare_repo = Path(tmpdir) / "myproject.git"
             bare_repo.mkdir()
 
-            cleanup_on_error(project_path, bare_repo)
+            remove_partial_project(project_path, bare_repo)
 
             assert not project_path.exists()
             assert not bare_repo.exists()
@@ -39,14 +39,14 @@ class TestCleanupOnError:
             project_path = Path(tmpdir) / "myproject"
             project_path.mkdir()
 
-            cleanup_on_error(project_path, None)
+            remove_partial_project(project_path, None)
 
             assert not project_path.exists()
 
     def test_handles_nonexistent_project_path(self):
         """Test that cleanup is safe when the project dir was never created"""
         nonexistent = Path("/tmp/nonexistent_create_project_test_xyz")
-        cleanup_on_error(nonexistent)  # Should not raise
+        remove_partial_project(nonexistent)  # Should not raise
 
     def test_handles_nonexistent_bare_repo(self):
         """Test that cleanup is safe when bare repo was never created"""
@@ -55,7 +55,7 @@ class TestCleanupOnError:
             project_path.mkdir()
             nonexistent_bare = Path(tmpdir) / "nonexistent.git"
 
-            cleanup_on_error(project_path, nonexistent_bare)  # Should not raise
+            remove_partial_project(project_path, nonexistent_bare)  # Should not raise
 
             assert not project_path.exists()
 
@@ -67,6 +67,6 @@ class TestCleanupOnError:
             nested.mkdir(parents=True)
             (nested / "state.py").write_text("# state")
 
-            cleanup_on_error(project_path)
+            remove_partial_project(project_path)
 
             assert not project_path.exists()

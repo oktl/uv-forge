@@ -26,6 +26,18 @@ from loguru import logger
 from app.core.constants import DEFAULT_GIT_HUB_ROOT
 
 
+def get_bare_repo_path(project_path: Path) -> Path:
+    """Derive the bare hub repository path for a project.
+
+    Args:
+        project_path: Absolute path to the project directory.
+
+    Returns:
+        Path to the corresponding bare repo at ~/Projects/git-repos/<name>.git.
+    """
+    return DEFAULT_GIT_HUB_ROOT / f"{project_path.name}.git"
+
+
 def _run_git(
     cmd: list[str], cwd: Path, *, check: bool = True
 ) -> subprocess.CompletedProcess:
@@ -72,7 +84,7 @@ def handle_git_init(project_path: Path, use_git: bool) -> None:
         logger.debug("Local .git already exists, skipping git init")
 
     # Initialize bare hub repo
-    bare_repo_path = hub_root / f"{project_path.name}.git"
+    bare_repo_path = get_bare_repo_path(project_path)
     logger.debug("Bare repo path: {}", bare_repo_path)
     bare_repo_path.mkdir(parents=True, exist_ok=True)
     if not (bare_repo_path / "HEAD").exists():

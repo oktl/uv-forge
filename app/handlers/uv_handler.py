@@ -104,7 +104,7 @@ def setup_virtual_env(project_path: Path, python_version: str) -> None:
 
 
 def install_package(project_path: Path, package_name: str) -> None:
-    """Install a package using uv add.
+    """Install a single package using uv add.
 
     Args:
         project_path: Path to the project directory.
@@ -116,6 +116,31 @@ def install_package(project_path: Path, package_name: str) -> None:
     uv_path = get_uv_path()
     subprocess.run(
         [uv_path, "add", package_name],
+        cwd=project_path,
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+
+
+def install_packages(project_path: Path, package_names: list[str]) -> None:
+    """Install multiple packages in a single uv add invocation.
+
+    More efficient than calling install_package() in a loop because it
+    resolves all dependencies together in one subprocess call.
+
+    Args:
+        project_path: Path to the project directory.
+        package_names: List of package names to install. No-op if empty.
+
+    Raises:
+        subprocess.CalledProcessError: If uv add command fails.
+    """
+    if not package_names:
+        return
+    uv_path = get_uv_path()
+    subprocess.run(
+        [uv_path, "add", *package_names],
         cwd=project_path,
         capture_output=True,
         text=True,

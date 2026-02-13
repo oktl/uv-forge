@@ -139,6 +139,24 @@ class ProjectConfig:
         """
         return self.project_path / self.project_name
 
+    @property
+    def effective_framework(self) -> str | None:
+        """Resolve the active UI framework, or None if UI is disabled.
+
+        Returns:
+            Framework name when ui_project_enabled is True, otherwise None.
+        """
+        return self.framework if self.ui_project_enabled else None
+
+    @property
+    def effective_project_type(self) -> str | None:
+        """Resolve the active project type, or None if other project is disabled.
+
+        Returns:
+            Project type when other_project_enabled is True, otherwise None.
+        """
+        return self.project_type if self.other_project_enabled else None
+
 
 @dataclass
 class BuildResult:
