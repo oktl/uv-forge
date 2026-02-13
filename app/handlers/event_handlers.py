@@ -966,6 +966,7 @@ class Handlers:
             git_enabled=self.state.initialize_git,
             ui_project_enabled=self.state.create_ui_project,
             framework=self.state.selected_framework or "",
+            other_project_enabled=self.state.create_other_project,
             project_type=self.state.selected_project_type,
             include_starter_files=self.state.include_starter_files,
             folders=self.state.folders
@@ -1036,9 +1037,11 @@ class Handlers:
             project_path=self.state.project_path,
             python_version=self.state.selected_python_version,
             git_enabled=self.state.initialize_git,
+            ui_project_enabled=self.state.create_ui_project,
             framework=self.state.selected_framework
             if self.state.create_ui_project
             else None,
+            other_project_enabled=self.state.create_other_project,
             project_type=self.state.selected_project_type
             if self.state.create_other_project
             else None,

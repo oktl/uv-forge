@@ -34,21 +34,21 @@ def test_folder_spec_all_parameters():
 
 
 def test_folder_spec_from_dict():
-    """Test FolderSpec.from_dict()"""
+    """Test FolderSpec._from_dict()"""
     data = {
         "name": "models",
         "create_init": True,
         "root_level": False,
         "files": ["__init__.py", "user.py"]
     }
-    folder = FolderSpec.from_dict(data)
+    folder = FolderSpec._from_dict(data)
     assert folder.name == "models"
     assert folder.create_init == True
     assert len(folder.files) == 2
 
 
 def test_folder_spec_from_dict_nested_subfolders():
-    """Test FolderSpec.from_dict() with nested subfolders"""
+    """Test FolderSpec._from_dict() with nested subfolders"""
     data = {
         "name": "app",
         "create_init": True,
@@ -57,7 +57,7 @@ def test_folder_spec_from_dict_nested_subfolders():
             {"name": "utils", "create_init": False}
         ]
     }
-    folder = FolderSpec.from_dict(data)
+    folder = FolderSpec._from_dict(data)
     assert folder.name == "app"
     assert len(folder.subfolders) == 2
     assert isinstance(folder.subfolders[0], FolderSpec)
