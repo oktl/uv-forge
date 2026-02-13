@@ -25,22 +25,6 @@ class TestConfigManagerInit:
         assert isinstance(manager.config_source, Path)
 
 
-class TestNormalizeFrameworkName:
-    """Tests for framework name normalization"""
-
-    @pytest.mark.parametrize("input_name,expected", [
-        ("PyQt6", "pyqt6"),
-        ("tkinter (built-in)", "tkinter"),
-        ("Flet", "flet"),
-        ("Django REST Framework", "django_rest_framework"),
-    ])
-    def test_normalize_framework_name(self, input_name, expected):
-        """Test framework name normalization"""
-        manager = ConfigManager()
-        result = manager._normalize_framework_name(input_name)
-        assert result == expected
-
-
 class TestLoadTemplate:
     """Tests for template loading"""
 
@@ -81,19 +65,46 @@ class TestLoadTemplate:
             temp_path.unlink()
 
 
+class TestUpdateConfigState:
+    """Tests for config state updates"""
+
+    def test_update_config_state_sets_attributes(self):
+        """Test _update_config_state updates all config attributes"""
+        manager = ConfigManager()
+        test_path = Path("/test/path.json")
+        test_template = "flet"
+        test_settings = {"folders": ["src", "tests"]}
+
+        manager._update_config_state(test_path, test_template, test_settings)
+
+        assert manager.config_source == test_path
+        assert manager.loaded_template == test_template
+        assert manager.settings == test_settings
+
+    def test_update_config_state_with_none_template(self):
+        """Test _update_config_state with None loaded_template"""
+        manager = ConfigManager()
+        test_path = Path("/test/default.json")
+        test_settings = {"folders": []}
+
+        manager._update_config_state(test_path, None, test_settings)
+
+        assert manager.loaded_template is None
+
+
 class TestLoadConfig:
     """Tests for config loading"""
 
-    def test_load_config_without_framework(self):
-        """Test load without framework (should use default)"""
+    def test_load_config_without_template(self):
+        """Test load without template (should use default)"""
         manager = ConfigManager()
         config = manager.load_config()
 
         assert isinstance(config, dict)
         assert "folders" in config
 
-    def test_load_config_with_nonexistent_framework(self):
-        """Test load with non-existent framework (should fall back to default)"""
+    def test_load_config_with_nonexistent_template(self):
+        """Test load with non-existent template (should fall back to default)"""
         manager = ConfigManager()
         config = manager.load_config("nonexistent_framework")
 
@@ -111,3 +122,13 @@ class TestGetConfigDisplayName:
 
         assert isinstance(display_name, str)
         assert len(display_name) > 0
+        assert display_name.endswith(" template")
+
+    def test_display_name_includes_template_suffix(self):
+        """Test display name always includes ' template' suffix"""
+        manager = ConfigManager()
+        manager.load_config()
+        display_name = manager.get_config_display_name()
+
+        assert " template" in display_name
+        assert display_name.endswith(" template")

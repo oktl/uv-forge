@@ -4,6 +4,7 @@ This module handles loading folder structure configurations from templates.
 Templates are organized in subdirectories:
 - app/config/templates/ui_frameworks/ - UI framework templates (Flet, PyQt6, etc.)
 - app/config/templates/project_types/ - Project type templates (Django, FastAPI, etc.)
+- app/config/templates/default.json - Generic default template (fallback)
 """
 
 import json
@@ -29,25 +30,14 @@ class ConfigManager:
     Attributes:
         config_source: Path to the active template file being used.
         settings: Current configuration dictionary with 'folders' key.
-        loaded_framework: Name of framework whose config is currently loaded.
+        loaded_template: Template identifier that was loaded (e.g., "flet", "project_types/django").
     """
 
     def __init__(self):
         """Initialize ConfigManager and load default settings."""
-        self.config_source: Path = UI_TEMPLATES_DIR / "default.json"
-        self.loaded_framework: Optional[str] = None
+        self.config_source: Path = TEMPLATES_DIR / "default.json"
+        self.loaded_template: Optional[str] = None
         self.settings: dict[str, Any] = self.load_config()
-
-    def _normalize_framework_name(self, framework: str) -> str:
-        """Convert framework display name to template filename.
-
-        Args:
-            framework: Framework display name (e.g., "PyQt6", "tkinter (built-in)").
-
-        Returns:
-            Normalized framework name for template filename (e.g., "pyqt6", "tkinter").
-        """
-        return normalize_framework_name(framework)
 
     def _load_template(self, template_path: Path) -> Optional[dict[str, Any]]:
         """Load and parse a template file.
@@ -65,57 +55,70 @@ class ConfigManager:
             with open(template_path, "r") as f:
                 data = json.load(f)
                 return {"folders": data.get("folders", DEFAULT_FOLDERS.copy())}
-        except json.JSONDecodeError, OSError:
+        except (json.JSONDecodeError, OSError):
             return None
 
-    def load_config(self, framework: Optional[str] = None) -> dict[str, Any]:
+    def _update_config_state(
+        self,
+        template_path: Path,
+        loaded_template: Optional[str],
+        settings: dict[str, Any],
+    ) -> None:
+        """Update config state after loading a template.
+
+        Args:
+            template_path: Path to the template file that was loaded.
+            loaded_template: Template identifier that was requested/loaded.
+            settings: Configuration dictionary with 'folders' key.
+        """
+        self.config_source = template_path
+        self.loaded_template = loaded_template
+        self.settings = settings
+
+    def load_config(self, template: Optional[str] = None) -> dict[str, Any]:
         """Load folder configuration from template files.
 
         Precedence:
-        1. Framework-specific template (if framework specified)
-            - Handles both UI frameworks (ui_frameworks/) and project types (project_types/)
-        2. Default template (ui_frameworks/default.json)
+        1. Template-specific configuration (if template specified)
+            - Handles both UI frameworks (e.g., "flet") and project types (e.g., "project_types/django")
+        2. Default template (templates/default.json)
         3. Hard-coded DEFAULT_FOLDERS constant
 
         Args:
-            framework: Optional framework name to load framework-specific template.
-                    Can be a simple name like "flet" or a path like "project_types/django".
+            template: Optional template identifier to load.
+                    Can be a UI framework name like "flet"
+                    or a project type path like "project_types/django".
 
         Returns:
             Dictionary containing 'folders' key with folder structure configuration.
         """
         defaults = {"folders": DEFAULT_FOLDERS.copy()}
 
-        # Try framework-specific template
-        if framework:
-            # Check if it's already a path (e.g., "project_types/django")
-            if "/" in framework:
-                template_path = TEMPLATES_DIR / f"{framework}.json"
+        # Try template-specific configuration
+        if template:
+            # Check if it's a project type path (e.g., "project_types/django")
+            if "/" in template:
+                filename = template.split("/")[-1]
+                template_path = PROJECT_TYPE_TEMPLATES_DIR / f"{filename}.json"
             else:
                 # UI framework - look in ui_frameworks directory
-                normalized = self._normalize_framework_name(framework)
+                normalized = normalize_framework_name(template)
                 template_path = UI_TEMPLATES_DIR / f"{normalized}.json"
 
             settings = self._load_template(template_path)
             if settings:
-                self.config_source = template_path
-                self.loaded_framework = framework
-                self.settings = settings
+                self._update_config_state(template_path, template, settings)
                 return settings
 
         # Fall back to default template
-        default_template = UI_TEMPLATES_DIR / "default.json"
+        default_template = TEMPLATES_DIR / "default.json"
         settings = self._load_template(default_template)
         if settings:
-            self.config_source = default_template
-            self.loaded_framework = framework
-            self.settings = settings
+            self._update_config_state(default_template, template, settings)
             return settings
 
         # Final fallback to hard-coded defaults
-        self.config_source = default_template  # For display purposes
-        self.loaded_framework = framework
-        self.settings = defaults
+        self._update_config_state(default_template, template, defaults)
         return defaults
 
     def save_config(self, settings: Optional[dict[str, Any]] = None) -> None:
@@ -136,13 +139,8 @@ class ConfigManager:
         """Get a user-friendly name for the active config source.
 
         Returns:
-            String like "default", "flet", "pyqt6", etc.
+            String like "default template", "flet template", "pyqt6 template", etc.
         """
         # Get template filename without extension
         template_name = self.config_source.stem
-
-        # If it's a framework template, show framework name
-        if self.loaded_framework and template_name != "default":
-            return f"{template_name} template"
-
         return f"{template_name} template"
