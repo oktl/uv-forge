@@ -9,6 +9,7 @@ import asyncio
 import subprocess
 import sys
 from pathlib import Path
+from typing import Any
 
 import flet as ft
 
@@ -16,7 +17,7 @@ from app.core.config_manager import ConfigManager
 from app.core.models import BuildSummaryConfig, ProjectConfig
 from app.core.project_builder import build_project
 from app.core.state import AppState
-from app.core.template_merger import merge_folder_lists
+from app.core.template_merger import merge_folder_lists, normalize_folder
 from app.core.validator import (
     validate_path,
     validate_project_name,
@@ -31,12 +32,15 @@ from app.ui.dialogs import (
     create_framework_dialog,
 )
 from app.ui.theme_manager import get_theme_colors
+from app.ui.ui_config import UIConfig
 from app.utils.async_executor import AsyncExecutor
 from app.core.constants import (
     DEFAULT_FOLDERS,
     DEFAULT_PYTHON_VERSION,
     GIT_CHEAT_SHEET_FILE,
     HELP_FILE,
+    OTHER_PROJECT_CHECKBOX_LABEL,
+    UI_PROJECT_CHECKBOX_LABEL,
 )
 
 
@@ -159,22 +163,24 @@ class Handlers:
             self.page.update()
 
     def _create_item_container(
-        self, name: str, path: list, item_type: str, indent: int = 0
+        self, name: str, item_path: list[int | str], item_type: str, indent: int = 0
     ) -> ft.Container:
         """Create a clickable container for a folder or file.
 
         Args:
             name: Display name of the item.
-            path: Navigation path to the item.
+            item_path: Navigation path to the item.
             item_type: Either "folder" or "file".
             indent: Indentation level (0 = root).
 
         Returns:
             Configured Container with click handler and selection highlighting.
         """
-        prefix = "  " * indent + ("|- " if indent > 0 else "")
+        prefix = UIConfig.FOLDER_TREE_INDENT_UNIT * indent + (
+            UIConfig.FOLDER_TREE_BRANCH_PREFIX if indent > 0 else ""
+        )
         is_selected = (
-            self.state.selected_item_path == path
+            self.state.selected_item_path == item_path
             and self.state.selected_item_type == item_type
         )
 
@@ -189,88 +195,63 @@ class Handlers:
         return ft.Container(
             content=ft.Text(
                 display_text,
-                size=12,
+                size=UIConfig.TEXT_SIZE_SMALL,
                 font_family="monospace",
                 color=text_color,
             ),
-            data={"path": path, "type": item_type, "name": name},
-            bgcolor=ft.Colors.BLUE_800 if is_selected else None,
-            border=ft.Border.all(2, ft.Colors.BLUE_400) if is_selected else None,
+            data={"path": item_path, "type": item_type, "name": name},
+            bgcolor=UIConfig.SELECTED_ITEM_BGCOLOR if is_selected else None,
+            border=(
+                ft.Border.all(
+                    UIConfig.BORDER_WIDTH_DEFAULT, UIConfig.SELECTED_ITEM_BORDER_COLOR
+                )
+                if is_selected
+                else None
+            ),
             on_click=self._on_item_click,
-            padding=ft.Padding(left=4, right=4, top=1, bottom=1),
+            padding=UIConfig.FOLDER_ITEM_PADDING,
             border_radius=2,
             margin=0,
         )
 
     def _process_folder_recursive(
-        self, folder, base_path: list, indent: int, controls_list: list
+        self,
+        folder: dict[str, Any],
+        base_path: list[int | str],
+        indent: int,
+        display_controls: list,
     ) -> None:
-        """Recursively process a folder item and add to controls list.
+        """Recursively process a folder dict and add to display controls.
 
         Args:
-            folder: Folder item (string, dict, or FolderSpec).
+            folder: Normalized folder dict with name, subfolders, files keys.
             base_path: Navigation path to this folder.
             indent: Current indentation level.
-            controls_list: List to append created containers to.
+            display_controls: List to append created containers to.
         """
-        if isinstance(folder, str):
-            controls_list.append(
-                self._create_item_container(folder, base_path, "folder", indent)
-            )
-        elif isinstance(folder, dict):
-            name = folder.get("name", "")
-            controls_list.append(
-                self._create_item_container(name, base_path, "folder", indent)
-            )
+        name = folder.get("name", "")
+        display_controls.append(
+            self._create_item_container(name, base_path, "folder", indent)
+        )
 
-            # Display files in this folder
-            files = folder.get("files", [])
-            if files:
-                for file_idx, file_name in enumerate(files):
-                    file_path = base_path + ["files", file_idx]
-                    controls_list.append(
-                        self._create_item_container(
-                            file_name, file_path, "file", indent + 1
-                        )
-                    )
-
-            # Display subfolders recursively
-            subfolders = folder.get("subfolders", [])
-            for subfolder_idx, subfolder in enumerate(subfolders):
-                subfolder_path = base_path + ["subfolders", subfolder_idx]
-                self._process_folder_recursive(
-                    subfolder, subfolder_path, indent + 1, controls_list
-                )
-        else:
-            # FolderSpec object
-            controls_list.append(
-                self._create_item_container(folder.name, base_path, "folder", indent)
+        for file_idx, file_name in enumerate(folder.get("files", [])):
+            file_path = base_path + ["files", file_idx]
+            display_controls.append(
+                self._create_item_container(file_name, file_path, "file", indent + 1)
             )
 
-            # Display files in this folder
-            if folder.files:
-                for file_idx, file_name in enumerate(folder.files):
-                    file_path = base_path + ["files", file_idx]
-                    controls_list.append(
-                        self._create_item_container(
-                            file_name, file_path, "file", indent + 1
-                        )
-                    )
-
-            # Display subfolders recursively
-            if folder.subfolders:
-                for subfolder_idx, subfolder in enumerate(folder.subfolders):
-                    subfolder_path = base_path + ["subfolders", subfolder_idx]
-                    self._process_folder_recursive(
-                        subfolder, subfolder_path, indent + 1, controls_list
-                    )
+        for subfolder_idx, subfolder in enumerate(folder.get("subfolders", [])):
+            subfolder_path = base_path + ["subfolders", subfolder_idx]
+            self._process_folder_recursive(
+                subfolder, subfolder_path, indent + 1, display_controls
+            )
 
     @staticmethod
-    def _count_folders_and_files(folders: list) -> tuple[int, int]:
-        """Recursively count folders and files in a folder structure.
+    def _count_folders_and_files(folders: list[dict[str, Any]]) -> tuple[int, int]:
+        """Recursively count folders and files in a normalized folder structure.
 
         Args:
-            folders: List of folder items (str, dict, or FolderSpec).
+            folders: List of normalized folder dicts.
 
         Returns:
             Tuple of (folder_count, file_count).
@@ -279,25 +260,13 @@ class Handlers:
         file_count = 0
 
         for folder in folders:
-            if isinstance(folder, str):
-                folder_count += 1
-            elif isinstance(folder, dict):
-                folder_count += 1
-                file_count += len(folder.get("files", []) or [])
-                subfolders = folder.get("subfolders", []) or []
-                if subfolders:
-                    sub_f, sub_fi = Handlers._count_folders_and_files(subfolders)
-                    folder_count += sub_f
-                    file_count += sub_fi
-            else:
-                # FolderSpec object
-                folder_count += 1
-                if folder.files:
-                    file_count += len(folder.files)
-                if folder.subfolders:
-                    sub_f, sub_fi = Handlers._count_folders_and_files(folder.subfolders)
-                    folder_count += sub_f
-                    file_count += sub_fi
+            folder_count += 1
+            file_count += len(folder.get("files", []) or [])
+            subfolders = folder.get("subfolders", []) or []
+            if subfolders:
+                sub_f, sub_fi = Handlers._count_folders_and_files(subfolders)
+                folder_count += sub_f
+                file_count += sub_fi
 
         return folder_count, file_count
 
@@ -343,40 +312,26 @@ class Handlers:
         """
         hierarchy = []
 
-        def process_folder(folder, base_path: list, parent_name: str = "") -> None:
+        def process_folder(
+            folder: dict[str, Any], base_path: list, parent_name: str = ""
+        ) -> None:
             """Recursively process folders and build hierarchy."""
-            if isinstance(folder, str):
-                label = f"{parent_name}{folder}/" if parent_name else f"{folder}/"
-                hierarchy.append({"label": label, "path": base_path})
-            elif isinstance(folder, dict):
-                name = folder.get("name", "")
-                label = f"{parent_name}{name}/" if parent_name else f"{name}/"
-                hierarchy.append({"label": label, "path": base_path})
+            name = folder.get("name", "")
+            label = f"{parent_name}{name}/" if parent_name else f"{name}/"
+            hierarchy.append({"label": label, "path": base_path})
 
-                # Process subfolders
-                subfolders = folder.get("subfolders", [])
-                for subfolder_idx, subfolder in enumerate(subfolders):
-                    subfolder_path = base_path + ["subfolders", subfolder_idx]
-                    process_folder(subfolder, subfolder_path, label)
-            else:
-                # FolderSpec object
-                label = (
-                    f"{parent_name}{folder.name}/" if parent_name else f"{folder.name}/"
-                )
-                hierarchy.append({"label": label, "path": base_path})
-
-                # Process subfolders
-                if folder.subfolders:
-                    for subfolder_idx, subfolder in enumerate(folder.subfolders):
-                        subfolder_path = base_path + ["subfolders", subfolder_idx]
-                        process_folder(subfolder, subfolder_path, label)
+            for subfolder_idx, subfolder in enumerate(folder.get("subfolders", [])):
+                subfolder_path = base_path + ["subfolders", subfolder_idx]
+                process_folder(subfolder, subfolder_path, label)
 
         for idx, folder in enumerate(self.state.folders):
             process_folder(folder, [idx])
 
         return hierarchy
 
-    def _navigate_to_parent(self, path: list | None):
+    def _navigate_to_parent(
+        self, path: list | None
+    ) -> tuple[list | dict, int | str | None]:
         """Navigate to parent container by path.
 
         Args:
@@ -394,17 +349,9 @@ class Handlers:
             if isinstance(segment, int):
                 current = current[segment]
             elif segment == "subfolders":
-                if isinstance(current, dict):
-                    current = current.get("subfolders", [])
-                else:
-                    current = (
-                        current.subfolders if hasattr(current, "subfolders") else []
-                    )
+                current = current.get("subfolders", [])
             elif segment == "files":
-                if isinstance(current, dict):
-                    current = current.get("files", [])
-                else:
-                    current = current.files if hasattr(current, "files") else []
+                current = current.get("files", [])
 
         return current, path[-1]
 
@@ -579,7 +526,7 @@ class Handlers:
                 self.state.framework = None
                 self.state.ui_project_enabled = False
                 self.controls.ui_project_checkbox.value = False
-                self.controls.ui_project_checkbox.label = "Create UI Project"
+                self.controls.ui_project_checkbox.label = UI_PROJECT_CHECKBOX_LABEL
                 self._style_selected_checkbox(self.controls.ui_project_checkbox)
                 self._reload_and_merge_templates()
                 self._set_status("UI framework cleared.", "info", update=False)
@@ -603,7 +550,7 @@ class Handlers:
             if not self.state.framework:
                 self.state.ui_project_enabled = False
                 self.controls.ui_project_checkbox.value = False
-                self.controls.ui_project_checkbox.label = "Create UI Project"
+                self.controls.ui_project_checkbox.label = UI_PROJECT_CHECKBOX_LABEL
                 self._style_selected_checkbox(self.controls.ui_project_checkbox)
                 self._set_status("No framework selected.", "info", update=False)
 
@@ -646,7 +593,7 @@ class Handlers:
                 self.state.other_project_enabled = False
                 self.controls.other_projects_checkbox.value = False
                 self.controls.other_projects_checkbox.label = (
-                    "Create Other Project Type"
+                    OTHER_PROJECT_CHECKBOX_LABEL
                 )
                 self._style_selected_checkbox(self.controls.other_projects_checkbox)
                 self._reload_and_merge_templates()
@@ -675,7 +622,7 @@ class Handlers:
                 self.state.other_project_enabled = False
                 self.controls.other_projects_checkbox.value = False
                 self.controls.other_projects_checkbox.label = (
-                    "Create Other Project Type"
+                    OTHER_PROJECT_CHECKBOX_LABEL
                 )
                 self._style_selected_checkbox(self.controls.other_projects_checkbox)
                 self._set_status("No project type selected.", "info", update=False)
@@ -695,20 +642,28 @@ class Handlers:
         dialog.open = True
         self.page.update()
 
+    def _load_template_folders(self, template_name: str | None) -> list[dict]:
+        """Load and normalize folder list from a template.
+
+        Args:
+            template_name: Template path (e.g. "flet", "project_types/django"),
+                or None for default.
+
+        Returns:
+            List of normalized folder dicts.
+        """
+        settings = self.config_manager.load_config(template_name)
+        raw_folders = settings.get("folders", DEFAULT_FOLDERS.copy())
+        return [normalize_folder(f) for f in raw_folders]
+
     def _load_project_type_template(self, project_type: str | None) -> None:
         """Load folder template for the specified project type.
 
         Args:
             project_type: Project type name to load template for, or None for default.
         """
-        # Try to load from project_types subfolder first
-        if project_type:
-            template_name = f"project_types/{project_type}"
-        else:
-            template_name = None
-
-        settings = self.config_manager.load_config(template_name)
-        self.state.folders = settings.get("folders", DEFAULT_FOLDERS.copy())
+        template_name = f"project_types/{project_type}" if project_type else None
+        self.state.folders = self._load_template_folders(template_name)
         self._update_folder_display()
 
     def _load_framework_template(self, framework: str | None) -> None:
@@ -717,8 +672,7 @@ class Handlers:
         Args:
             framework: Framework name to load template for, or None for default.
         """
-        settings = self.config_manager.load_config(framework)
-        self.state.folders = settings.get("folders", DEFAULT_FOLDERS.copy())
+        self.state.folders = self._load_template_folders(framework)
         self._update_folder_display()
 
     def _reload_and_merge_templates(self) -> None:
@@ -738,30 +692,24 @@ class Handlers:
         )
 
         if framework and project_type:
-            fw_settings = self.config_manager.load_config(framework)
-            fw_folders = fw_settings.get("folders", DEFAULT_FOLDERS.copy())
-
-            pt_settings = self.config_manager.load_config(
+            fw_folders = self._load_template_folders(framework)
+            pt_folders = self._load_template_folders(
                 f"project_types/{project_type}"
             )
-            pt_folders = pt_settings.get("folders", DEFAULT_FOLDERS.copy())
-
             self.state.folders = merge_folder_lists(fw_folders, pt_folders)
 
-            fw_name = framework
             pt_name = project_type.replace("_", " ").title()
             self._set_status(
-                f"Merged templates: {fw_name} + {pt_name}", "info", update=False
+                f"Merged templates: {framework} + {pt_name}", "info", update=False
             )
         elif framework:
-            settings = self.config_manager.load_config(framework)
-            self.state.folders = settings.get("folders", DEFAULT_FOLDERS.copy())
+            self.state.folders = self._load_template_folders(framework)
         elif project_type:
-            settings = self.config_manager.load_config(f"project_types/{project_type}")
-            self.state.folders = settings.get("folders", DEFAULT_FOLDERS.copy())
+            self.state.folders = self._load_template_folders(
+                f"project_types/{project_type}"
+            )
         else:
-            settings = self.config_manager.load_config(None)
-            self.state.folders = settings.get("folders", DEFAULT_FOLDERS.copy())
+            self.state.folders = self._load_template_folders(None)
 
         # Clear selection since folder structure changed
         self.state.selected_item_path = None
@@ -808,37 +756,11 @@ class Handlers:
                 else:
                     parent_folder = parent_container
 
-                # Ensure parent is a dict (convert if needed)
-                if isinstance(parent_folder, str):
-                    # Convert string folder to dict
-                    parent_folder = {
-                        "name": parent_folder,
-                        "subfolders": [],
-                        "files": [],
-                    }
-                    parent_container[idx] = parent_folder
-                elif not isinstance(parent_folder, dict):
-                    # FolderSpec - convert to dict
-                    parent_folder = {
-                        "name": parent_folder.name,
-                        "subfolders": list(parent_folder.subfolders)
-                        if parent_folder.subfolders
-                        else [],
-                        "files": list(parent_folder.files)
-                        if parent_folder.files
-                        else [],
-                    }
-                    parent_container[idx] = parent_folder
-
                 # Set parent_container to the folder's subfolders or files
                 if item_type == "folder":
-                    if "subfolders" not in parent_folder:
-                        parent_folder["subfolders"] = []
-                    parent_container = parent_folder["subfolders"]
+                    parent_container = parent_folder.setdefault("subfolders", [])
                 else:  # file
-                    if "files" not in parent_folder:
-                        parent_folder["files"] = []
-                    parent_container = parent_folder["files"]
+                    parent_container = parent_folder.setdefault("files", [])
 
             # Add the new item
             if item_type == "folder":
@@ -915,12 +837,7 @@ class Handlers:
         item_type = self.state.selected_item_type
         if isinstance(idx, int) and idx < len(parent_container):
             item = parent_container[idx]
-            if isinstance(item, str):
-                item_name = item
-            elif isinstance(item, dict):
-                item_name = item.get("name", "unnamed")
-            else:
-                item_name = item.name if hasattr(item, "name") else "unnamed"
+            item_name = item.get("name", "unnamed") if isinstance(item, dict) else item
 
             # Remove the item
             del parent_container[idx]
@@ -945,6 +862,28 @@ class Handlers:
         self._set_status(f"Auto-save folder changes {status}.", "info", update=True)
 
     # --- Main Actions ---
+
+    @staticmethod
+    def _open_in_file_manager(project_path: Path) -> None:
+        """Open the project directory in the OS file manager."""
+        if sys.platform == "darwin":
+            subprocess.Popen(["open", str(project_path)])
+        elif sys.platform == "win32":
+            subprocess.Popen(["explorer", str(project_path)])
+        else:
+            subprocess.Popen(["xdg-open", str(project_path)])
+
+    def _open_in_vscode(self, project_path: Path) -> None:
+        """Open the project directory in VS Code."""
+        try:
+            if sys.platform == "darwin":
+                subprocess.Popen(
+                    ["open", "-a", "Visual Studio Code", str(project_path)]
+                )
+            else:
+                subprocess.Popen(["code", str(project_path)])
+        except FileNotFoundError:
+            self._show_snackbar("VS Code not found", is_error=True)
 
     async def _execute_build(
         self, open_folder: bool = False, open_vscode: bool = False
@@ -986,22 +925,9 @@ class Handlers:
             self._show_snackbar(result.message, is_error=False)
             project_path = config.project_path / config.project_name
             if open_folder:
-                if sys.platform == "darwin":
-                    subprocess.Popen(["open", str(project_path)])
-                elif sys.platform == "win32":
-                    subprocess.Popen(["explorer", str(project_path)])
-                else:
-                    subprocess.Popen(["xdg-open", str(project_path)])
+                self._open_in_file_manager(project_path)
             if open_vscode:
-                try:
-                    if sys.platform == "darwin":
-                        subprocess.Popen(
-                            ["open", "-a", "Visual Studio Code", str(project_path)]
-                        )
-                    else:
-                        subprocess.Popen(["code", str(project_path)])
-                except FileNotFoundError:
-                    self._show_snackbar("VS Code not found", is_error=True)
+                self._open_in_vscode(project_path)
         else:
             self._set_status(result.message, "error", update=False)
             self._show_snackbar(result.message, is_error=True)
@@ -1018,7 +944,7 @@ class Handlers:
             return
 
         # Count folders/files for the summary
-        fc, fic = self._count_folders_and_files(self.state.folders)
+        folder_count, file_count = self._count_folders_and_files(self.state.folders)
 
         async def on_confirm(_):
             open_folder = dialog.open_folder_checkbox.value
@@ -1046,8 +972,8 @@ class Handlers:
             if self.state.other_project_enabled
             else None,
             starter_files=self.state.include_starter_files,
-            folder_count=fc,
-            file_count=fic,
+            folder_count=folder_count,
+            file_count=file_count,
         )
 
         dialog = create_build_summary_dialog(
@@ -1076,9 +1002,9 @@ class Handlers:
         self.controls.create_git_checkbox.value = True
         self.controls.include_starter_files_checkbox.value = True
         self.controls.ui_project_checkbox.value = False
-        self.controls.ui_project_checkbox.label = "Create UI Project"
+        self.controls.ui_project_checkbox.label = UI_PROJECT_CHECKBOX_LABEL
         self.controls.other_projects_checkbox.value = False
-        self.controls.other_projects_checkbox.label = "Create Other Project Type"
+        self.controls.other_projects_checkbox.label = OTHER_PROJECT_CHECKBOX_LABEL
         self.controls.auto_save_folder_changes.value = False
 
         # Reset checkbox label styles (include_starter_files stays green — it defaults to checked)
@@ -1219,7 +1145,7 @@ def attach_handlers(page: ft.Page, state: AppState) -> None:
 
     # Set initial UI state (path icon if default path exists, button disabled)
     if state.path_valid:
-        Handlers._set_validation_icon(controls.project_path_input, True)
+        handlers._set_validation_icon(controls.project_path_input, True)
     handlers._update_build_button_state()
 
     # Apply green styling to any checkboxes that start in a checked state
@@ -1227,7 +1153,7 @@ def attach_handlers(page: ft.Page, state: AppState) -> None:
         controls.create_git_checkbox,
         controls.include_starter_files_checkbox,
     ):
-        Handlers._style_selected_checkbox(checkbox)
+        handlers._style_selected_checkbox(checkbox)
 
     # --- Path & Name Handlers ---
     controls.browse_button.on_click = wrap_async(handlers.on_browse_click)

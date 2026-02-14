@@ -134,6 +134,10 @@ DEFAULT_GIT_HUB_ROOT = Path.home() / "Projects" / "git-repos"
 # Default folder structure (used as final fallback)
 DEFAULT_FOLDERS = ["core", "ui", "utils", "assets"]
 
+# Checkbox label constants
+UI_PROJECT_CHECKBOX_LABEL = "Create UI Project"
+OTHER_PROJECT_CHECKBOX_LABEL = "Create Other Project Type"
+
 # ============================================================================
 # Dialog Data Structures
 # ============================================================================

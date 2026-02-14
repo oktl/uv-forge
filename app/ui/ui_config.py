@@ -80,6 +80,13 @@ class UIConfig:
     SELECTION_COLOR_ACTIVE = ft.Colors.BLUE_600
     SELECTION_COLOR_INACTIVE = ft.Colors.GREY_600
 
+    # Folder Tree Display
+    FOLDER_TREE_INDENT_UNIT = "  "
+    FOLDER_TREE_BRANCH_PREFIX = "|- "
+    FOLDER_ITEM_PADDING = ft.Padding(left=4, right=4, top=1, bottom=1)
+    SELECTED_ITEM_BGCOLOR = ft.Colors.BLUE_800
+    SELECTED_ITEM_BORDER_COLOR = ft.Colors.BLUE_400
+
     @classmethod
     def create_button_style(
         cls,

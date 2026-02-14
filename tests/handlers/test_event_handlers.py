@@ -8,7 +8,11 @@ import tempfile
 
 from app.handlers.event_handlers import Handlers
 from app.core.state import AppState
-from app.core.constants import DEFAULT_PYTHON_VERSION
+from app.core.constants import (
+    DEFAULT_PYTHON_VERSION,
+    UI_PROJECT_CHECKBOX_LABEL,
+    OTHER_PROJECT_CHECKBOX_LABEL,
+)
 
 
 class MockControl:
@@ -69,8 +73,8 @@ class MockControls:
         self.python_version_dropdown = MockControl(value=DEFAULT_PYTHON_VERSION)
         self.create_git_checkbox = MockControl(value=False)
         self.include_starter_files_checkbox = MockControl(value=False)
-        self.ui_project_checkbox = MockControl(value=False, label="Create UI Project")
-        self.other_projects_checkbox = MockControl(value=False, label="Create Other Project Type")
+        self.ui_project_checkbox = MockControl(value=False, label=UI_PROJECT_CHECKBOX_LABEL)
+        self.other_projects_checkbox = MockControl(value=False, label=OTHER_PROJECT_CHECKBOX_LABEL)
         self.auto_save_folder_changes = MockControl(value=False)
         self.app_subfolders_label = MockText()
         self.subfolders_container = MockContainer()
@@ -161,7 +165,11 @@ def test_update_folder_display_simple(mock_handlers):
     """Test _update_folder_display with simple folder list"""
     handlers, page, controls, state = mock_handlers
 
-    state.folders = ["core", "ui", "utils"]
+    state.folders = [
+        {"name": "core", "subfolders": [], "files": []},
+        {"name": "ui", "subfolders": [], "files": []},
+        {"name": "utils", "subfolders": [], "files": []},
+    ]
     handlers._update_folder_display()
 
     assert len(controls.subfolders_container.content.controls) == 3
@@ -173,13 +181,14 @@ def test_update_folder_display_nested(mock_handlers):
     handlers, page, controls, state = mock_handlers
 
     state.folders = [
-        "core",
+        {"name": "core", "subfolders": [], "files": []},
         {
             "name": "ui",
             "subfolders": [
-                {"name": "components", "subfolders": []},
-                {"name": "styles", "subfolders": []}
-            ]
+                {"name": "components", "subfolders": [], "files": []},
+                {"name": "styles", "subfolders": [], "files": []}
+            ],
+            "files": [],
         }
     ]
     handlers._update_folder_display()
@@ -204,7 +213,7 @@ def test_create_item_container_folder(mock_handlers):
 
     container = handlers._create_item_container(
         name="core",
-        path=[0],
+        item_path=[0],
         item_type="folder",
         indent=0
     )
@@ -222,7 +231,7 @@ def test_create_item_container_file(mock_handlers):
 
     container = handlers._create_item_container(
         name="config.py",
-        path=[0, "files", 0],
+        item_path=[0, "files", 0],
         item_type="file",
         indent=1
     )
@@ -242,7 +251,7 @@ def test_create_item_container_selected_folder(mock_handlers):
 
     container = handlers._create_item_container(
         name="core",
-        path=[0],
+        item_path=[0],
         item_type="folder",
         indent=0
     )
@@ -261,7 +270,7 @@ def test_create_item_container_selected_file(mock_handlers):
 
     container = handlers._create_item_container(
         name="config.py",
-        path=[0, "files", 0],
+        item_path=[0, "files", 0],
         item_type="file",
         indent=1
     )
@@ -280,7 +289,7 @@ def test_create_item_container_not_selected(mock_handlers):
 
     container = handlers._create_item_container(
         name="core",
-        path=[0],
+        item_path=[0],
         item_type="folder",
         indent=0
     )
@@ -290,12 +299,14 @@ def test_create_item_container_not_selected(mock_handlers):
     assert container.border is None
 
 
-def test_process_folder_recursive_string(mock_handlers):
-    """Test _process_folder_recursive with string folder"""
+def test_process_folder_recursive_minimal_dict(mock_handlers):
+    """Test _process_folder_recursive with minimal dict folder"""
     handlers, page, controls, state = mock_handlers
 
     controls_list = []
-    handlers._process_folder_recursive("core", [0], 0, controls_list)
+    handlers._process_folder_recursive(
+        {"name": "core", "subfolders": [], "files": []}, [0], 0, controls_list
+    )
 
     assert len(controls_list) == 1
     assert controls_list[0].data["name"] == "core"
@@ -471,7 +482,7 @@ def test_load_framework_template_default(mock_handlers):
         handlers._load_framework_template(None)
 
         mock_load.assert_called_once_with(None)
-        assert state.folders == ["core", "ui", "utils"]
+        assert [f["name"] for f in state.folders] == ["core", "ui", "utils"]
 
 
 def test_load_framework_template_specific(mock_handlers):
@@ -483,7 +494,7 @@ def test_load_framework_template_specific(mock_handlers):
         handlers._load_framework_template("flet")
 
         mock_load.assert_called_once_with("flet")
-        assert state.folders == ["app", "components", "styles"]
+        assert [f["name"] for f in state.folders] == ["app", "components", "styles"]
 
 
 def test_load_framework_template_updates_display(mock_handlers):
@@ -557,7 +568,7 @@ async def test_on_other_project_toggle_checked(mock_handlers):
 
     # Create mock event (value doesn't matter — handler always forces True)
     mock_event = Mock()
-    mock_event.control = MockControl(value=False, label="Create Other Project Type")
+    mock_event.control = MockControl(value=False, label=OTHER_PROJECT_CHECKBOX_LABEL)
 
     # Mock the dialog show method to avoid Flet dependencies
     with patch.object(handlers, '_show_project_type_dialog') as mock_show:
@@ -611,7 +622,7 @@ async def test_on_other_project_toggle_does_not_uncheck_ui(mock_handlers):
 
     # Create mock event to check Other project
     mock_event = Mock()
-    mock_event.control = MockControl(value=True, label="Create Other Project Type")
+    mock_event.control = MockControl(value=True, label=OTHER_PROJECT_CHECKBOX_LABEL)
 
     # Mock the dialog show method
     with patch.object(handlers, '_show_project_type_dialog'):
@@ -641,8 +652,8 @@ def test_load_project_type_template_with_type(mock_handlers):
         # Verify correct template path was requested
         mock_load.assert_called_once_with("project_types/django")
 
-        # Verify folders were loaded
-        assert state.folders == ["api", "core", "models"]
+        # Verify folders were loaded (normalized to dicts)
+        assert [f["name"] for f in state.folders] == ["api", "core", "models"]
 
 
 def test_load_project_type_template_none(mock_handlers):
@@ -650,7 +661,7 @@ def test_load_project_type_template_none(mock_handlers):
     handlers, page, controls, state = mock_handlers
 
     # Set initial folders
-    state.folders = ["old", "folders"]
+    state.folders = [{"name": "old", "subfolders": [], "files": []}]
 
     # Mock the config manager
     with patch.object(handlers.config_manager, 'load_config') as mock_load:
@@ -663,8 +674,8 @@ def test_load_project_type_template_none(mock_handlers):
         # Verify default was requested (None)
         mock_load.assert_called_once_with(None)
 
-        # Verify folders were updated
-        assert state.folders == ["default", "folders"]
+        # Verify folders were updated (normalized to dicts)
+        assert [f["name"] for f in state.folders] == ["default", "folders"]
 
 
 @pytest.mark.parametrize("project_type,expected_path", [
@@ -730,7 +741,7 @@ async def test_ui_project_toggle_does_not_uncheck_other_project(mock_handlers):
 
     # Create mock event to check UI project
     mock_event = Mock()
-    mock_event.control = MockControl(value=False, label="Create UI Project")
+    mock_event.control = MockControl(value=False, label=UI_PROJECT_CHECKBOX_LABEL)
 
     # Mock the dialog show method
     with patch.object(handlers, '_show_framework_dialog'):
@@ -804,7 +815,7 @@ def test_reload_and_merge_templates_only_framework(mock_handlers):
         handlers._reload_and_merge_templates()
 
         mock_load.assert_called_once_with("flet")
-    assert state.folders == ["core", "ui"]
+    assert [f["name"] for f in state.folders] == ["core", "ui"]
 
 
 def test_reload_and_merge_templates_only_project_type(mock_handlers):
@@ -820,7 +831,7 @@ def test_reload_and_merge_templates_only_project_type(mock_handlers):
         handlers._reload_and_merge_templates()
 
         mock_load.assert_called_once_with("project_types/django")
-    assert state.folders == ["api", "models"]
+    assert [f["name"] for f in state.folders] == ["api", "models"]
 
 
 def test_reload_and_merge_templates_neither_selected(mock_handlers):
@@ -835,7 +846,7 @@ def test_reload_and_merge_templates_neither_selected(mock_handlers):
         handlers._reload_and_merge_templates()
 
         mock_load.assert_called_once_with(None)
-    assert state.folders == ["default1", "default2"]
+    assert [f["name"] for f in state.folders] == ["default1", "default2"]
 
 
 def test_show_framework_dialog_adds_to_overlay(mock_handlers):
@@ -916,9 +927,14 @@ def test_count_folders_and_files_empty(mock_handlers):
     assert fic == 0
 
 
-def test_count_folders_and_files_flat_strings(mock_handlers):
-    """Test _count_folders_and_files with flat string folders"""
-    fc, fic = Handlers._count_folders_and_files(["core", "ui", "utils"])
+def test_count_folders_and_files_flat_dicts(mock_handlers):
+    """Test _count_folders_and_files with flat dict folders"""
+    folders = [
+        {"name": "core", "subfolders": [], "files": []},
+        {"name": "ui", "subfolders": [], "files": []},
+        {"name": "utils", "subfolders": [], "files": []},
+    ]
+    fc, fic = Handlers._count_folders_and_files(folders)
     assert fc == 3
     assert fic == 0
 
@@ -951,14 +967,13 @@ def test_count_folders_and_files_nested(mock_handlers):
     assert fic == 4  # main.py, state.py, components.py, theme.py
 
 
-def test_count_folders_and_files_folderspec(mock_handlers):
-    """Test _count_folders_and_files with FolderSpec objects"""
-    from app.core.models import FolderSpec
+def test_count_folders_and_files_nested_dicts(mock_handlers):
+    """Test _count_folders_and_files with nested dict structures"""
     folders = [
-        FolderSpec(name="core", files=["state.py", "models.py"], subfolders=None),
-        FolderSpec(name="ui", files=None, subfolders=[
-            FolderSpec(name="widgets", files=["button.py"], subfolders=None),
-        ]),
+        {"name": "core", "subfolders": [], "files": ["state.py", "models.py"]},
+        {"name": "ui", "subfolders": [
+            {"name": "widgets", "subfolders": [], "files": ["button.py"]},
+        ], "files": []},
     ]
     fc, fic = Handlers._count_folders_and_files(folders)
     assert fc == 3  # core, ui, widgets
@@ -1389,7 +1404,7 @@ async def test_on_ui_project_toggle_opens_dialog(mock_handlers):
     handlers, page, controls, state = mock_handlers
 
     mock_event = Mock()
-    mock_event.control = MockControl(value=False, label="Create UI Project")
+    mock_event.control = MockControl(value=False, label=UI_PROJECT_CHECKBOX_LABEL)
 
     with patch.object(handlers, '_show_framework_dialog') as mock_show:
         await handlers.on_ui_project_toggle(mock_event)
@@ -1473,7 +1488,7 @@ def test_framework_dialog_on_select_none_clears_state(mock_handlers):
     assert state.framework is None
     assert state.ui_project_enabled == False
     assert controls.ui_project_checkbox.value == False
-    assert controls.ui_project_checkbox.label == "Create UI Project"
+    assert controls.ui_project_checkbox.label == UI_PROJECT_CHECKBOX_LABEL
     assert mock_dialog.open == False
 
 
@@ -1499,7 +1514,7 @@ def test_framework_dialog_on_close_unchecks_when_no_prior_selection(mock_handler
 
     assert state.ui_project_enabled == False
     assert controls.ui_project_checkbox.value == False
-    assert controls.ui_project_checkbox.label == "Create UI Project"
+    assert controls.ui_project_checkbox.label == UI_PROJECT_CHECKBOX_LABEL
     assert mock_dialog.open == False
 
 
@@ -1560,7 +1575,7 @@ def test_project_type_dialog_on_select_none_clears_state(mock_handlers):
     assert state.project_type is None
     assert state.other_project_enabled == False
     assert controls.other_projects_checkbox.value == False
-    assert controls.other_projects_checkbox.label == "Create Other Project Type"
+    assert controls.other_projects_checkbox.label == OTHER_PROJECT_CHECKBOX_LABEL
     assert mock_dialog.open == False
 
 
@@ -1585,7 +1600,7 @@ async def test_reset_clears_both_checkbox_labels(mock_handlers):
     with patch.object(handlers, '_reload_and_merge_templates'):
         await handlers.on_reset(mock_event)
 
-    assert controls.ui_project_checkbox.label == "Create UI Project"
-    assert controls.other_projects_checkbox.label == "Create Other Project Type"
+    assert controls.ui_project_checkbox.label == UI_PROJECT_CHECKBOX_LABEL
+    assert controls.other_projects_checkbox.label == OTHER_PROJECT_CHECKBOX_LABEL
     assert controls.ui_project_checkbox.value == False
     assert controls.other_projects_checkbox.value == False
