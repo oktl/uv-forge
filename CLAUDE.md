@@ -47,7 +47,6 @@ app/
 │   ├── filesystem_handler.py # setup_app_structure(), folder creation, cleanup_on_error()
 │   ├── uv_handler.py         # run_uv_init(), install_package(), setup_virtual_env()
 │   ├── git_handler.py        # handle_git_init(), finalize_git_setup() — two-phase git setup
-│   └── handler_factory.py    # HandlerFactory.create_handler() — async wrappers
 ├── ui/
 │   ├── components.py         # Controls class + build_main_view(page, state)
 │   ├── dialogs.py            # 8 dialog functions + 5 shared helpers; all theme-aware via is_dark_mode
@@ -64,7 +63,7 @@ app/
 
 tests/
 ├── core/                     # 148 tests (state, models, validator, config_manager, template_merger, boilerplate_resolver)
-├── handlers/                 # 93 tests (event_handlers, filesystem, git, uv, handler_factory)
+├── handlers/                 # 93 tests (event_handlers, filesystem, git, uv)
 ├── ui/                       # 19 tests (dialogs)
 └── utils/                    # 13 tests (async_executor)
 ```
@@ -137,7 +136,7 @@ Files use `{{project_name}}` placeholders, substituted at build time with a norm
 - **Constants centralized in `app/core/constants.py`** — do not create duplicate constant files
 - **AppState is the single mutable state object** — passed to UI builder and handlers, never duplicated
 - **`page.controls_ref` and `page.state_ref`** store references for cross-module access
-- **Async pattern**: sync handlers wrapped via `HandlerFactory` / `AsyncExecutor.run()` to keep UI responsive
+- **Async pattern**: sync handlers wrapped via `wrap_async()` / `AsyncExecutor.run()` to keep UI responsive
 - **`_reload_and_merge_templates()`** is the single entry point for all template loading — framework change, project type change, reset, toggle off
 - **`normalize_framework_name()`** in `boilerplate_resolver.py` is the shared function for framework name normalization — used by both `ConfigManager` and `BoilerplateResolver`
 - **`normalize_project_name()`** in `boilerplate_resolver.py` converts project names to title case with spaces for `{{project_name}}` substitution (e.g. `my_app` → `My App`)
@@ -157,7 +156,7 @@ Files use `{{project_name}}` placeholders, substituted at build time with a norm
 
 - **Run `uv run pytest` before committing** — 387 tests, coverage automatic
 - **Add tests** in `tests/core/`, `tests/handlers/`, or `tests/utils/` for new functionality
-- **Use `handler_factory` for new async handlers** wrapping blocking code
+- **Use `wrap_async()` for new async handlers** wrapping coroutines for Flet callbacks
 - **Use `uv add <package>`** for dependencies, never pip
 - **Follow existing patterns**: dataclasses for models, try-except with cleanup, type hints
 

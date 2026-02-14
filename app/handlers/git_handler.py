@@ -73,7 +73,6 @@ def handle_git_init(project_path: Path, use_git: bool) -> None:
         return
 
     logger.info("Initializing git repositories for: {}", project_path.name)
-    hub_root = DEFAULT_GIT_HUB_ROOT
 
     # Initialize local repo (idempotent)
     git_dir = project_path / ".git"
