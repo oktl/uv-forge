@@ -4,7 +4,7 @@ import asyncio
 import time
 import pytest
 
-from app.utils.async_executor import AsyncExecutor, run_async
+from app.utils.async_executor import AsyncExecutor
 
 
 class TestAsyncExecutorClass:
@@ -93,29 +93,6 @@ class TestAsyncExecutorClass:
         assert isinstance(result, dict)
         assert result["key"] == "value"
         assert result["number"] == 42
-
-
-class TestRunAsyncAlias:
-    """Tests for run_async convenience function"""
-
-    @pytest.mark.asyncio
-    async def test_run_async_alias_works(self):
-        """Test run_async alias works"""
-        def test_func(value):
-            return value * 2
-
-        result1 = await run_async(test_func, 21)
-        result2 = await AsyncExecutor.run(test_func, 21)
-        assert result1 == result2 == 42
-
-    @pytest.mark.asyncio
-    async def test_run_async_with_kwargs(self):
-        """Test run_async with kwargs"""
-        def greet(name, greeting="Hello"):
-            return f"{greeting}, {name}!"
-
-        result = await run_async(greet, "World", greeting="Hi")
-        assert result == "Hi, World!"
 
 
 class TestEdgeCases:

@@ -40,19 +40,5 @@ class AsyncExecutor:
                 key=value
             )
         """
-        loop = asyncio.get_event_loop()
-
-        # If function has kwargs, wrap in lambda
-        if kwargs:
-            return await loop.run_in_executor(None, lambda: func(*args, **kwargs))
-
-        # If just args, can pass directly
-        if args:
-            return await loop.run_in_executor(None, lambda: func(*args))
-
-        # No args, call directly
-        return await loop.run_in_executor(None, func)
-
-
-# Convenience alias for shorter syntax
-run_async = AsyncExecutor.run
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, lambda: func(*args, **kwargs))
