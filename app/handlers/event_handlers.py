@@ -535,18 +535,18 @@ class Handlers:
 
     async def on_python_version_change(self, e: ft.ControlEvent) -> None:
         """Handle Python version dropdown changes."""
-        self.state.selected_python_version = e.control.value or DEFAULT_PYTHON_VERSION
+        self.state.python_version = e.control.value or DEFAULT_PYTHON_VERSION
         self._set_status(
-            f"Python version set to {self.state.selected_python_version}",
+            f"Python version set to {self.state.python_version}",
             "info",
             update=True,
         )
 
     async def on_git_toggle(self, e: ft.ControlEvent) -> None:
         """Handle git initialization checkbox toggle."""
-        self.state.initialize_git = e.control.value
+        self.state.git_enabled = e.control.value
         self._style_selected_checkbox(e.control)
-        status = "enabled" if self.state.initialize_git else "disabled"
+        status = "enabled" if self.state.git_enabled else "disabled"
         self._set_status(f"Git initialization {status}.", "info", update=True)
 
     async def on_boilerplate_toggle(self, e: ft.ControlEvent) -> None:
@@ -564,7 +564,7 @@ class Handlers:
         checkbox reopens the dialog to allow changing the selection.
         """
         e.control.value = True
-        self.state.create_ui_project = True
+        self.state.ui_project_enabled = True
         self._style_selected_checkbox(e.control)
         self._show_framework_dialog()
         self.page.update()
@@ -576,16 +576,16 @@ class Handlers:
             """Handle framework selection."""
             if framework is None:
                 # "None" selected — clear state, uncheck checkbox, reset label
-                self.state.selected_framework = None
-                self.state.create_ui_project = False
-                self.controls.create_ui_project_checkbox.value = False
-                self.controls.create_ui_project_checkbox.label = "Create UI Project"
-                self._style_selected_checkbox(self.controls.create_ui_project_checkbox)
+                self.state.framework = None
+                self.state.ui_project_enabled = False
+                self.controls.ui_project_checkbox.value = False
+                self.controls.ui_project_checkbox.label = "Create UI Project"
+                self._style_selected_checkbox(self.controls.ui_project_checkbox)
                 self._reload_and_merge_templates()
                 self._set_status("UI framework cleared.", "info", update=False)
             else:
-                self.state.selected_framework = framework
-                self.controls.create_ui_project_checkbox.label = (
+                self.state.framework = framework
+                self.controls.ui_project_checkbox.label = (
                     f"UI Framework: {framework}"
                 )
                 self._reload_and_merge_templates()
@@ -600,11 +600,11 @@ class Handlers:
 
         def on_close(e) -> None:
             """Handle dialog close/cancel."""
-            if not self.state.selected_framework:
-                self.state.create_ui_project = False
-                self.controls.create_ui_project_checkbox.value = False
-                self.controls.create_ui_project_checkbox.label = "Create UI Project"
-                self._style_selected_checkbox(self.controls.create_ui_project_checkbox)
+            if not self.state.framework:
+                self.state.ui_project_enabled = False
+                self.controls.ui_project_checkbox.value = False
+                self.controls.ui_project_checkbox.label = "Create UI Project"
+                self._style_selected_checkbox(self.controls.ui_project_checkbox)
                 self._set_status("No framework selected.", "info", update=False)
 
             dialog.open = False
@@ -613,7 +613,7 @@ class Handlers:
         dialog = create_framework_dialog(
             on_select_callback=on_select,
             on_close_callback=on_close,
-            current_selection=self.state.selected_framework,
+            current_selection=self.state.framework,
             is_dark_mode=self.state.is_dark_mode,
         )
 
@@ -629,7 +629,7 @@ class Handlers:
         checkbox reopens the dialog to allow changing the selection.
         """
         e.control.value = True
-        self.state.create_other_project = True
+        self.state.other_project_enabled = True
         self._style_selected_checkbox(e.control)
         self._show_project_type_dialog()
         self.page.update()
@@ -642,8 +642,8 @@ class Handlers:
             """Handle project type selection."""
             if project_type is None:
                 # "None" selected — clear state, uncheck checkbox, reset label
-                self.state.selected_project_type = None
-                self.state.create_other_project = False
+                self.state.project_type = None
+                self.state.other_project_enabled = False
                 self.controls.other_projects_checkbox.value = False
                 self.controls.other_projects_checkbox.label = (
                     "Create Other Project Type"
@@ -652,7 +652,7 @@ class Handlers:
                 self._reload_and_merge_templates()
                 self._set_status("Project type cleared.", "info", update=False)
             else:
-                self.state.selected_project_type = project_type
+                self.state.project_type = project_type
                 self._reload_and_merge_templates()
 
                 # Update checkbox label with selected type
@@ -671,8 +671,8 @@ class Handlers:
         def on_close(e) -> None:
             """Handle dialog close/cancel."""
             # If no project type selected, uncheck the checkbox
-            if not self.state.selected_project_type:
-                self.state.create_other_project = False
+            if not self.state.project_type:
+                self.state.other_project_enabled = False
                 self.controls.other_projects_checkbox.value = False
                 self.controls.other_projects_checkbox.label = (
                     "Create Other Project Type"
@@ -687,7 +687,7 @@ class Handlers:
         dialog = create_project_type_dialog(
             on_select_callback=on_select,
             on_close_callback=on_close,
-            current_selection=self.state.selected_project_type,
+            current_selection=self.state.project_type,
             is_dark_mode=self.state.is_dark_mode,
         )
 
@@ -729,11 +729,11 @@ class Handlers:
         Falls back to the default template when neither is selected.
         """
         framework = (
-            self.state.selected_framework if self.state.create_ui_project else None
+            self.state.framework if self.state.ui_project_enabled else None
         )
         project_type = (
-            self.state.selected_project_type
-            if self.state.create_other_project
+            self.state.project_type
+            if self.state.other_project_enabled
             else None
         )
 
@@ -962,12 +962,12 @@ class Handlers:
         config = ProjectConfig(
             project_name=self.state.project_name,
             project_path=Path(self.state.project_path),
-            python_version=self.state.selected_python_version,
-            git_enabled=self.state.initialize_git,
-            ui_project_enabled=self.state.create_ui_project,
-            framework=self.state.selected_framework or "",
-            other_project_enabled=self.state.create_other_project,
-            project_type=self.state.selected_project_type,
+            python_version=self.state.python_version,
+            git_enabled=self.state.git_enabled,
+            ui_project_enabled=self.state.ui_project_enabled,
+            framework=self.state.framework or "",
+            other_project_enabled=self.state.other_project_enabled,
+            project_type=self.state.project_type,
             include_starter_files=self.state.include_starter_files,
             folders=self.state.folders
             if self.state.folders
@@ -1035,15 +1035,15 @@ class Handlers:
         build_config = BuildSummaryConfig(
             project_name=self.state.project_name,
             project_path=self.state.project_path,
-            python_version=self.state.selected_python_version,
-            git_enabled=self.state.initialize_git,
-            ui_project_enabled=self.state.create_ui_project,
-            framework=self.state.selected_framework
-            if self.state.create_ui_project
+            python_version=self.state.python_version,
+            git_enabled=self.state.git_enabled,
+            ui_project_enabled=self.state.ui_project_enabled,
+            framework=self.state.framework
+            if self.state.ui_project_enabled
             else None,
-            other_project_enabled=self.state.create_other_project,
-            project_type=self.state.selected_project_type
-            if self.state.create_other_project
+            other_project_enabled=self.state.other_project_enabled,
+            project_type=self.state.project_type
+            if self.state.other_project_enabled
             else None,
             starter_files=self.state.include_starter_files,
             folder_count=fc,
@@ -1072,11 +1072,11 @@ class Handlers:
         # Reset UI controls
         self.controls.project_path_input.value = self.state.project_path
         self.controls.project_name_input.value = ""
-        self.controls.python_version_dropdown.value = self.state.selected_python_version
+        self.controls.python_version_dropdown.value = self.state.python_version
         self.controls.create_git_checkbox.value = True
         self.controls.include_starter_files_checkbox.value = True
-        self.controls.create_ui_project_checkbox.value = False
-        self.controls.create_ui_project_checkbox.label = "Create UI Project"
+        self.controls.ui_project_checkbox.value = False
+        self.controls.ui_project_checkbox.label = "Create UI Project"
         self.controls.other_projects_checkbox.value = False
         self.controls.other_projects_checkbox.label = "Create Other Project Type"
         self.controls.auto_save_folder_changes.value = False
@@ -1084,7 +1084,7 @@ class Handlers:
         # Reset checkbox label styles (include_starter_files stays green — it defaults to checked)
         for cb in (
             self.controls.create_git_checkbox,
-            self.controls.create_ui_project_checkbox,
+            self.controls.ui_project_checkbox,
             self.controls.other_projects_checkbox,
             self.controls.auto_save_folder_changes,
         ):
@@ -1242,7 +1242,7 @@ def attach_handlers(page: ft.Page, state: AppState) -> None:
     controls.include_starter_files_checkbox.on_change = wrap_async(
         handlers.on_boilerplate_toggle
     )
-    controls.create_ui_project_checkbox.on_change = wrap_async(
+    controls.ui_project_checkbox.on_change = wrap_async(
         handlers.on_ui_project_toggle
     )
     controls.other_projects_checkbox.on_change = wrap_async(

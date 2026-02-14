@@ -31,7 +31,7 @@ class Controls:
         python_version_label: Label for Python version dropdown.
         python_version_dropdown: Dropdown for selecting Python version.
         create_git_checkbox: Checkbox for git initialization option.
-        create_ui_project_checkbox: Checkbox for UI project option.
+        ui_project_checkbox: Checkbox for UI project option.
         other_projects_checkbox: Checkbox for Other Project types option.
         app_subfolders_label: Label for folder display.
         subfolders_container: Container showing folder structure.
@@ -62,7 +62,7 @@ class Controls:
         self.python_version_label: ft.Text
         self.python_version_dropdown: ft.Dropdown
         self.create_git_checkbox: ft.Checkbox
-        self.create_ui_project_checkbox: ft.Checkbox
+        self.ui_project_checkbox: ft.Checkbox
         self.other_projects_checkbox: ft.Checkbox
         self.app_subfolders_label: ft.Text
         self.subfolders_container: ft.Container
@@ -176,7 +176,7 @@ def create_controls(state: "AppState", colors: dict) -> Controls:
     # Python version controls
     controls.python_version_label = ft.Text("Python Version")
     controls.python_version_dropdown = ft.Dropdown(
-        value=state.selected_python_version,
+        value=state.python_version,
         options=[ft.dropdown.Option(v) for v in PYTHON_VERSIONS],
         tooltip="Choose a version, default is 3.14",
         expand=True,
@@ -186,7 +186,7 @@ def create_controls(state: "AppState", colors: dict) -> Controls:
     # Checkbox controls
     controls.create_git_checkbox = ft.Checkbox(
         label="Initialize Git Repository",
-        value=state.initialize_git,
+        value=state.git_enabled,
         tooltip="Choose if you want a git repository\nDefault is yes",
     )
 
@@ -199,9 +199,9 @@ def create_controls(state: "AppState", colors: dict) -> Controls:
         tooltip="Create template files with boilerplate starter content.\nDefault is no – only folders and __init__.py are created.",
     )
 
-    controls.create_ui_project_checkbox = ft.Checkbox(
+    controls.ui_project_checkbox = ft.Checkbox(
         label="Create UI Project",
-        value=state.create_ui_project,
+        value=state.ui_project_enabled,
         tooltip="Choose if you're creating a UI.\nDefault is no.\nOpens a scrolling dialog to choose options.\nCan be combined with Other Project Type",
     )
     controls.other_projects_checkbox = ft.Checkbox(
@@ -331,7 +331,7 @@ def create_sections(controls: Controls, state: "AppState") -> None:
                     controls.python_version_label,
                     controls.python_version_dropdown,
                     controls.create_git_checkbox,
-                    controls.create_ui_project_checkbox,
+                    controls.ui_project_checkbox,
                     controls.other_projects_checkbox,
                     controls.include_starter_files_checkbox,
                 ],

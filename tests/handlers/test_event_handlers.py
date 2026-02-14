@@ -69,7 +69,7 @@ class MockControls:
         self.python_version_dropdown = MockControl(value=DEFAULT_PYTHON_VERSION)
         self.create_git_checkbox = MockControl(value=False)
         self.include_starter_files_checkbox = MockControl(value=False)
-        self.create_ui_project_checkbox = MockControl(value=False, label="Create UI Project")
+        self.ui_project_checkbox = MockControl(value=False, label="Create UI Project")
         self.other_projects_checkbox = MockControl(value=False, label="Create Other Project Type")
         self.auto_save_folder_changes = MockControl(value=False)
         self.app_subfolders_label = MockText()
@@ -529,12 +529,12 @@ async def test_wrap_async_creates_callable():
 
 
 @pytest.mark.parametrize("field,value", [
-    ("selected_python_version", "3.11"),
-    ("initialize_git", True),
-    ("create_ui_project", True),
-    ("selected_framework", "flet"),
-    ("create_other_project", True),
-    ("selected_project_type", "django"),
+    ("python_version", "3.11"),
+    ("git_enabled", True),
+    ("ui_project_enabled", True),
+    ("framework", "flet"),
+    ("other_project_enabled", True),
+    ("project_type", "django"),
     ("auto_save_folders", True),
 ])
 def test_state_updates_from_handlers(mock_handlers, field, value):
@@ -565,7 +565,7 @@ async def test_on_other_project_toggle_checked(mock_handlers):
 
     # Handler always forces checkbox to True and opens dialog
     assert mock_event.control.value == True
-    assert state.create_other_project == True
+    assert state.other_project_enabled == True
 
     # Verify dialog was shown
     mock_show.assert_called_once()
@@ -580,8 +580,8 @@ async def test_on_other_project_toggle_reopens_dialog(mock_handlers):
     handlers, page, controls, state = mock_handlers
 
     # Set initial state — already checked with selection
-    state.create_other_project = True
-    state.selected_project_type = "django"
+    state.other_project_enabled = True
+    state.project_type = "django"
 
     # Create mock event (even if user "unchecks", handler forces True and opens dialog)
     mock_event = Mock()
@@ -592,7 +592,7 @@ async def test_on_other_project_toggle_reopens_dialog(mock_handlers):
 
     # Handler forces checkbox to True and opens dialog
     assert mock_event.control.value == True
-    assert state.create_other_project == True
+    assert state.other_project_enabled == True
 
     # Dialog was shown (user can select None to clear)
     mock_show.assert_called_once()
@@ -605,9 +605,9 @@ async def test_on_other_project_toggle_does_not_uncheck_ui(mock_handlers):
     handlers, page, controls, state = mock_handlers
 
     # Start with UI project checked
-    state.create_ui_project = True
-    state.selected_framework = "flet"
-    controls.create_ui_project_checkbox.value = True
+    state.ui_project_enabled = True
+    state.framework = "flet"
+    controls.ui_project_checkbox.value = True
 
     # Create mock event to check Other project
     mock_event = Mock()
@@ -618,12 +618,12 @@ async def test_on_other_project_toggle_does_not_uncheck_ui(mock_handlers):
         await handlers.on_other_project_toggle(mock_event)
 
     # Verify UI project state is UNCHANGED
-    assert state.create_ui_project == True
-    assert controls.create_ui_project_checkbox.value == True
-    assert state.selected_framework == "flet"
+    assert state.ui_project_enabled == True
+    assert controls.ui_project_checkbox.value == True
+    assert state.framework == "flet"
 
     # Verify Other project is now checked
-    assert state.create_other_project == True
+    assert state.other_project_enabled == True
 
 
 def test_load_project_type_template_with_type(mock_handlers):
@@ -705,7 +705,7 @@ def test_show_project_type_dialog_adds_to_overlay(mock_handlers):
         call_kwargs = mock_create.call_args[1]
         assert 'on_select_callback' in call_kwargs
         assert 'on_close_callback' in call_kwargs
-        assert call_kwargs['current_selection'] == state.selected_project_type
+        assert call_kwargs['current_selection'] == state.project_type
         assert call_kwargs['is_dark_mode'] == state.is_dark_mode
 
         # Verify dialog was added to overlay
@@ -724,8 +724,8 @@ async def test_ui_project_toggle_does_not_uncheck_other_project(mock_handlers):
     handlers, page, controls, state = mock_handlers
 
     # Start with Other project checked
-    state.create_other_project = True
-    state.selected_project_type = "django"
+    state.other_project_enabled = True
+    state.project_type = "django"
     controls.other_projects_checkbox.value = True
 
     # Create mock event to check UI project
@@ -737,9 +737,9 @@ async def test_ui_project_toggle_does_not_uncheck_other_project(mock_handlers):
         await handlers.on_ui_project_toggle(mock_event)
 
     # Verify Other project state is UNCHANGED
-    assert state.create_other_project == True
+    assert state.other_project_enabled == True
     assert controls.other_projects_checkbox.value == True
-    assert state.selected_project_type == "django"
+    assert state.project_type == "django"
 
 
 # ========== Template Merge / Co-selection Tests ==========
@@ -749,26 +749,26 @@ def test_both_checkboxes_can_be_checked(mock_handlers):
     """Test both UI and Other project checkboxes can be checked simultaneously"""
     handlers, page, controls, state = mock_handlers
 
-    state.create_ui_project = True
-    state.selected_framework = "flet"
-    state.create_other_project = True
-    state.selected_project_type = "django"
+    state.ui_project_enabled = True
+    state.framework = "flet"
+    state.other_project_enabled = True
+    state.project_type = "django"
 
     # Both should remain true
-    assert state.create_ui_project == True
-    assert state.create_other_project == True
-    assert state.selected_framework == "flet"
-    assert state.selected_project_type == "django"
+    assert state.ui_project_enabled == True
+    assert state.other_project_enabled == True
+    assert state.framework == "flet"
+    assert state.project_type == "django"
 
 
 def test_reload_and_merge_templates_both_selected(mock_handlers):
     """Test _reload_and_merge_templates merges when both are selected"""
     handlers, page, controls, state = mock_handlers
 
-    state.create_ui_project = True
-    state.selected_framework = "flet"
-    state.create_other_project = True
-    state.selected_project_type = "django"
+    state.ui_project_enabled = True
+    state.framework = "flet"
+    state.other_project_enabled = True
+    state.project_type = "django"
 
     with patch.object(handlers.config_manager, 'load_config') as mock_load:
         mock_load.side_effect = [
@@ -795,9 +795,9 @@ def test_reload_and_merge_templates_only_framework(mock_handlers):
     """Test _reload_and_merge_templates with only framework selected"""
     handlers, page, controls, state = mock_handlers
 
-    state.create_ui_project = True
-    state.selected_framework = "flet"
-    state.create_other_project = False
+    state.ui_project_enabled = True
+    state.framework = "flet"
+    state.other_project_enabled = False
 
     with patch.object(handlers.config_manager, 'load_config') as mock_load:
         mock_load.return_value = {"folders": ["core", "ui"]}
@@ -811,9 +811,9 @@ def test_reload_and_merge_templates_only_project_type(mock_handlers):
     """Test _reload_and_merge_templates with only project type selected"""
     handlers, page, controls, state = mock_handlers
 
-    state.create_ui_project = False
-    state.create_other_project = True
-    state.selected_project_type = "django"
+    state.ui_project_enabled = False
+    state.other_project_enabled = True
+    state.project_type = "django"
 
     with patch.object(handlers.config_manager, 'load_config') as mock_load:
         mock_load.return_value = {"folders": ["api", "models"]}
@@ -827,8 +827,8 @@ def test_reload_and_merge_templates_neither_selected(mock_handlers):
     """Test _reload_and_merge_templates with neither selected loads default"""
     handlers, page, controls, state = mock_handlers
 
-    state.create_ui_project = False
-    state.create_other_project = False
+    state.ui_project_enabled = False
+    state.other_project_enabled = False
 
     with patch.object(handlers.config_manager, 'load_config') as mock_load:
         mock_load.return_value = {"folders": ["default1", "default2"]}
@@ -854,7 +854,7 @@ def test_show_framework_dialog_adds_to_overlay(mock_handlers):
         call_kwargs = mock_create.call_args[1]
         assert 'on_select_callback' in call_kwargs
         assert 'on_close_callback' in call_kwargs
-        assert call_kwargs['current_selection'] == state.selected_framework
+        assert call_kwargs['current_selection'] == state.framework
         assert call_kwargs['is_dark_mode'] == state.is_dark_mode
 
         # Verify dialog was added to overlay and opened
@@ -868,10 +868,10 @@ async def test_reset_with_both_checked(mock_handlers):
     """Test on_reset works correctly when both are checked"""
     handlers, page, controls, state = mock_handlers
 
-    state.create_ui_project = True
-    state.selected_framework = "flet"
-    state.create_other_project = True
-    state.selected_project_type = "django"
+    state.ui_project_enabled = True
+    state.framework = "flet"
+    state.other_project_enabled = True
+    state.project_type = "django"
 
     mock_event = Mock()
 
@@ -881,11 +881,11 @@ async def test_reset_with_both_checked(mock_handlers):
         mock_reload.assert_called_once()
 
     # Verify state was reset
-    assert state.create_ui_project == False
-    assert state.create_other_project == False
-    assert state.selected_framework is None
-    assert state.selected_project_type is None
-    assert controls.create_ui_project_checkbox.value == False
+    assert state.ui_project_enabled == False
+    assert state.other_project_enabled == False
+    assert state.framework is None
+    assert state.project_type is None
+    assert controls.ui_project_checkbox.value == False
     assert controls.other_projects_checkbox.value == False
 
 
@@ -895,8 +895,8 @@ def test_reload_and_merge_clears_selection(mock_handlers):
 
     state.selected_item_path = [0, "subfolders", 1]
     state.selected_item_type = "folder"
-    state.create_ui_project = False
-    state.create_other_project = False
+    state.ui_project_enabled = False
+    state.other_project_enabled = False
 
     with patch.object(handlers.config_manager, 'load_config') as mock_load:
         mock_load.return_value = {"folders": ["core"]}
@@ -1396,7 +1396,7 @@ async def test_on_ui_project_toggle_opens_dialog(mock_handlers):
 
     # Handler forces checkbox to True and opens dialog
     assert mock_event.control.value == True
-    assert state.create_ui_project == True
+    assert state.ui_project_enabled == True
     mock_show.assert_called_once()
     assert page.updated == True
 
@@ -1407,8 +1407,8 @@ async def test_on_ui_project_toggle_reopens_dialog(mock_handlers):
     handlers, page, controls, state = mock_handlers
 
     # Already checked with a framework
-    state.create_ui_project = True
-    state.selected_framework = "flet"
+    state.ui_project_enabled = True
+    state.framework = "flet"
 
     mock_event = Mock()
     mock_event.control = MockControl(value=True, label="UI Project: flet")
@@ -1442,8 +1442,8 @@ def test_framework_dialog_on_select_sets_state(mock_handlers):
     with patch.object(handlers, '_reload_and_merge_templates'):
         on_select("flet")
 
-    assert state.selected_framework == "flet"
-    assert controls.create_ui_project_checkbox.label == "UI Framework: flet"
+    assert state.framework == "flet"
+    assert controls.ui_project_checkbox.label == "UI Framework: flet"
     assert mock_dialog.open == False
 
 
@@ -1452,10 +1452,10 @@ def test_framework_dialog_on_select_none_clears_state(mock_handlers):
     handlers, page, controls, state = mock_handlers
 
     # Start with framework selected
-    state.create_ui_project = True
-    state.selected_framework = "flet"
-    controls.create_ui_project_checkbox.value = True
-    controls.create_ui_project_checkbox.label = "UI Project: flet"
+    state.ui_project_enabled = True
+    state.framework = "flet"
+    controls.ui_project_checkbox.value = True
+    controls.ui_project_checkbox.label = "UI Project: flet"
 
     with patch('app.handlers.event_handlers.create_framework_dialog') as mock_create:
         mock_dialog = Mock()
@@ -1470,10 +1470,10 @@ def test_framework_dialog_on_select_none_clears_state(mock_handlers):
     with patch.object(handlers, '_reload_and_merge_templates'):
         on_select(None)
 
-    assert state.selected_framework is None
-    assert state.create_ui_project == False
-    assert controls.create_ui_project_checkbox.value == False
-    assert controls.create_ui_project_checkbox.label == "Create UI Project"
+    assert state.framework is None
+    assert state.ui_project_enabled == False
+    assert controls.ui_project_checkbox.value == False
+    assert controls.ui_project_checkbox.label == "Create UI Project"
     assert mock_dialog.open == False
 
 
@@ -1482,9 +1482,9 @@ def test_framework_dialog_on_close_unchecks_when_no_prior_selection(mock_handler
     handlers, page, controls, state = mock_handlers
 
     # No prior framework
-    state.create_ui_project = True
-    state.selected_framework = None
-    controls.create_ui_project_checkbox.value = True
+    state.ui_project_enabled = True
+    state.framework = None
+    controls.ui_project_checkbox.value = True
 
     with patch('app.handlers.event_handlers.create_framework_dialog') as mock_create:
         mock_dialog = Mock()
@@ -1497,9 +1497,9 @@ def test_framework_dialog_on_close_unchecks_when_no_prior_selection(mock_handler
 
     on_close(None)
 
-    assert state.create_ui_project == False
-    assert controls.create_ui_project_checkbox.value == False
-    assert controls.create_ui_project_checkbox.label == "Create UI Project"
+    assert state.ui_project_enabled == False
+    assert controls.ui_project_checkbox.value == False
+    assert controls.ui_project_checkbox.label == "Create UI Project"
     assert mock_dialog.open == False
 
 
@@ -1508,10 +1508,10 @@ def test_framework_dialog_on_close_keeps_prior_selection(mock_handlers):
     handlers, page, controls, state = mock_handlers
 
     # Has prior framework selection
-    state.create_ui_project = True
-    state.selected_framework = "PyQt6"
-    controls.create_ui_project_checkbox.value = True
-    controls.create_ui_project_checkbox.label = "UI Project: PyQt6"
+    state.ui_project_enabled = True
+    state.framework = "PyQt6"
+    controls.ui_project_checkbox.value = True
+    controls.ui_project_checkbox.label = "UI Project: PyQt6"
 
     with patch('app.handlers.event_handlers.create_framework_dialog') as mock_create:
         mock_dialog = Mock()
@@ -1525,9 +1525,9 @@ def test_framework_dialog_on_close_keeps_prior_selection(mock_handlers):
     on_close(None)
 
     # Should keep everything as-is
-    assert state.create_ui_project == True
-    assert state.selected_framework == "PyQt6"
-    assert controls.create_ui_project_checkbox.value == True
+    assert state.ui_project_enabled == True
+    assert state.framework == "PyQt6"
+    assert controls.ui_project_checkbox.value == True
     assert mock_dialog.open == False
 
 
@@ -1539,8 +1539,8 @@ def test_project_type_dialog_on_select_none_clears_state(mock_handlers):
     handlers, page, controls, state = mock_handlers
 
     # Start with project type selected
-    state.create_other_project = True
-    state.selected_project_type = "django"
+    state.other_project_enabled = True
+    state.project_type = "django"
     controls.other_projects_checkbox.value = True
     controls.other_projects_checkbox.label = "Project: Django"
 
@@ -1557,8 +1557,8 @@ def test_project_type_dialog_on_select_none_clears_state(mock_handlers):
     with patch.object(handlers, '_reload_and_merge_templates'):
         on_select(None)
 
-    assert state.selected_project_type is None
-    assert state.create_other_project == False
+    assert state.project_type is None
+    assert state.other_project_enabled == False
     assert controls.other_projects_checkbox.value == False
     assert controls.other_projects_checkbox.label == "Create Other Project Type"
     assert mock_dialog.open == False
@@ -1570,13 +1570,13 @@ async def test_reset_clears_both_checkbox_labels(mock_handlers):
     handlers, page, controls, state = mock_handlers
 
     # Set up checked state with labels
-    state.create_ui_project = True
-    state.selected_framework = "flet"
-    controls.create_ui_project_checkbox.value = True
-    controls.create_ui_project_checkbox.label = "UI Project: flet"
+    state.ui_project_enabled = True
+    state.framework = "flet"
+    controls.ui_project_checkbox.value = True
+    controls.ui_project_checkbox.label = "UI Project: flet"
 
-    state.create_other_project = True
-    state.selected_project_type = "django"
+    state.other_project_enabled = True
+    state.project_type = "django"
     controls.other_projects_checkbox.value = True
     controls.other_projects_checkbox.label = "Project: Django"
 
@@ -1585,7 +1585,7 @@ async def test_reset_clears_both_checkbox_labels(mock_handlers):
     with patch.object(handlers, '_reload_and_merge_templates'):
         await handlers.on_reset(mock_event)
 
-    assert controls.create_ui_project_checkbox.label == "Create UI Project"
+    assert controls.ui_project_checkbox.label == "Create UI Project"
     assert controls.other_projects_checkbox.label == "Create Other Project Type"
-    assert controls.create_ui_project_checkbox.value == False
+    assert controls.ui_project_checkbox.value == False
     assert controls.other_projects_checkbox.value == False

@@ -12,12 +12,12 @@ def test_appstate_initialization():
 
     assert state.project_path == DEFAULT_PROJECT_ROOT
     assert state.project_name == ""
-    assert state.selected_python_version == DEFAULT_PYTHON_VERSION
-    assert state.initialize_git == True
-    assert state.create_ui_project == False
-    assert state.selected_framework is None
-    assert state.create_other_project == False
-    assert state.selected_project_type is None
+    assert state.python_version == DEFAULT_PYTHON_VERSION
+    assert state.git_enabled == True
+    assert state.ui_project_enabled == False
+    assert state.framework is None
+    assert state.other_project_enabled == False
+    assert state.project_type is None
     assert state.folders == []
     assert state.auto_save_folders == False
     assert state.is_dark_mode == True
@@ -30,12 +30,12 @@ def test_appstate_custom_initialization():
     state = AppState(
         project_path="/custom/path",
         project_name="my_project",
-        selected_python_version="3.12",
-        initialize_git=True,
-        create_ui_project=True,
-        selected_framework="flet",
-        create_other_project=True,
-        selected_project_type="django",
+        python_version="3.12",
+        git_enabled=True,
+        ui_project_enabled=True,
+        framework="flet",
+        other_project_enabled=True,
+        project_type="django",
         folders=["core", "ui", "utils"],
         auto_save_folders=True,
         is_dark_mode=False,
@@ -45,12 +45,12 @@ def test_appstate_custom_initialization():
 
     assert state.project_path == "/custom/path"
     assert state.project_name == "my_project"
-    assert state.selected_python_version == "3.12"
-    assert state.initialize_git == True
-    assert state.create_ui_project == True
-    assert state.selected_framework == "flet"
-    assert state.create_other_project == True
-    assert state.selected_project_type == "django"
+    assert state.python_version == "3.12"
+    assert state.git_enabled == True
+    assert state.ui_project_enabled == True
+    assert state.framework == "flet"
+    assert state.other_project_enabled == True
+    assert state.project_type == "django"
     assert state.folders == ["core", "ui", "utils"]
     assert state.auto_save_folders == True
     assert state.is_dark_mode == False
@@ -64,12 +64,12 @@ def test_appstate_reset():
     state = AppState(
         project_path="/custom/path",
         project_name="my_project",
-        selected_python_version="3.12",
-        initialize_git=True,
-        create_ui_project=True,
-        selected_framework="flet",
-        create_other_project=True,
-        selected_project_type="django",
+        python_version="3.12",
+        git_enabled=True,
+        ui_project_enabled=True,
+        framework="flet",
+        other_project_enabled=True,
+        project_type="django",
         folders=["core", "ui", "utils"],
         auto_save_folders=True,
         is_dark_mode=False,  # Set to False to test it's preserved
@@ -83,12 +83,12 @@ def test_appstate_reset():
     # Test reset values (all should be back to defaults except is_dark_mode)
     assert state.project_path == DEFAULT_PROJECT_ROOT
     assert state.project_name == ""
-    assert state.selected_python_version == DEFAULT_PYTHON_VERSION
-    assert state.initialize_git == True
-    assert state.create_ui_project == False
-    assert state.selected_framework is None
-    assert state.create_other_project == False
-    assert state.selected_project_type is None
+    assert state.python_version == DEFAULT_PYTHON_VERSION
+    assert state.git_enabled == True
+    assert state.ui_project_enabled == False
+    assert state.framework is None
+    assert state.other_project_enabled == False
+    assert state.project_type is None
     assert state.folders == []
     assert state.auto_save_folders == False
     assert state.is_dark_mode == False  # PRESERVED (was False, still False)
@@ -113,12 +113,12 @@ def test_appstate_reset_preserves_dark_mode_false():
 @pytest.mark.parametrize("field,value", [
     ("project_path", "/new/path"),
     ("project_name", "new_name"),
-    ("selected_python_version", "3.11"),
-    ("initialize_git", True),
-    ("create_ui_project", True),
-    ("selected_framework", "pyqt6"),
-    ("create_other_project", True),
-    ("selected_project_type", "fastapi"),
+    ("python_version", "3.11"),
+    ("git_enabled", True),
+    ("ui_project_enabled", True),
+    ("framework", "pyqt6"),
+    ("other_project_enabled", True),
+    ("project_type", "fastapi"),
     ("auto_save_folders", True),
     ("is_dark_mode", False),
     ("path_valid", False),
@@ -158,35 +158,35 @@ def test_appstate_folders_independence():
 def test_appstate_project_type_defaults():
     """Test project type fields initialize with correct defaults"""
     state = AppState()
-    assert state.create_other_project == False
-    assert state.selected_project_type is None
+    assert state.other_project_enabled == False
+    assert state.project_type is None
 
 
-def test_appstate_create_other_project_mutability():
-    """Test create_other_project field is mutable"""
+def test_appstate_other_project_enabled_mutability():
+    """Test other_project_enabled field is mutable"""
     state = AppState()
-    assert state.create_other_project == False
+    assert state.other_project_enabled == False
 
-    state.create_other_project = True
-    assert state.create_other_project == True
+    state.other_project_enabled = True
+    assert state.other_project_enabled == True
 
-    state.create_other_project = False
-    assert state.create_other_project == False
+    state.other_project_enabled = False
+    assert state.other_project_enabled == False
 
 
-def test_appstate_selected_project_type_mutability():
-    """Test selected_project_type field is mutable"""
+def test_appstate_project_type_mutability():
+    """Test project_type field is mutable"""
     state = AppState()
-    assert state.selected_project_type is None
+    assert state.project_type is None
 
-    state.selected_project_type = "django"
-    assert state.selected_project_type == "django"
+    state.project_type = "django"
+    assert state.project_type == "django"
 
-    state.selected_project_type = "fastapi"
-    assert state.selected_project_type == "fastapi"
+    state.project_type = "fastapi"
+    assert state.project_type == "fastapi"
 
-    state.selected_project_type = None
-    assert state.selected_project_type is None
+    state.project_type = None
+    assert state.project_type is None
 
 
 @pytest.mark.parametrize("project_type", [
@@ -201,8 +201,8 @@ def test_appstate_selected_project_type_mutability():
 ])
 def test_appstate_various_project_types(project_type):
     """Test AppState can store various project type values"""
-    state = AppState(selected_project_type=project_type)
-    assert state.selected_project_type == project_type
+    state = AppState(project_type=project_type)
+    assert state.project_type == project_type
 
 
 def test_appstate_mutual_exclusion_concept():
@@ -211,29 +211,29 @@ def test_appstate_mutual_exclusion_concept():
     state = AppState()
 
     # Can set UI project
-    state.create_ui_project = True
-    state.selected_framework = "flet"
-    assert state.create_ui_project == True
-    assert state.selected_framework == "flet"
+    state.ui_project_enabled = True
+    state.framework = "flet"
+    assert state.ui_project_enabled == True
+    assert state.framework == "flet"
 
     # State allows both to be set (handlers enforce mutual exclusion)
-    state.create_other_project = True
-    state.selected_project_type = "django"
-    assert state.create_other_project == True
-    assert state.selected_project_type == "django"
+    state.other_project_enabled = True
+    state.project_type = "django"
+    assert state.other_project_enabled == True
+    assert state.project_type == "django"
 
 
 def test_appstate_reset_clears_project_type():
     """Test reset() clears project type fields"""
     state = AppState(
-        create_other_project=True,
-        selected_project_type="fastapi"
+        other_project_enabled=True,
+        project_type="fastapi"
     )
 
-    assert state.create_other_project == True
-    assert state.selected_project_type == "fastapi"
+    assert state.other_project_enabled == True
+    assert state.project_type == "fastapi"
 
     state.reset()
 
-    assert state.create_other_project == False
-    assert state.selected_project_type is None
+    assert state.other_project_enabled == False
+    assert state.project_type is None

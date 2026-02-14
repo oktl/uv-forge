@@ -4,8 +4,8 @@ This module defines the AppState dataclass that holds all mutable application
 state, including project configuration, UI state, and validation status.
 """
 
-from dataclasses import dataclass, field
-from typing import Optional
+from dataclasses import dataclass, field, fields
+from typing import Any, Literal
 
 from app.core.constants import DEFAULT_PROJECT_ROOT, DEFAULT_PYTHON_VERSION
 
@@ -17,12 +17,17 @@ class AppState:
     Attributes:
         project_path: Base directory where project will be created.
         project_name: Name of the project to create.
-        selected_python_version: Python version for the project.
-        initialize_git: Whether to create a git repository.
-        create_ui_project: Whether this is a UI framework project.
-        selected_framework: Selected UI framework (if create_ui_project is True).
+        python_version: Python version for the project.
+        git_enabled: Whether to create a git repository.
+        include_starter_files: Whether to populate files with starter content.
+        ui_project_enabled: Whether this is a UI framework project.
+        framework: Selected UI framework (if ui_project_enabled is True).
+        other_project_enabled: Whether an other project type is selected.
+        project_type: Selected project type (if other_project_enabled is True).
         folders: Current folder structure from template.
         auto_save_folders: Whether to auto-save folder changes to config.
+        selected_item_path: Path to selected item for folder/file removal.
+        selected_item_type: Whether selected item is a "folder" or "file".
         is_dark_mode: Whether dark theme is active.
         path_valid: Whether the current path passes validation.
         name_valid: Whether the current project name passes validation.
@@ -33,23 +38,21 @@ class AppState:
     project_name: str = ""
 
     # Options
-    selected_python_version: str = DEFAULT_PYTHON_VERSION
-    initialize_git: bool = True
+    python_version: str = DEFAULT_PYTHON_VERSION
+    git_enabled: bool = True
     include_starter_files: bool = True
-    create_ui_project: bool = False
-    selected_framework: Optional[str] = None
-    create_other_project: bool = False
-    selected_project_type: Optional[str] = None
+    ui_project_enabled: bool = False
+    framework: str | None = None
+    other_project_enabled: bool = False
+    project_type: str | None = None
 
     # Folder management
-    folders: list = field(default_factory=list)
+    folders: list[str | dict[str, Any]] = field(default_factory=list)
     auto_save_folders: bool = False
 
     # Selection tracking for folder/file removal
-    selected_item_path: Optional[list] = (
-        None  # Path to selected item, e.g., [0, "subfolders", 1]
-    )
-    selected_item_type: Optional[str] = None  # "folder" or "file"
+    selected_item_path: list[int | str] | None = None
+    selected_item_type: Literal["folder", "file"] | None = None
 
     # UI state
     is_dark_mode: bool = True
@@ -63,18 +66,8 @@ class AppState:
 
         Preserves is_dark_mode since theme preference should persist.
         """
-        self.project_path = DEFAULT_PROJECT_ROOT
-        self.project_name = ""
-        self.selected_python_version = DEFAULT_PYTHON_VERSION
-        self.initialize_git = True
-        self.include_starter_files = True
-        self.create_ui_project = False
-        self.selected_framework = None
-        self.create_other_project = False
-        self.selected_project_type = None
-        self.folders = []
-        self.auto_save_folders = False
-        self.selected_item_path = None
-        self.selected_item_type = None
-        self.path_valid = True
-        self.name_valid = False
+        preserved_dark_mode = self.is_dark_mode
+        fresh = AppState()
+        for f in fields(self):
+            setattr(self, f.name, getattr(fresh, f.name))
+        self.is_dark_mode = preserved_dark_mode

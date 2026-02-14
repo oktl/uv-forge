@@ -166,12 +166,12 @@ Create Flet Page
 Initialize AppState
   ├─ project_path = DEFAULT_PROJECT_ROOT
   ├─ project_name = ""
-  ├─ selected_python_version = "3.14"
-  ├─ initialize_git = False
-  ├─ create_ui_project = False
-  ├─ selected_framework = None
-  ├─ create_other_project = False
-  ├─ selected_project_type = None
+  ├─ python_version = "3.14"
+  ├─ git_enabled = False
+  ├─ ui_project_enabled = False
+  ├─ framework = None
+  ├─ other_project_enabled = False
+  ├─ project_type = None
   └─ folders = []
   ↓
 components.build_main_view(page, state)
@@ -202,7 +202,7 @@ User clicks "Create UI Project" checkbox (or already-checked checkbox to reopen)
   ↓
 on_ui_project_toggle(e)
   ├─ Force checkbox value = True
-  ├─ Set state.create_ui_project = True
+  ├─ Set state.ui_project_enabled = True
   └─ Call _show_framework_dialog()
   ↓
 _show_framework_dialog()
@@ -218,7 +218,7 @@ Dialog opens (modal)
 User selects framework (e.g., "Flet") and clicks "Select"
   ↓
 on_select("flet") callback fires
-  ├─ state.selected_framework = "flet"
+  ├─ state.framework = "flet"
   ├─ Update checkbox label → "UI Project: Flet"
   ├─ Call _reload_and_merge_templates()
   │   ├─ If only framework: load framework template
@@ -236,8 +236,8 @@ UI shows folder structure
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   ↓
 on_select(None) callback fires
-  ├─ state.selected_framework = None
-  ├─ state.create_ui_project = False
+  ├─ state.framework = None
+  ├─ state.ui_project_enabled = False
   ├─ Uncheck checkbox
   ├─ Reset label → "Create UI Project"
   ├─ Reload templates (removes framework template)
@@ -283,7 +283,7 @@ User clicks "Create Other Project Type" checkbox (or already-checked to reopen)
   ↓
 on_other_project_toggle(e)
   ├─ Force checkbox value = True
-  ├─ Set state.create_other_project = True
+  ├─ Set state.other_project_enabled = True
   └─ Call _show_project_type_dialog()
   ↓
 _show_project_type_dialog()
@@ -307,7 +307,7 @@ User hovers over option → Tooltip shows!
 User selects "Django" and clicks "Select"
   ↓
 on_select(project_type="django") callback fires
-  ├─ state.selected_project_type = "django"
+  ├─ state.project_type = "django"
   ├─ Update checkbox label → "Project: Django"
   ├─ Call _reload_and_merge_templates()
   │   ├─ If UI framework also selected:
@@ -329,8 +329,8 @@ UI shows folder structure
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   ↓
 on_select(None) callback fires
-  ├─ state.selected_project_type = None
-  ├─ state.create_other_project = False
+  ├─ state.project_type = None
+  ├─ state.other_project_enabled = False
   ├─ Uncheck checkbox
   ├─ Reset label → "Create Other Project Type"
   ├─ Reload templates (removes project type template)
@@ -358,11 +358,11 @@ Set status: "Building project..."
 Create ProjectConfig
   ├─ name = state.project_name
   ├─ path = Path(state.project_path)
-  ├─ python_version = state.selected_python_version
-  ├─ git_enabled = state.initialize_git
-  ├─ ui_project_enabled = state.create_ui_project
-  ├─ framework = state.selected_framework
-  ├─ project_type = state.selected_project_type
+  ├─ python_version = state.python_version
+  ├─ git_enabled = state.git_enabled
+  ├─ ui_project_enabled = state.ui_project_enabled
+  ├─ framework = state.framework
+  ├─ project_type = state.project_type
   └─ folders = state.folders
   ↓
 AsyncExecutor.run(build_project, config)
@@ -610,14 +610,14 @@ class AppState:
     # Project configuration
     project_path: str = DEFAULT_PROJECT_ROOT
     project_name: str = ""
-    selected_python_version: str = DEFAULT_PYTHON_VERSION
+    python_version: str = DEFAULT_PYTHON_VERSION
 
     # Options
-    initialize_git: bool = False
-    create_ui_project: bool = False
-    selected_framework: Optional[str] = None
-    create_other_project: bool = False
-    selected_project_type: Optional[str] = None
+    git_enabled: bool = False
+    ui_project_enabled: bool = False
+    framework: Optional[str] = None
+    other_project_enabled: bool = False
+    project_type: Optional[str] = None
 
     # Folder management
     folders: list = field(default_factory=list)
@@ -1251,7 +1251,7 @@ class Controls:
     project_name_field: ft.TextField
     python_version_dropdown: ft.Dropdown
     create_git_checkbox: ft.Checkbox
-    create_ui_project_checkbox: ft.Checkbox
+    ui_project_checkbox: ft.Checkbox
     other_projects_checkbox: ft.Checkbox
     folder_display: ft.Column
     add_folder_button: ft.FilledButton
