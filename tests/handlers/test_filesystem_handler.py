@@ -5,94 +5,9 @@ from pathlib import Path
 import pytest
 
 from app.handlers.filesystem_handler import (
-    flatten_folders_for_display,
-    flatten_folders_with_paths,
     create_folders,
     setup_app_structure,
 )
-
-
-class TestFlattenFoldersForDisplay:
-    """Tests for flatten_folders_for_display function"""
-
-    def test_simple_string_folders(self):
-        """Test simple string folders"""
-        folders = ["core", "utils", "handlers"]
-        result = flatten_folders_for_display(folders)
-        assert result == ["core", "utils", "handlers"]
-
-    def test_folder_no_init_marker(self):
-        """Test folder with no __init__ marker"""
-        folders = [{"name": "assets", "create_init": False}]
-        result = flatten_folders_for_display(folders)
-        assert result == ["assets [no __init__]"]
-
-    def test_folder_root_marker(self):
-        """Test folder with root marker"""
-        folders = [{"name": "tests", "root_level": True}]
-        result = flatten_folders_for_display(folders)
-        assert result == ["tests [root]"]
-
-    def test_folder_both_markers(self):
-        """Test folder with both markers"""
-        folders = [{"name": "docs", "create_init": False, "root_level": True}]
-        result = flatten_folders_for_display(folders)
-        assert result == ["docs [no __init__, root]"]
-
-    def test_folder_with_files(self):
-        """Test folder with files"""
-        folders = [{"name": "models", "files": ["user.py", "post.py"]}]
-        result = flatten_folders_for_display(folders)
-        expected = ["models", "  user.py", "  post.py"]
-        assert result == expected
-
-    def test_nested_subfolders(self):
-        """Test nested subfolders"""
-        folders = [
-            {
-                "name": "app",
-                "subfolders": ["core", {"name": "utils", "subfolders": ["helpers"]}]
-            }
-        ]
-        result = flatten_folders_for_display(folders)
-        expected = ["app", "  core", "  utils", "    helpers"]
-        assert result == expected
-
-    def test_mixed_folder_types(self):
-        """Test mixed folder types"""
-        folders = [
-            "simple",
-            {"name": "complex", "create_init": False, "files": ["test.py"]},
-            "another_simple"
-        ]
-        result = flatten_folders_for_display(folders)
-        expected = ["simple", "complex [no __init__]", "  test.py", "another_simple"]
-        assert result == expected
-
-
-class TestFlattenFoldersWithPaths:
-    """Tests for flatten_folders_with_paths function"""
-
-    def test_simple_folders_with_paths(self):
-        """Test simple folders with paths"""
-        folders = ["core", "utils"]
-        result = flatten_folders_with_paths(folders)
-        expected = [("core", [0]), ("utils", [1])]
-        assert result == expected
-
-    def test_folder_with_files_and_paths(self):
-        """Test folder with files and paths"""
-        folders = [{"name": "models", "files": ["user.py"]}]
-        result = flatten_folders_with_paths(folders)
-        expected = [("models", [0]), ("  user.py", [0, "files", 0])]
-        assert result == expected
-
-    def test_nested_subfolders_with_paths(self):
-        """Test nested subfolders with paths"""
-        folders = [{"name": "app", "subfolders": ["core"]}]
-        result = flatten_folders_with_paths(folders)
-        expected = [("app", [0]), ("  core", [0, "subfolders", 0])]
-        assert result == expected
 
 
 class TestCreateFolders:

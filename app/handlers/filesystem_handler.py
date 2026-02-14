@@ -11,136 +11,6 @@ if TYPE_CHECKING:
     from app.core.boilerplate_resolver import BoilerplateResolver
 
 
-def flatten_folders_for_display(
-    folders: list[str | dict[str, Any]],
-    prefix: str = "",
-    result: list[str] | None = None,
-) -> list[str]:
-    """Flatten nested folder configuration into display strings.
-
-    Recursively processes folder structures and converts them into a flat list
-    of strings with indentation showing hierarchy. Adds markers for special
-    configurations like [no __init__] and [root].
-
-    Args:
-        folders: List of folder specifications (strings or dict objects).
-        prefix: Indentation prefix for current nesting level (default: "").
-        result: Accumulator list for recursive calls (default: None).
-
-    Returns:
-        Flat list of formatted display strings with hierarchy markers.
-    """
-    if result is None:
-        result = []
-
-    for folder_spec in folders:
-        if isinstance(folder_spec, str):
-            result.append(f"{prefix}{folder_spec}")
-        elif isinstance(folder_spec, dict):
-            folder_name = folder_spec.get("name", "")
-            create_init = folder_spec.get("create_init", True)
-            root_level = folder_spec.get("root_level", False)
-            subfolders = folder_spec.get("subfolders", [])
-            files = folder_spec.get("files", [])
-
-            if not folder_name:
-                continue
-
-            # Add markers for special configurations
-            markers = []
-            if not create_init:
-                markers.append("no __init__")
-            if root_level:
-                markers.append("root")
-            marker = f" [{', '.join(markers)}]" if markers else ""
-            result.append(f"{prefix}{folder_name}{marker}")
-
-            # Add files in this folder with indentation
-            if files:
-                for file_name in files:
-                    result.append(f"{prefix}  {file_name}")
-
-            # Recursively add subfolders with indentation
-            if subfolders:
-                flatten_folders_for_display(
-                    subfolders, prefix=f"{prefix}  ", result=result
-                )
-
-    return result
-
-
-def flatten_folders_with_paths(
-    folders: list[str | dict[str, Any]],
-    prefix: str = "",
-    result: list[tuple[str, list]] | None = None,
-    current_path: list | None = None,
-) -> list[tuple[str, list]]:
-    """Flatten nested folder configuration with path tracking.
-
-    Similar to flatten_folders_for_display but also returns the path
-    to each item in the original folders structure.
-
-    Args:
-        folders: List of folder specifications.
-        prefix: Indentation prefix for current nesting level.
-        result: Accumulator list for recursive calls.
-        current_path: Current path in the folders structure.
-
-    Returns:
-        List of (display_string, path) tuples where path is a list
-        of indices/keys to navigate to the item.
-    """
-    if result is None:
-        result = []
-    if current_path is None:
-        current_path = []
-
-    for i, folder_spec in enumerate(folders):
-        item_path = current_path + [i]
-
-        if isinstance(folder_spec, str):
-            display = f"{prefix}{folder_spec}"
-            result.append((display, item_path))
-        elif isinstance(folder_spec, dict):
-            folder_name = folder_spec.get("name", "")
-            create_init = folder_spec.get("create_init", True)
-            root_level = folder_spec.get("root_level", False)
-            subfolders = folder_spec.get("subfolders", [])
-            files = folder_spec.get("files", [])
-
-            if not folder_name:
-                continue
-
-            # Build display string with markers
-            markers = []
-            if not create_init:
-                markers.append("no __init__")
-            if root_level:
-                markers.append("root")
-            marker = f" [{', '.join(markers)}]" if markers else ""
-            display = f"{prefix}{folder_name}{marker}"
-            result.append((display, item_path))
-
-            # Add files in this folder with indentation
-            if files:
-                for file_idx, file_name in enumerate(files):
-                    file_display = f"{prefix}  {file_name}"
-                    file_path = item_path + ["files", file_idx]
-                    result.append((file_display, file_path))
-
-            # Recursively add subfolders
-            if subfolders:
-                subfolder_path = item_path + ["subfolders"]
-                flatten_folders_with_paths(
-                    subfolders,
-                    prefix=f"{prefix}  ",
-                    result=result,
-                    current_path=subfolder_path,
-                )
-
-    return result
-
-
 def create_folders(
     parent_dir: Path,
     folders: list[str | dict[str, Any]],
@@ -254,14 +124,12 @@ def setup_app_structure(
     if main_py.exists():
         main_py.rename(app_main)
 
-    # Replace UV's default main.py with boilerplate version if one exists
+    # Replace UV's default main.py and README.md with boilerplate if available
     if resolver and not skip_files:
         content = resolver.resolve("main.py")
         if content is not None:
             app_main.write_text(content, encoding="utf-8")
 
-    # Replace UV's empty README.md with boilerplate version if one exists
-    if resolver and not skip_files:
         readme_content = resolver.resolve("README.md")
         if readme_content is not None:
             (project_path / "README.md").write_text(readme_content, encoding="utf-8")
