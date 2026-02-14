@@ -1,7 +1,8 @@
 import sys
-from pathlib import Path
 
 from loguru import logger
+
+from app.core.constants import PROJECT_DIR
 
 
 def setup_logging():
@@ -17,8 +18,8 @@ def setup_logging():
         level="INFO",  # Only show INFO and above in console
     )
 
-    # Create logs directory
-    log_folder = Path("logs")
+    # Create logs directory relative to the project root
+    log_folder = PROJECT_DIR / "logs"
     log_folder.mkdir(exist_ok=True)
 
     # Add file handler for all logs
