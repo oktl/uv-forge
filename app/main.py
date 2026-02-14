@@ -52,9 +52,8 @@ async def main(page: ft.Page) -> None:
 
         await page.window.center()
 
-    except Exception as e:
-        logger.error(f"Application error: {e}")
-        logger.exception("Full traceback:")
+    except Exception:
+        logger.exception("Application error")
         raise
 
 
