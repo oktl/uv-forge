@@ -94,7 +94,7 @@ def create_section_box(
     colors = get_theme_colors(is_dark)
     title_text = ft.Text(
         title,
-        size=16,
+        size=UIConfig.SECTION_TITLE_SIZE,
         weight=ft.FontWeight.W_600,
         color=colors["section_title"],
     )
@@ -105,12 +105,12 @@ def create_section_box(
                 *content,
             ],
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-            spacing=10,
+            spacing=UIConfig.SPACING_SMALL,
         ),
-        border=ft.Border.all(1, colors["section_border"]),
-        border_radius=8,
-        padding=15,
-        width=700,
+        border=ft.Border.all(UIConfig.BORDER_WIDTH_THIN, colors["section_border"]),
+        border_radius=UIConfig.BORDER_RADIUS_DEFAULT,
+        padding=UIConfig.PADDING_SECTION,
+        width=UIConfig.SECTION_WIDTH,
     )
     return container, title_text
 
@@ -130,19 +130,19 @@ def create_controls(state: "AppState", colors: dict) -> Controls:
     # Icon buttons
     controls.theme_toggle_button = ft.IconButton(
         icon=ft.Icons.LIGHT_MODE if state.is_dark_mode else ft.Icons.DARK_MODE,
-        icon_size=18,
+        icon_size=UIConfig.ICON_SIZE_DEFAULT,
         tooltip="Toggle dark/light mode",
     )
 
     controls.git_cheat_sheet_button = ft.IconButton(
         icon=ft.Icons.MENU_BOOK,
-        icon_size=18,
+        icon_size=UIConfig.ICON_SIZE_DEFAULT,
         tooltip="Git Cheat Sheet",
     )
 
     controls.help_button = ft.IconButton(
         icon=ft.Icons.HELP_OUTLINE,
-        icon_size=18,
+        icon_size=UIConfig.ICON_SIZE_DEFAULT,
         tooltip="Help & Documentation",
     )
 
@@ -220,8 +220,8 @@ def create_controls(state: "AppState", colors: dict) -> Controls:
         border=ft.Border.all(1, ft.Colors.GREY_700),
         border_radius=4,
         padding=10,
-        height=200,
-        width=700,
+        height=UIConfig.SUBFOLDERS_HEIGHT,
+        width=UIConfig.SECTION_WIDTH,
     )
 
     controls.auto_save_folder_changes = ft.Checkbox(
@@ -248,7 +248,7 @@ def create_controls(state: "AppState", colors: dict) -> Controls:
         tooltip="Enter a valid path and project name to enable.",
         bgcolor=ft.Colors.GREEN,
         color=ft.Colors.WHITE,
-        width=300,
+        width=UIConfig.BUTTON_WIDTH_BUILD,
         disabled=True,
         opacity=0.5,
     )
@@ -259,7 +259,7 @@ def create_controls(state: "AppState", colors: dict) -> Controls:
         tooltip="Resets all controls and values\nto their original state.",
         bgcolor=ft.Colors.ORANGE,
         color=ft.Colors.WHITE,
-        width=110,
+        width=UIConfig.BUTTON_WIDTH_ACTION,
     )
 
     controls.exit_button = ft.Button(
@@ -267,7 +267,7 @@ def create_controls(state: "AppState", colors: dict) -> Controls:
         icon=ft.Icons.EXIT_TO_APP,
         bgcolor=ft.Colors.RED,
         color=ft.Colors.WHITE,
-        width=110,
+        width=UIConfig.BUTTON_WIDTH_ACTION,
     )
 
     controls.progress_ring = ft.ProgressRing(
@@ -280,7 +280,7 @@ def create_controls(state: "AppState", colors: dict) -> Controls:
     # Title and container lists
     controls.main_title = ft.Text(
         "UV Project Creator",
-        size=24,
+        size=UIConfig.MAIN_TITLE_SIZE,
         weight=ft.FontWeight.BOLD,
         color=colors["main_title"],
     )
@@ -378,7 +378,7 @@ def create_app_bars(page: ft.Page, controls: Controls, colors: dict) -> None:
     page.appbar = ft.AppBar(
         title=ft.Text(
             "Create New Project with UV",
-            size=18,
+            size=UIConfig.APPBAR_TITLE_SIZE,
             color=colors["main_title"],
         ),
         bgcolor=ft.Colors.TRANSPARENT,
@@ -387,7 +387,7 @@ def create_app_bars(page: ft.Page, controls: Controls, colors: dict) -> None:
             controls.help_button,
             controls.theme_toggle_button,
         ],
-        toolbar_height=30,
+        toolbar_height=UIConfig.APPBAR_TOOLBAR_HEIGHT,
     )
 
     page.bottom_appbar = ft.BottomAppBar(
@@ -398,7 +398,7 @@ def create_app_bars(page: ft.Page, controls: Controls, colors: dict) -> None:
                 controls.exit_button,
             ],
             alignment=ft.MainAxisAlignment.CENTER,
-            spacing=80,
+            spacing=UIConfig.SPACING_XLARGE,
         ),
     )
 
@@ -414,7 +414,7 @@ def create_layout(controls: Controls) -> ft.Column:
     """
     return ft.Column(
         controls=[
-            ft.Container(height=10),  # Spacer
+            ft.Container(height=UIConfig.VSPACE_SMALL),  # Spacer
             controls.section_containers[0],  # Set Project Path and Name
             controls.section_containers[1],  # Set Options
             controls.section_containers[2],  # Add or Remove Folders
@@ -427,9 +427,9 @@ def create_layout(controls: Controls) -> ft.Column:
             ),
             ft.Row(
                 controls=[controls.build_project_button],
-                alignment=ft.CrossAxisAlignment.CENTER,
+                alignment=ft.MainAxisAlignment.CENTER,
             ),
-            ft.Divider(height=20),
+            ft.Divider(height=UIConfig.SPACING_LARGE),
         ],
         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
     )

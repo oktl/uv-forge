@@ -172,30 +172,36 @@ def create_dialog_text_field(content: str, is_dark_mode: bool) -> ft.TextField:
     )
 
 
-def create_help_dialog(
-    content: str, on_close, page: ft.Page, is_dark_mode: bool
+def _create_markdown_dialog(
+    title: str,
+    content: str,
+    on_close,
+    page: ft.Page,
+    is_dark_mode: bool,
+    width: int = UIConfig.DIALOG_WIDTH,
 ) -> ft.AlertDialog:
-    """Create theme-aware help dialog with scrollable content.
+    """Create a theme-aware dialog with scrollable markdown content.
 
     Args:
-        content: Help text (markdown format)
+        title: Dialog title text
+        content: Markdown content to display
         on_close: Close button callback
         page: The Flet page instance (needed to launch URLs)
         is_dark_mode: Whether dark mode is active
+        width: Dialog content width in pixels
 
     Returns:
         Configured AlertDialog
     """
     colors = get_theme_colors(is_dark_mode)
 
-    # Logic to handle the link click
     async def handle_link_click(e):
         await page.launch_url(e.data)
 
     return ft.AlertDialog(
         modal=True,
         title=ft.Text(
-            "Help & Documentation",
+            title,
             size=UIConfig.DIALOG_TITLE_SIZE,
             color=colors["main_title"],
         ),
@@ -211,7 +217,7 @@ def create_help_dialog(
                 ],
                 scroll=ft.ScrollMode.AUTO,
             ),
-            width=UIConfig.DIALOG_WIDTH,
+            width=width,
             height=UIConfig.DIALOG_HEIGHT,
             padding=UIConfig.DIALOG_CONTENT_PADDING,
         ),
@@ -220,50 +226,21 @@ def create_help_dialog(
     )
 
 
+def create_help_dialog(
+    content: str, on_close, page: ft.Page, is_dark_mode: bool
+) -> ft.AlertDialog:
+    """Create theme-aware help dialog with scrollable content."""
+    return _create_markdown_dialog(
+        "Help & Documentation", content, on_close, page, is_dark_mode
+    )
+
+
 def create_git_cheat_sheet_dialog(
     content: str, on_close, page: ft.Page, is_dark_mode: bool
 ) -> ft.AlertDialog:
-    """Create theme-aware dialog displaying the Git cheat sheet.
-
-    Args:
-        content: Markdown content of the cheat sheet
-        on_close: Close button callback
-        page: The Flet page instance (needed to launch URLs)
-        is_dark_mode: Whether dark mode is active
-
-    Returns:
-        Configured AlertDialog
-    """
-    colors = get_theme_colors(is_dark_mode)
-
-    async def handle_link_click(e):
-        await page.launch_url(e.data)
-
-    return ft.AlertDialog(
-        modal=True,
-        title=ft.Text(
-            "Git Cheat Sheet",
-            size=UIConfig.DIALOG_TITLE_SIZE,
-            color=colors["main_title"],
-        ),
-        content=ft.Container(
-            content=ft.Column(
-                controls=[
-                    ft.Markdown(
-                        content,
-                        selectable=True,
-                        extension_set=ft.MarkdownExtensionSet.GITHUB_WEB,
-                        on_tap_link=handle_link_click,
-                    )
-                ],
-                scroll=ft.ScrollMode.AUTO,
-            ),
-            width=900,
-            height=UIConfig.DIALOG_HEIGHT,
-            padding=UIConfig.DIALOG_CONTENT_PADDING,
-        ),
-        actions=[ft.TextButton("Close", on_click=on_close)],
-        actions_alignment=ft.MainAxisAlignment.END,
+    """Create theme-aware dialog displaying the Git cheat sheet."""
+    return _create_markdown_dialog(
+        "Git Cheat Sheet", content, on_close, page, is_dark_mode, width=900
     )
 
 
@@ -287,7 +264,7 @@ def create_edit_file_dialog(
     # Extract filename from path for display - add safety check
     try:
         filename = Path(file_path).name
-    except ValueError, TypeError:
+    except (ValueError, TypeError):
         filename = str(file_path)
 
     # Create editable text field
@@ -397,6 +374,7 @@ def create_project_type_dialog(
     dialog_controls.extend(_create_none_option_container(is_dark_mode))
 
     # Iterate through categories from constants
+    category_names = list(PROJECT_TYPE_CATEGORIES.keys())
     for category_name, category_data in PROJECT_TYPE_CATEGORIES.items():
         # Get color attribute from ft.Colors dynamically
         light_color = getattr(
@@ -446,7 +424,7 @@ def create_project_type_dialog(
             dialog_controls.append(radio_container)
 
         # Add divider after each category except the last
-        if category_name != "Other":
+        if category_name != category_names[-1]:
             dialog_controls.append(
                 ft.Divider(
                     height=1,
@@ -700,7 +678,7 @@ def create_add_item_dialog(
         else:
             try:
                 parent_path = ast.literal_eval(parent_value)
-            except ValueError, SyntaxError:
+            except (ValueError, SyntaxError):
                 parent_path = None
 
         on_add_callback(name, item_type, parent_path)
