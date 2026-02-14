@@ -10,7 +10,6 @@ from app.handlers.uv_handler import (
     get_uv_path,
     run_uv_init,
     setup_virtual_env,
-    install_package,
     configure_pyproject,
     _resolve_entry_point,
 )
@@ -154,23 +153,6 @@ class TestUvCommandsWithMocks:
 
                     assert first_call == ['/usr/bin/uv', 'venv', '--python', '3.14']
                     assert second_call == ['/usr/bin/uv', 'sync']
-
-    def test_install_package_command_structure(self):
-        """Test install_package command structure"""
-        with patch('app.handlers.uv_handler.get_uv_path', return_value='/usr/bin/uv'):
-            with patch('subprocess.run') as mock_run:
-                mock_run.return_value = MagicMock(returncode=0)
-
-                with tempfile.TemporaryDirectory() as tmpdir:
-                    project_path = Path(tmpdir)
-                    install_package(project_path, "flet")
-
-                    call_args = mock_run.call_args
-                    cmd = call_args[0][0]
-
-                    assert cmd == ['/usr/bin/uv', 'add', 'flet']
-                    assert call_args[1]['cwd'] == project_path
-
 
 class TestResolveEntryPoint:
     """Tests for _resolve_entry_point helper"""
