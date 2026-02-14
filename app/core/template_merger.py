@@ -9,8 +9,11 @@ from typing import Any
 
 from app.core.models import FolderSpec
 
+# Folder specs arrive as strings, dicts (from JSON), or FolderSpec instances.
+type FolderInput = str | dict[str, Any] | FolderSpec
 
-def normalize_folder(folder: Any) -> dict[str, Any]:
+
+def normalize_folder(folder: FolderInput) -> dict[str, Any]:
     """Convert any folder form to a canonical dict.
 
     Args:
@@ -68,8 +71,31 @@ def _merge_files(primary_files: list[str], secondary_files: list[str]) -> list[s
     return result
 
 
+def _merge_single_folder(
+    primary: dict[str, Any], secondary: dict[str, Any]
+) -> dict[str, Any]:
+    """Merge two normalized folder dicts with the same name.
+
+    Args:
+        primary: Primary folder dict.
+        secondary: Secondary folder dict.
+
+    Returns:
+        Merged folder dict.
+    """
+    return {
+        "name": primary["name"],
+        "create_init": primary["create_init"] or secondary["create_init"],
+        "root_level": primary["root_level"] or secondary["root_level"],
+        "subfolders": merge_folder_lists(
+            primary["subfolders"], secondary["subfolders"]
+        ),
+        "files": _merge_files(primary["files"], secondary["files"]),
+    }
+
+
 def merge_folder_lists(
-    primary: list[Any], secondary: list[Any]
+    primary: list[FolderInput], secondary: list[FolderInput]
 ) -> list[dict[str, Any]]:
     """Merge two folder lists into one.
 
@@ -77,6 +103,9 @@ def merge_folder_lists(
     subfolders are merged, files are unioned, booleans are OR'd.
     Non-matching folders from both lists are included (primary order first,
     then secondary-only folders appended).
+
+    Assumes folder names are unique within each list. If duplicates exist,
+    only the last occurrence in secondary is used for matching.
 
     Args:
         primary: Primary folder list (its order takes precedence).
@@ -112,26 +141,3 @@ def merge_folder_lists(
             merged.append(s_folder)
 
     return merged
-
-
-def _merge_single_folder(
-    primary: dict[str, Any], secondary: dict[str, Any]
-) -> dict[str, Any]:
-    """Merge two normalized folder dicts with the same name.
-
-    Args:
-        primary: Primary folder dict.
-        secondary: Secondary folder dict.
-
-    Returns:
-        Merged folder dict.
-    """
-    return {
-        "name": primary["name"],
-        "create_init": primary["create_init"] or secondary["create_init"],
-        "root_level": primary["root_level"] or secondary["root_level"],
-        "subfolders": merge_folder_lists(
-            primary["subfolders"], secondary["subfolders"]
-        ),
-        "files": _merge_files(primary["files"], secondary["files"]),
-    }
