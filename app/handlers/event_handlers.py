@@ -187,6 +187,15 @@ class Handlers:
         if update:
             self.page.update()
 
+    def _update_path_preview(self) -> None:
+        """Update the resolved path preview below the project name field."""
+        path = self.controls.project_path_input.value or ""
+        name = self.controls.project_name_input.value or ""
+        if path and name and self.state.path_valid and self.state.name_valid:
+            self.controls.path_preview_text.value = f"→ {Path(path) / name}"
+        else:
+            self.controls.path_preview_text.value = ""
+
     def _create_item_container(
         self, name: str, item_path: list[int | str], item_type: str, indent: int = 0
     ) -> ft.Container:
@@ -573,9 +582,11 @@ class Handlers:
 
         if is_valid:
             self._set_warning("", update=False)
-            self._set_status("", "info", update=True)
+            self._set_status("", "info", update=False)
         else:
-            self._set_warning(error_msg, update=True)
+            self._set_warning(error_msg, update=False)
+        self._update_path_preview()
+        self.page.update()
 
     async def on_project_name_change(self, e: ft.ControlEvent) -> None:
         """Handle project name input changes.
@@ -589,7 +600,9 @@ class Handlers:
             self.state.name_valid = False
             self._set_validation_icon(self.controls.project_name_input, None)
             self._update_build_button_state()
-            self._set_warning("Enter a project name.", update=True)
+            self._set_warning("Enter a project name.", update=False)
+            self._update_path_preview()
+            self.page.update()
             return
 
         # Validate raw input to catch invalid characters (including spaces) immediately
@@ -604,19 +617,18 @@ class Handlers:
                 self._set_validation_icon(self.controls.project_name_input, False)
                 self._set_warning(
                     f"Project '{name}' already exists at this location.",
-                    update=True,
+                    update=False,
                 )
             else:
                 self._set_validation_icon(self.controls.project_name_input, True)
                 self._set_warning("", update=False)
-                self._set_status(
-                    f"Project will be created at: {full_path}", "info", update=True
-                )
         else:
             self._set_validation_icon(self.controls.project_name_input, False)
-            self._set_warning(error_msg, update=True)
+            self._set_warning(error_msg, update=False)
 
         self._update_build_button_state()
+        self._update_path_preview()
+        self.page.update()
 
     # --- Options Handlers ---
 
@@ -1255,6 +1267,7 @@ class Handlers:
         self._style_selected_checkbox(self.controls.include_starter_files_checkbox)
         self._style_selected_checkbox(self.controls.create_git_checkbox)
         self.controls.warning_banner.value = ""
+        self.controls.path_preview_text.value = ""
         self.controls.progress_ring.visible = False
 
         # Reset validation icons (default path is valid, name is empty)

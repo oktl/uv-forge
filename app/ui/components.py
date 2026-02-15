@@ -44,6 +44,7 @@ class Controls:
         add_package_button: Button to open the add-packages dialog.
         remove_package_button: Button to remove the selected package.
         clear_packages_button: Button to remove all packages from the list.
+        path_preview_text: Small greyed text showing the resolved project path as the user types.
         include_starter_files_checkbox: Checkbox to include starter files in template.
         status_text: Text for displaying status messages.
         build_project_button: Button to build the project.
@@ -82,6 +83,7 @@ class Controls:
         self.remove_package_button: ft.Button
         self.clear_packages_button: ft.Button
         self.include_starter_files_checkbox: ft.Checkbox
+        self.path_preview_text: ft.Text
         self.status_icon: ft.Icon
         self.status_text: ft.Text
         self.build_project_button: ft.Button
@@ -193,6 +195,13 @@ def create_controls(state: "AppState", colors: dict) -> Controls:
         expand=True,
         border_color=UIConfig.COLOR_INFO,
         border_width=1,
+    )
+
+    controls.path_preview_text = ft.Text(
+        "",
+        size=12,
+        color=ft.Colors.GREY_500,
+        italic=True,
     )
 
     # Python version controls
@@ -378,6 +387,7 @@ def create_sections(controls: Controls, state: "AppState") -> None:
                     controls.warning_banner,
                     controls.project_name_label,
                     controls.project_name_input,
+                    controls.path_preview_text,
                 ],
             ),
         ],

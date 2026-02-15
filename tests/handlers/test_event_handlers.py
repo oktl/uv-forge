@@ -70,6 +70,7 @@ class MockControls:
     """Mock Controls class"""
     def __init__(self):
         self.warning_banner = MockText()
+        self.path_preview_text = MockControl()
         self.status_icon = MockControl()
         self.status_text = MockText()
         self.copy_path_button = MockControl()
