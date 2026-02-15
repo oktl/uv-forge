@@ -1,6 +1,6 @@
 # CLAUDE.md - UV Project Creator
 
-**Version:** 0.2.3 | **Python:** 3.14+ | **UI:** Flet 0.80.5+ | **Package Manager:** UV
+**Version:** 0.1.0 | **Python:** 3.14+ | **UI:** Flet 0.80.5+ | **Package Manager:** UV
 
 ---
 
@@ -33,27 +33,27 @@ uv run pytest                 # Run 387 tests (coverage automatic)
 app/
 ├── main.py                   # Entry point: creates page, state, UI, attaches handlers
 ├── core/
-│   ├── constants.py          # Single source of truth: versions, frameworks, package maps, paths, dialog data
+│   ├── constants.py          # Single source of truth: versions, frameworks, package maps, paths
 │   ├── state.py              # AppState dataclass — single source of truth for all mutable state
 │   ├── models.py             # FolderSpec, ProjectConfig, BuildResult, BuildSummaryConfig dataclasses
 │   ├── validator.py          # validate_project_name(), validate_folder_name(), validate_path()
-│   ├── project_builder.py    # build_project() orchestration — UV init, git, folders, packages
-│   ├── config_manager.py     # ConfigManager: loads JSON templates, fallback chain
+│   ├── template_loader.py    # TemplateLoader: loads JSON templates, fallback chain
 │   ├── boilerplate_resolver.py # BoilerplateResolver: populates files with starter content
 │   ├── template_merger.py    # normalize_folder(), merge_folder_lists(), _merge_files()
-│   └── state_validator.py    # EMPTY placeholder
+│   ├── async_executor.py    # AsyncExecutor.run() — ThreadPoolExecutor wrapper
+│   └── logging_config.py    # Loguru setup: console + file handlers with rotation
 ├── handlers/
-│   ├── event_handlers.py     # Handlers class + attach_handlers() — all UI event wiring
+│   ├── ui_handler.py         # Handlers class + attach_handlers() — all UI event wiring
+│   ├── project_builder.py    # build_project() orchestration — UV init, git, folders, packages
 │   ├── filesystem_handler.py # setup_app_structure(), folder creation, cleanup_on_error()
 │   ├── uv_handler.py         # run_uv_init(), install_package(), setup_virtual_env()
 │   ├── git_handler.py        # handle_git_init(), finalize_git_setup() — two-phase git setup
 ├── ui/
 │   ├── components.py         # Controls class + build_main_view(page, state)
 │   ├── dialogs.py            # 8 dialog functions + 5 shared helpers; all theme-aware via is_dark_mode
+│   ├── dialog_data.py        # Framework/project type categories, checkbox labels — dialog display metadata
 │   ├── theme_manager.py      # get_theme_colors() singleton
 │   └── ui_config.py          # UI constants (colors, sizes)
-├── utils/
-│   └── async_executor.py     # AsyncExecutor.run() — ThreadPoolExecutor wrapper
 └── config/templates/
     ├── ui_frameworks/        # 11 templates: flet.json, pyqt6.json, default.json, etc.
     ├── project_types/        # 21 templates: django.json, fastapi.json, etc.
@@ -62,8 +62,8 @@ app/
         └── ui_frameworks/    # flet/main.py, flet/state.py, flet/components.py
 
 tests/
-├── core/                     # 148 tests (state, models, validator, config_manager, template_merger, boilerplate_resolver)
-├── handlers/                 # 93 tests (event_handlers, filesystem, git, uv)
+├── core/                     # 148 tests (state, models, validator, template_loader, template_merger, boilerplate_resolver)
+├── handlers/                 # 93 tests (ui_handler, filesystem, git, uv)
 ├── ui/                       # 19 tests (dialogs)
 └── utils/                    # 13 tests (async_executor)
 ```
@@ -103,20 +103,20 @@ Templates are JSON files in `app/config/templates/` defining `FolderSpec` struct
  "subfolders": [...], "files": ["state.py", "models.py"]}
 ```
 
-**Loading fallback chain** (see `config_manager.py`):
+**Loading fallback chain** (see `template_loader.py`):
 1. Framework-specific template (e.g., `ui_frameworks/flet.json`)
 2. `ui_frameworks/default.json`
 3. Hardcoded `DEFAULT_FOLDERS` from `constants.py`
 
 **Template merging** (see `template_merger.py`):
-When both UI framework + project type are selected, `_reload_and_merge_templates()` in `event_handlers.py` loads both and calls `merge_folder_lists()`:
+When both UI framework + project type are selected, `_reload_and_merge_templates()` in `ui_handler.py` loads both and calls `merge_folder_lists()`:
 - Folders matched by name → merged recursively (subfolders merged, files unioned, booleans OR'd)
 - Unmatched folders → included from both (primary order first)
 
 **Adding a new framework/project type:**
 1. Add to `UI_FRAMEWORKS` or `PROJECT_TYPE_PACKAGE_MAP` in `constants.py`
 2. Add package mapping to `FRAMEWORK_PACKAGE_MAP` if UI framework
-3. Add entry to `UI_FRAMEWORK_DETAILS` or the appropriate category in `PROJECT_TYPE_CATEGORIES` in `constants.py`
+3. Add entry to `UI_FRAMEWORK_CATEGORIES` or `PROJECT_TYPE_CATEGORIES` in `ui/dialog_data.py`
 4. Create template JSON in the appropriate templates subdirectory
 
 **Boilerplate file scaffolding** (see `boilerplate_resolver.py`):
@@ -145,10 +145,6 @@ Files use `{{project_name}}` placeholders, substituted at build time with a norm
   - Phase 2 (`finalize_git_setup`): Called after all files created; stages, commits, and pushes to hub automatically
 
 ---
-
-## Known Issues & Cleanup Needed
-
-- `app/core/state_validator.py` — empty placeholder (file not yet created)
 
 ---
 

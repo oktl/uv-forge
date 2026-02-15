@@ -4,7 +4,7 @@ import asyncio
 import time
 import pytest
 
-from app.utils.async_executor import AsyncExecutor
+from app.core.async_executor import AsyncExecutor
 
 
 class TestAsyncExecutorClass:

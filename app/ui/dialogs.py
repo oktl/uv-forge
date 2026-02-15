@@ -648,7 +648,8 @@ def create_project_type_dialog(
     is_dark_mode: bool,
 ) -> ft.AlertDialog:
     """Create dialog for selecting project type with rich tooltips and styling."""
-    from app.core.constants import PROJECT_TYPE_CATEGORIES, PROJECT_TYPE_PACKAGE_MAP
+    from app.core.constants import PROJECT_TYPE_PACKAGE_MAP
+    from app.ui.dialog_data import PROJECT_TYPE_CATEGORIES
 
     return _create_categorized_radio_dialog(
         title="Select Project Type",
@@ -669,7 +670,8 @@ def create_framework_dialog(
     is_dark_mode: bool,
 ) -> ft.AlertDialog:
     """Create dialog for selecting UI framework with rich tooltips."""
-    from app.core.constants import FRAMEWORK_PACKAGE_MAP, UI_FRAMEWORK_CATEGORIES
+    from app.core.constants import FRAMEWORK_PACKAGE_MAP
+    from app.ui.dialog_data import UI_FRAMEWORK_CATEGORIES
 
     return _create_categorized_radio_dialog(
         title="Select UI Framework",

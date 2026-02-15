@@ -13,9 +13,9 @@ from typing import Any
 
 import flet as ft
 
-from app.core.config_manager import ConfigManager
+from app.core.template_loader import TemplateLoader
 from app.core.models import BuildSummaryConfig, ProjectConfig
-from app.core.project_builder import build_project
+from app.handlers.project_builder import build_project
 from app.core.state import AppState
 from app.core.template_merger import merge_folder_lists, normalize_folder
 from app.core.validator import (
@@ -36,15 +36,17 @@ from app.ui.dialogs import (
 )
 from app.ui.theme_manager import get_theme_colors
 from app.ui.ui_config import UIConfig
-from app.utils.async_executor import AsyncExecutor
+from app.core.async_executor import AsyncExecutor
 from app.core.constants import (
     DEFAULT_FOLDERS,
     DEFAULT_PYTHON_VERSION,
     FRAMEWORK_PACKAGE_MAP,
     GIT_CHEAT_SHEET_FILE,
     HELP_FILE,
-    OTHER_PROJECT_CHECKBOX_LABEL,
     PROJECT_TYPE_PACKAGE_MAP,
+)
+from app.ui.dialog_data import (
+    OTHER_PROJECT_CHECKBOX_LABEL,
     UI_PROJECT_CHECKBOX_LABEL,
 )
 
@@ -88,7 +90,7 @@ class Handlers:
         self.page = page
         self.controls = controls
         self.state = state
-        self.config_manager = ConfigManager()
+        self.template_loader = TemplateLoader()
 
     @staticmethod
     def _style_selected_checkbox(checkbox: ft.Checkbox) -> None:
@@ -826,7 +828,7 @@ class Handlers:
         Returns:
             List of normalized folder dicts.
         """
-        settings = self.config_manager.load_config(template_name)
+        settings = self.template_loader.load_config(template_name)
         raw_folders = settings.get("folders", DEFAULT_FOLDERS.copy())
         return [normalize_folder(f) for f in raw_folders]
 

@@ -6,10 +6,10 @@ from pathlib import Path
 from unittest.mock import Mock, patch
 import tempfile
 
-from app.handlers.event_handlers import Handlers
+from app.handlers.ui_handler import Handlers
 from app.core.state import AppState
-from app.core.constants import (
-    DEFAULT_PYTHON_VERSION,
+from app.core.constants import DEFAULT_PYTHON_VERSION
+from app.ui.dialog_data import (
     UI_PROJECT_CHECKBOX_LABEL,
     OTHER_PROJECT_CHECKBOX_LABEL,
 )
@@ -115,7 +115,7 @@ def test_handlers_initialization(mock_handlers):
     assert handlers.page is page
     assert handlers.controls is controls
     assert handlers.state is state
-    assert handlers.config_manager is not None
+    assert handlers.template_loader is not None
 
 
 def test_set_warning_without_update(mock_handlers):
@@ -488,7 +488,7 @@ def test_load_framework_template_default(mock_handlers):
     """Test loading default template (None framework)"""
     handlers, page, controls, state = mock_handlers
 
-    with patch.object(handlers.config_manager, 'load_config') as mock_load:
+    with patch.object(handlers.template_loader, 'load_config') as mock_load:
         mock_load.return_value = {"folders": ["core", "ui", "utils"]}
         handlers._load_framework_template(None)
 
@@ -500,7 +500,7 @@ def test_load_framework_template_specific(mock_handlers):
     """Test loading framework-specific template"""
     handlers, page, controls, state = mock_handlers
 
-    with patch.object(handlers.config_manager, 'load_config') as mock_load:
+    with patch.object(handlers.template_loader, 'load_config') as mock_load:
         mock_load.return_value = {"folders": ["app", "components", "styles"]}
         handlers._load_framework_template("flet")
 
@@ -512,7 +512,7 @@ def test_load_framework_template_updates_display(mock_handlers):
     """Test that folder display is updated after template load"""
     handlers, page, controls, state = mock_handlers
 
-    with patch.object(handlers.config_manager, 'load_config') as mock_load:
+    with patch.object(handlers.template_loader, 'load_config') as mock_load:
         mock_load.return_value = {"folders": ["core", "ui"]}
         handlers._load_framework_template("test")
 
@@ -523,7 +523,7 @@ def test_load_framework_template_missing_folders_key(mock_handlers):
     """Test handling missing folders key in template"""
     handlers, page, controls, state = mock_handlers
 
-    with patch.object(handlers.config_manager, 'load_config') as mock_load:
+    with patch.object(handlers.template_loader, 'load_config') as mock_load:
         mock_load.return_value = {}
         state.folders = ["old", "folders"]
         handlers._load_framework_template("unknown")
@@ -653,7 +653,7 @@ def test_load_project_type_template_with_type(mock_handlers):
     handlers, page, controls, state = mock_handlers
 
     # Mock the config manager
-    with patch.object(handlers.config_manager, 'load_config') as mock_load:
+    with patch.object(handlers.template_loader, 'load_config') as mock_load:
         mock_load.return_value = {
             "folders": ["api", "core", "models"]
         }
@@ -675,7 +675,7 @@ def test_load_project_type_template_none(mock_handlers):
     state.folders = [{"name": "old", "subfolders": [], "files": []}]
 
     # Mock the config manager
-    with patch.object(handlers.config_manager, 'load_config') as mock_load:
+    with patch.object(handlers.template_loader, 'load_config') as mock_load:
         mock_load.return_value = {
             "folders": ["default", "folders"]
         }
@@ -701,7 +701,7 @@ def test_load_project_type_template_various_types(mock_handlers, project_type, e
     """Test loading various project type templates"""
     handlers, page, controls, state = mock_handlers
 
-    with patch.object(handlers.config_manager, 'load_config') as mock_load:
+    with patch.object(handlers.template_loader, 'load_config') as mock_load:
         mock_load.return_value = {"folders": []}
 
         handlers._load_project_type_template(project_type)
@@ -792,13 +792,13 @@ def test_reload_and_merge_templates_both_selected(mock_handlers):
     state.other_project_enabled = True
     state.project_type = "django"
 
-    with patch.object(handlers.config_manager, 'load_config') as mock_load:
+    with patch.object(handlers.template_loader, 'load_config') as mock_load:
         mock_load.side_effect = [
             {"folders": [{"name": "ui", "subfolders": [], "files": []}]},
             {"folders": [{"name": "api", "subfolders": [], "files": []}]},
         ]
 
-        with patch('app.handlers.event_handlers.merge_folder_lists') as mock_merge:
+        with patch('app.handlers.ui_handler.merge_folder_lists') as mock_merge:
             mock_merge.return_value = [
                 {"name": "ui", "subfolders": [], "files": []},
                 {"name": "api", "subfolders": [], "files": []},
@@ -821,7 +821,7 @@ def test_reload_and_merge_templates_only_framework(mock_handlers):
     state.framework = "flet"
     state.other_project_enabled = False
 
-    with patch.object(handlers.config_manager, 'load_config') as mock_load:
+    with patch.object(handlers.template_loader, 'load_config') as mock_load:
         mock_load.return_value = {"folders": ["core", "ui"]}
         handlers._reload_and_merge_templates()
 
@@ -837,7 +837,7 @@ def test_reload_and_merge_templates_only_project_type(mock_handlers):
     state.other_project_enabled = True
     state.project_type = "django"
 
-    with patch.object(handlers.config_manager, 'load_config') as mock_load:
+    with patch.object(handlers.template_loader, 'load_config') as mock_load:
         mock_load.return_value = {"folders": ["api", "models"]}
         handlers._reload_and_merge_templates()
 
@@ -852,7 +852,7 @@ def test_reload_and_merge_templates_neither_selected(mock_handlers):
     state.ui_project_enabled = False
     state.other_project_enabled = False
 
-    with patch.object(handlers.config_manager, 'load_config') as mock_load:
+    with patch.object(handlers.template_loader, 'load_config') as mock_load:
         mock_load.return_value = {"folders": ["default1", "default2"]}
         handlers._reload_and_merge_templates()
 
@@ -864,7 +864,7 @@ def test_show_framework_dialog_adds_to_overlay(mock_handlers):
     """Test that framework dialog is added to page overlay"""
     handlers, page, controls, state = mock_handlers
 
-    with patch('app.handlers.event_handlers.create_framework_dialog') as mock_create:
+    with patch('app.handlers.ui_handler.create_framework_dialog') as mock_create:
         mock_dialog = Mock()
         mock_dialog.open = False
         mock_create.return_value = mock_dialog
@@ -920,7 +920,7 @@ def test_reload_and_merge_clears_selection(mock_handlers):
     state.ui_project_enabled = False
     state.other_project_enabled = False
 
-    with patch.object(handlers.config_manager, 'load_config') as mock_load:
+    with patch.object(handlers.template_loader, 'load_config') as mock_load:
         mock_load.return_value = {"folders": ["core"]}
         handlers._reload_and_merge_templates()
 
@@ -1454,7 +1454,7 @@ def test_framework_dialog_on_select_sets_state(mock_handlers):
     """Test framework dialog on_select callback sets framework and reloads templates"""
     handlers, page, controls, state = mock_handlers
 
-    with patch('app.handlers.event_handlers.create_framework_dialog') as mock_create:
+    with patch('app.handlers.ui_handler.create_framework_dialog') as mock_create:
         mock_dialog = Mock()
         mock_dialog.open = True
         mock_create.return_value = mock_dialog
@@ -1483,7 +1483,7 @@ def test_framework_dialog_on_select_none_clears_state(mock_handlers):
     controls.ui_project_checkbox.value = True
     controls.ui_project_checkbox.label = "UI Project: flet"
 
-    with patch('app.handlers.event_handlers.create_framework_dialog') as mock_create:
+    with patch('app.handlers.ui_handler.create_framework_dialog') as mock_create:
         mock_dialog = Mock()
         mock_dialog.open = True
         mock_create.return_value = mock_dialog
@@ -1512,7 +1512,7 @@ def test_framework_dialog_on_close_unchecks_when_no_prior_selection(mock_handler
     state.framework = None
     controls.ui_project_checkbox.value = True
 
-    with patch('app.handlers.event_handlers.create_framework_dialog') as mock_create:
+    with patch('app.handlers.ui_handler.create_framework_dialog') as mock_create:
         mock_dialog = Mock()
         mock_dialog.open = True
         mock_create.return_value = mock_dialog
@@ -1539,7 +1539,7 @@ def test_framework_dialog_on_close_keeps_prior_selection(mock_handlers):
     controls.ui_project_checkbox.value = True
     controls.ui_project_checkbox.label = "UI Project: PyQt6"
 
-    with patch('app.handlers.event_handlers.create_framework_dialog') as mock_create:
+    with patch('app.handlers.ui_handler.create_framework_dialog') as mock_create:
         mock_dialog = Mock()
         mock_dialog.open = True
         mock_create.return_value = mock_dialog

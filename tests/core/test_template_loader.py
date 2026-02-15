@@ -1,19 +1,19 @@
-"""Test suite for ConfigManager class"""
+"""Test suite for TemplateLoader class"""
 
 import json
 import tempfile
 from pathlib import Path
 import pytest
 
-from app.core.config_manager import ConfigManager
+from app.core.template_loader import TemplateLoader
 
 
-class TestConfigManagerInit:
-    """Tests for ConfigManager initialization"""
+class TestTemplateLoaderInit:
+    """Tests for TemplateLoader initialization"""
 
     def test_init_creates_valid_manager(self):
-        """Test ConfigManager initialization"""
-        manager = ConfigManager()
+        """Test TemplateLoader initialization"""
+        manager = TemplateLoader()
 
         # Check if settings is a dict (not a method object)
         assert isinstance(manager.settings, dict)
@@ -30,13 +30,13 @@ class TestLoadTemplate:
 
     def test_returns_none_for_nonexistent_file(self):
         """Test returns None for non-existent file"""
-        manager = ConfigManager()
+        manager = TemplateLoader()
         result = manager._load_template(Path("/nonexistent/path.json"))
         assert result is None
 
     def test_loads_valid_json_template(self):
         """Test loads valid JSON file"""
-        manager = ConfigManager()
+        manager = TemplateLoader()
 
         with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
             json.dump({"folders": ["src", "tests"]}, f)
@@ -52,7 +52,7 @@ class TestLoadTemplate:
 
     def test_returns_none_for_invalid_json(self):
         """Test returns None for invalid JSON file"""
-        manager = ConfigManager()
+        manager = TemplateLoader()
 
         with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
             f.write("{ invalid json }")
@@ -70,7 +70,7 @@ class TestUpdateConfigState:
 
     def test_update_config_state_sets_attributes(self):
         """Test _update_config_state updates all config attributes"""
-        manager = ConfigManager()
+        manager = TemplateLoader()
         test_path = Path("/test/path.json")
         test_template = "flet"
         test_settings = {"folders": ["src", "tests"]}
@@ -83,7 +83,7 @@ class TestUpdateConfigState:
 
     def test_update_config_state_with_none_template(self):
         """Test _update_config_state with None loaded_template"""
-        manager = ConfigManager()
+        manager = TemplateLoader()
         test_path = Path("/test/default.json")
         test_settings = {"folders": []}
 
@@ -97,7 +97,7 @@ class TestLoadConfig:
 
     def test_load_config_without_template(self):
         """Test load without template (should use default)"""
-        manager = ConfigManager()
+        manager = TemplateLoader()
         config = manager.load_config()
 
         assert isinstance(config, dict)
@@ -105,7 +105,7 @@ class TestLoadConfig:
 
     def test_load_config_with_nonexistent_template(self):
         """Test load with non-existent template (should fall back to default)"""
-        manager = ConfigManager()
+        manager = TemplateLoader()
         config = manager.load_config("nonexistent_framework")
 
         assert isinstance(config, dict)
@@ -117,7 +117,7 @@ class TestGetConfigDisplayName:
 
     def test_returns_valid_display_name(self):
         """Test returns valid display name"""
-        manager = ConfigManager()
+        manager = TemplateLoader()
         display_name = manager.get_config_display_name()
 
         assert isinstance(display_name, str)
@@ -126,7 +126,7 @@ class TestGetConfigDisplayName:
 
     def test_display_name_includes_template_suffix(self):
         """Test display name always includes ' template' suffix"""
-        manager = ConfigManager()
+        manager = TemplateLoader()
         manager.load_config()
         display_name = manager.get_config_display_name()
 

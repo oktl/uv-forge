@@ -3,7 +3,7 @@
 import tempfile
 from pathlib import Path
 
-from app.core.project_builder import remove_partial_project
+from app.handlers.project_builder import remove_partial_project
 
 
 class TestRemovePartialProject:

@@ -21,6 +21,9 @@ logs/
 .DS_Store
 Thumbs.db
 
+# Type checking
+.mypy_cache/
+
 # IDE
 .vscode/
 

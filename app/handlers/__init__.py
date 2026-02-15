@@ -1,1 +1,1 @@
-"""Event handlers for the UV Project Creator."""
+"""Handlers for the UV Project Creator."""

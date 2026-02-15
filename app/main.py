@@ -15,9 +15,9 @@ if __name__ == "__main__":
 import flet as ft
 from loguru import logger
 
-from app.config.logging_config import setup_logging
+from app.core.logging_config import setup_logging
 from app.core.state import AppState
-from app.handlers.event_handlers import attach_handlers
+from app.handlers.ui_handler import attach_handlers
 from app.ui.components import build_main_view
 
 

@@ -1,4 +1,4 @@
-"""Configuration manager for folder preferences.
+"""Template loader for folder structure configurations.
 
 This module handles loading folder structure configurations from templates.
 Templates are organized in subdirectories:
@@ -20,7 +20,7 @@ from app.core.constants import (
 )
 
 
-class ConfigManager:
+class TemplateLoader:
     """Manages loading folder configuration from templates.
 
     Loads folder structure templates from organized subdirectories:
@@ -34,7 +34,7 @@ class ConfigManager:
     """
 
     def __init__(self):
-        """Initialize ConfigManager and load default settings."""
+        """Initialize TemplateLoader and load default settings."""
         self.config_source: Path = TEMPLATES_DIR / "default.json"
         self.loaded_template: Optional[str] = None
         self.settings: dict[str, Any] = self.load_config()
