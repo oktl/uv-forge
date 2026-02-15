@@ -119,7 +119,7 @@ class Handlers:
         btn.disabled = not is_ready
         btn.opacity = 1.0 if is_ready else 0.5
         if is_ready:
-            btn.tooltip = "Build project (Ctrl+Enter)"
+            btn.tooltip = "Build project\n\n⌘Enter / Ctrl+Enter"
         else:
             reasons = []
             if not self.state.path_valid:
@@ -136,6 +136,7 @@ class Handlers:
                     if not name_val
                     else "Project name is invalid — no spaces or special characters"
                 )
+            reasons.append("\n⌘Enter / Ctrl+Enter")
             btn.tooltip = "\n".join(reasons)
 
         copy_btn = self.controls.copy_path_button

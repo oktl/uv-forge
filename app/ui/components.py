@@ -317,7 +317,7 @@ def create_controls(state: "AppState", colors: dict) -> Controls:
 
     controls.build_project_button = ft.Button(
         content="Build Project",
-        tooltip="Enter a valid path and project name to enable.",
+        tooltip="Enter a valid path and project name to enable.\n\n⌘Enter / Ctrl+Enter",
         bgcolor=UIConfig.COLOR_BTN_BUILD,
         color=ft.Colors.WHITE,
         width=UIConfig.BUTTON_WIDTH_BUILD,
