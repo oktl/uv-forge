@@ -617,6 +617,7 @@ class Handlers:
             self._update_build_button_state()
             self._set_warning("Enter a project name.", update=False)
             self._update_path_preview()
+            self.page.title = "UV Project Creator"
             self.page.update()
             return
 
@@ -643,6 +644,9 @@ class Handlers:
 
         self._update_build_button_state()
         self._update_path_preview()
+        self.page.title = (
+            f"UV Project Creator — {name}" if self.state.name_valid else "UV Project Creator"
+        )
         self.page.update()
 
     # --- Options Handlers ---
@@ -1315,6 +1319,7 @@ class Handlers:
         self.controls.warning_banner.value = ""
         self.controls.path_preview_text.value = ""
         self.controls.progress_ring.visible = False
+        self.page.title = "UV Project Creator"
 
         # Reset validation icons (default path is valid, name is empty)
         self._set_validation_icon(self.controls.project_path_input, True)
