@@ -822,6 +822,8 @@ def create_add_item_dialog(
 
         on_add_callback(name, item_type, parent_path)
 
+    name_field.on_submit = on_add_click
+
     dialog = ft.AlertDialog(
         modal=True,
         title=_create_dialog_title(
