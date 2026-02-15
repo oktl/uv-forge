@@ -116,20 +116,32 @@ def _create_summary_row(label: str, value: str) -> ft.Row:
 def _create_none_option_container(is_dark_mode: bool) -> list[ft.Control]:
     """Create 'None (Clear Selection)' radio option with divider.
 
+    Styled distinctly from regular options (tinted bg + cancel icon) to
+    signal that this is a clearing action rather than a normal selection.
+
     Args:
         is_dark_mode: Whether dark mode is active
 
     Returns:
         List containing the none option container and divider
     """
+    bg_color = ft.Colors.GREY_700 if is_dark_mode else ft.Colors.GREY_200
+
     return [
         ft.Container(
-            content=ft.Radio(
-                value="_none_",
-                label="None (Clear Selection)",
-                label_style=ft.TextStyle(size=13, italic=True),
+            content=ft.Row(
+                [
+                    ft.Icon(ft.Icons.CANCEL, size=14, color=UIConfig.COLOR_ERROR),
+                    ft.Radio(
+                        value="_none_",
+                        label="None (Clear Selection)",
+                        label_style=ft.TextStyle(size=13, italic=True),
+                    ),
+                ],
+                spacing=4,
             ),
-            padding=ft.Padding(left=12, top=4, bottom=4, right=0),
+            padding=ft.Padding(left=8, top=4, bottom=4, right=0),
+            bgcolor=bg_color,
             tooltip="Clear selection and uncheck the checkbox",
             border_radius=4,
             ink=True,
