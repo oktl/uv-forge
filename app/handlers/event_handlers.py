@@ -121,7 +121,22 @@ class Handlers:
         if is_ready:
             btn.tooltip = "Build project (Ctrl+Enter)"
         else:
-            btn.tooltip = "Enter a valid path and project name to enable"
+            reasons = []
+            if not self.state.path_valid:
+                path_val = self.controls.project_path_input.value or ""
+                reasons.append(
+                    "Project path is required"
+                    if not path_val
+                    else "Project path is invalid or does not exist"
+                )
+            if not self.state.name_valid:
+                name_val = self.controls.project_name_input.value or ""
+                reasons.append(
+                    "Project name is required"
+                    if not name_val
+                    else "Project name is invalid — no spaces or special characters"
+                )
+            btn.tooltip = "\n".join(reasons)
 
         copy_btn = self.controls.copy_path_button
         copy_btn.disabled = not is_ready
