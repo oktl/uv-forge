@@ -25,6 +25,7 @@ from app.core.validator import (
 )
 from app.ui.components import Controls
 from app.ui.dialogs import (
+    create_confirm_dialog,
     create_git_cheat_sheet_dialog,
     create_help_dialog,
     create_add_item_dialog,
@@ -1219,11 +1220,8 @@ class Handlers:
         dialog.open = True
         self.page.update()
 
-    async def on_reset(self, _: ft.ControlEvent) -> None:
-        """Handle Reset button click.
-
-        Resets all UI controls and state to initial values.
-        """
+    async def _do_reset(self) -> None:
+        """Perform the actual reset of all UI controls and state."""
         # Reset state (preserves dark mode)
         self.state.reset()
 
@@ -1263,6 +1261,29 @@ class Handlers:
         self._set_status("All fields reset.", "info", update=True)
         await self.controls.project_path_input.focus()
 
+    async def on_reset(self, _: ft.ControlEvent) -> None:
+        """Handle Reset button click — shows confirmation dialog first."""
+
+        async def do_reset(_):
+            dialog.open = False
+            self.page.update()
+            await self._do_reset()
+
+        def cancel(_):
+            dialog.open = False
+            self.page.update()
+
+        dialog = create_confirm_dialog(
+            title="Reset All Settings?",
+            message="This will clear all selections, packages, and folder changes.",
+            confirm_label="Reset",
+            on_confirm=do_reset,
+            on_cancel=cancel,
+            is_dark_mode=self.state.is_dark_mode,
+            confirm_icon=ft.Icons.REFRESH,
+        )
+        self.page.show_dialog(dialog)
+
     async def on_keyboard_event(self, e: ft.KeyboardEvent) -> None:
         """Handle keyboard shortcuts.
 
@@ -1279,8 +1300,25 @@ class Handlers:
                 await self.on_build_project(e)
 
     async def on_exit(self, _: ft.ControlEvent) -> None:
-        """Handle Exit button click."""
-        await self.page.window.close()
+        """Handle Exit button click — shows confirmation dialog first."""
+
+        async def do_exit(_):
+            await self.page.window.close()
+
+        def cancel(_):
+            dialog.open = False
+            self.page.update()
+
+        dialog = create_confirm_dialog(
+            title="Exit Application?",
+            message="Any unsaved configuration will be lost.",
+            confirm_label="Exit",
+            on_confirm=do_exit,
+            on_cancel=cancel,
+            is_dark_mode=self.state.is_dark_mode,
+            confirm_icon=ft.Icons.EXIT_TO_APP,
+        )
+        self.page.show_dialog(dialog)
 
     # --- UI Feature Handlers ---
 

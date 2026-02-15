@@ -897,7 +897,7 @@ async def test_reset_with_both_checked(mock_handlers):
     mock_event = Mock()
 
     with patch.object(handlers, '_reload_and_merge_templates') as mock_reload:
-        await handlers.on_reset(mock_event)
+        await handlers._do_reset()
 
         mock_reload.assert_called_once()
 
@@ -1394,7 +1394,7 @@ async def test_reset_clears_validation_icons(mock_handlers):
     mock_event = Mock()
 
     with patch.object(handlers, '_reload_and_merge_templates'):
-        await handlers.on_reset(mock_event)
+        await handlers._do_reset()
 
     # Path should get valid icon (default path is valid)
     assert controls.project_path_input.suffix is not None
@@ -1608,7 +1608,7 @@ async def test_reset_clears_both_checkbox_labels(mock_handlers):
     mock_event = Mock()
 
     with patch.object(handlers, '_reload_and_merge_templates'):
-        await handlers.on_reset(mock_event)
+        await handlers._do_reset()
 
     assert controls.ui_project_checkbox.label == UI_PROJECT_CHECKBOX_LABEL
     assert controls.other_projects_checkbox.label == OTHER_PROJECT_CHECKBOX_LABEL

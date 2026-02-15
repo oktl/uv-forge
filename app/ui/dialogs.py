@@ -159,6 +159,92 @@ def _create_none_option_container(is_dark_mode: bool) -> list[ft.Control]:
 # ============================================================================
 
 
+def create_confirm_dialog(
+    title: str,
+    message: str,
+    confirm_label: str,
+    on_confirm,
+    on_cancel,
+    is_dark_mode: bool,
+    confirm_icon: str | None = None,
+) -> ft.AlertDialog:
+    """Create a simple confirmation dialog with confirm and cancel actions.
+
+    The confirm button receives autofocus so pressing Enter immediately triggers
+    it. Both buttons show an obvious focused state when tabbing between them.
+
+    Args:
+        title: Dialog title text
+        message: Body message to display
+        confirm_label: Label for the confirm button
+        on_confirm: Callback when confirm is clicked
+        on_cancel: Callback when cancel is clicked
+        is_dark_mode: Whether dark mode is active
+        confirm_icon: Optional icon for the confirm button
+
+    Returns:
+        Configured AlertDialog
+    """
+    colors = get_theme_colors(is_dark_mode)
+
+    # Confirm button — autofocused so Enter triggers it immediately.
+    # Focused state uses a BRIGHTER shade (not darker) so it stands out
+    # against the dark dialog background, plus a white border ring.
+    confirm_btn = ft.FilledButton(
+        confirm_label,
+        on_click=on_confirm,
+        autofocus=True,
+        style=ft.ButtonStyle(
+            bgcolor={
+                ft.ControlState.DEFAULT: ft.Colors.BLUE_600,
+                ft.ControlState.FOCUSED: ft.Colors.BLUE_400,
+                ft.ControlState.HOVERED: ft.Colors.BLUE_500,
+                ft.ControlState.PRESSED: ft.Colors.BLUE_700,
+            },
+            side={
+                ft.ControlState.DEFAULT: ft.BorderSide(0, ft.Colors.TRANSPARENT),
+                ft.ControlState.FOCUSED: ft.BorderSide(2, ft.Colors.WHITE),
+                ft.ControlState.HOVERED: ft.BorderSide(0, ft.Colors.TRANSPARENT),
+            },
+        ),
+    )
+    if confirm_icon:
+        confirm_btn.icon = confirm_icon
+
+    # Cancel button — outlined at rest, fills with grey + white border when focused.
+    cancel_bg_focused = ft.Colors.GREY_700 if is_dark_mode else ft.Colors.GREY_300
+    cancel_btn = ft.OutlinedButton(
+        "Cancel",
+        on_click=on_cancel,
+        style=ft.ButtonStyle(
+            bgcolor={
+                ft.ControlState.DEFAULT: ft.Colors.TRANSPARENT,
+                ft.ControlState.FOCUSED: cancel_bg_focused,
+                ft.ControlState.HOVERED: cancel_bg_focused,
+            },
+            side={
+                ft.ControlState.DEFAULT: ft.BorderSide(1, ft.Colors.GREY_500),
+                ft.ControlState.FOCUSED: ft.BorderSide(2, ft.Colors.WHITE),
+                ft.ControlState.HOVERED: ft.BorderSide(1, ft.Colors.GREY_400),
+            },
+        ),
+    )
+
+    return ft.AlertDialog(
+        modal=True,
+        title=_create_dialog_title(
+            title, colors, icon=ft.Icons.WARNING_AMBER_ROUNDED, icon_size=20
+        ),
+        content=ft.Container(
+            content=ft.Text(message, size=14, color=colors.get("section_title")),
+            width=360,
+            padding=UIConfig.DIALOG_CONTENT_PADDING,
+        ),
+        actions=[confirm_btn, cancel_btn],
+        actions_alignment=ft.MainAxisAlignment.END,
+    )
+
+
 def create_dialog_text_field(content: str, is_dark_mode: bool) -> ft.TextField:
     """Return an editable, preformatted text field.
 
