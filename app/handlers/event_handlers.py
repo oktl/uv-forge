@@ -1109,6 +1109,30 @@ class Handlers:
         else:
             subprocess.Popen(["xdg-open", str(project_path)])
 
+    @staticmethod
+    def _open_in_terminal(project_path: Path) -> None:
+        """Open a terminal window at the project root."""
+        if sys.platform == "darwin":
+            subprocess.Popen(["open", "-a", "Terminal", str(project_path)])
+        elif sys.platform == "win32":
+            subprocess.Popen(
+                ["cmd"],
+                cwd=str(project_path),
+                creationflags=subprocess.CREATE_NEW_CONSOLE,
+            )
+        else:
+            for terminal, args in [
+                ("gnome-terminal", [f"--working-directory={project_path}"]),
+                ("konsole", ["--workdir", str(project_path)]),
+                ("xfce4-terminal", ["--working-directory", str(project_path)]),
+                ("xterm", []),
+            ]:
+                try:
+                    subprocess.Popen([terminal] + args, cwd=str(project_path))
+                    break
+                except FileNotFoundError:
+                    continue
+
     def _open_in_vscode(self, project_path: Path) -> None:
         """Open the project directory in VS Code."""
         try:
@@ -1122,7 +1146,7 @@ class Handlers:
             self._show_snackbar("VS Code not found", is_error=True)
 
     async def _execute_build(
-        self, open_folder: bool = False, open_vscode: bool = False
+        self, open_folder: bool = False, open_vscode: bool = False, open_terminal: bool = False
     ) -> None:
         """Execute the project build after confirmation.
 
@@ -1168,6 +1192,8 @@ class Handlers:
                 self._open_in_file_manager(project_path)
             if open_vscode:
                 self._open_in_vscode(project_path)
+            if open_terminal:
+                self._open_in_terminal(project_path)
         else:
             self._set_status("Build failed. See error details.", "error", update=False)
 
@@ -1200,9 +1226,14 @@ class Handlers:
         async def on_confirm(_):
             open_folder = dialog.open_folder_checkbox.value
             open_vscode = dialog.open_vscode_checkbox.value
+            open_terminal = dialog.open_terminal_checkbox.value
             dialog.open = False
             self.page.update()
-            await self._execute_build(open_folder=open_folder, open_vscode=open_vscode)
+            await self._execute_build(
+                open_folder=open_folder,
+                open_vscode=open_vscode,
+                open_terminal=open_terminal,
+            )
 
         def on_cancel(_):
             dialog.open = False

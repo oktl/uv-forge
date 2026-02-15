@@ -1101,6 +1101,21 @@ def create_build_summary_dialog(
         vertical_alignment=ft.CrossAxisAlignment.CENTER,
     )
 
+    open_terminal_checkbox = ft.Checkbox(
+        label="Open terminal at project root",
+        value=False,
+        on_change=on_checkbox_change,
+    )
+
+    open_terminal_row = ft.Row(
+        [
+            ft.Icon(ft.Icons.TERMINAL, size=16, color=ft.Colors.GREY_400),
+            open_terminal_checkbox,
+        ],
+        spacing=6,
+        vertical_alignment=ft.CrossAxisAlignment.CENTER,
+    )
+
     dialog = ft.AlertDialog(
         modal=True,
         title=_create_dialog_title("Confirm Build", colors, ft.Icons.BUILD_CIRCLE),
@@ -1111,6 +1126,7 @@ def create_build_summary_dialog(
                     ft.Divider(height=16, thickness=1),
                     open_folder_row,
                     open_vscode_row,
+                    open_terminal_row,
                 ],
                 tight=True,
                 spacing=8,
@@ -1126,4 +1142,5 @@ def create_build_summary_dialog(
 
     dialog.open_folder_checkbox = open_folder_checkbox
     dialog.open_vscode_checkbox = open_vscode_checkbox
+    dialog.open_terminal_checkbox = open_terminal_checkbox
     return dialog
