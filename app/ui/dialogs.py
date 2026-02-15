@@ -1213,6 +1213,12 @@ def create_build_summary_dialog(
                 rows
                 + [
                     ft.Divider(height=16, thickness=1),
+                    ft.Text(
+                        "After Build",
+                        size=13,
+                        weight=ft.FontWeight.BOLD,
+                        color=colors["section_title"],
+                    ),
                     open_folder_row,
                     open_vscode_row,
                     open_terminal_row,
