@@ -82,6 +82,7 @@ class MockControls:
         self.packages_container = MockContainer()
         self.add_package_button = MockControl()
         self.remove_package_button = MockControl()
+        self.clear_packages_button = MockControl()
         self.progress_ring = MockControl()
         self.build_project_button = MockControl()
         self.reset_button = MockControl()
@@ -1614,13 +1615,13 @@ async def test_reset_clears_both_checkbox_labels(mock_handlers):
 
 
 def test_update_package_display_empty(mock_handlers):
-    """_update_package_display renders an empty list correctly."""
+    """_update_package_display renders a 'No packages' placeholder when list is empty."""
     handlers, page, controls, state = mock_handlers
 
     state.packages = []
     handlers._update_package_display()
 
-    assert controls.packages_container.content.controls == []
+    assert len(controls.packages_container.content.controls) == 1
     assert controls.packages_label.value == "Packages: 0"
 
 

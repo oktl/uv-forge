@@ -200,6 +200,7 @@ class BuildSummaryConfig:
         starter_files: Whether starter files will be included in the project.
         folder_count: Number of folders to be created in the project.
         file_count: Number of files to be created in the project.
+        packages: List of packages that will be installed (default: []).
 
     Note:
         ui_project_enabled and other_project_enabled are independent—both can be
@@ -218,3 +219,4 @@ class BuildSummaryConfig:
     starter_files: bool
     folder_count: int
     file_count: int
+    packages: list[str] = field(default_factory=list)

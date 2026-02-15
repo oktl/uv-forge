@@ -900,6 +900,9 @@ def create_build_summary_dialog(
         )
     )
 
+    pkg_display = ", ".join(config.packages) if config.packages else "None"
+    rows.append(_create_summary_row("Packages:", pkg_display))
+
     def on_checkbox_change(e):
         e.control.label_style = (
             ft.TextStyle(color=ft.Colors.GREEN) if e.control.value else None

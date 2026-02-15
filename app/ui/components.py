@@ -42,6 +42,7 @@ class Controls:
         packages_container: Container showing packages list.
         add_package_button: Button to open the add-packages dialog.
         remove_package_button: Button to remove the selected package.
+        clear_packages_button: Button to remove all packages from the list.
         include_starter_files_checkbox: Checkbox to include starter files in template.
         status_text: Text for displaying status messages.
         build_project_button: Button to build the project.
@@ -77,6 +78,7 @@ class Controls:
         self.packages_container: ft.Container
         self.add_package_button: ft.Button
         self.remove_package_button: ft.Button
+        self.clear_packages_button: ft.Button
         self.include_starter_files_checkbox: ft.Checkbox
         self.status_text: ft.Text
         self.build_project_button: ft.Button
@@ -282,6 +284,12 @@ def create_controls(state: "AppState", colors: dict) -> Controls:
         style=_split_btn_style,
     )
 
+    controls.clear_packages_button = ft.Button(
+        "Clear All",
+        tooltip="Remove all packages from the install list.",
+        style=_split_btn_style,
+    )
+
     # Status and action controls
     controls.status_text = ft.Text("")
 
@@ -415,6 +423,7 @@ def create_sections(controls: Controls, state: "AppState") -> None:
                                     controls.remove_package_button,
                                 ],
                             ),
+                            controls.clear_packages_button,
                         ],
                         spacing=UIConfig.SPACING_SMALL,
                     ),

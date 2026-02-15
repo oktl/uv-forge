@@ -321,10 +321,23 @@ class Handlers:
 
     def _update_package_display(self) -> None:
         """Update the packages container with the current package list."""
-        package_controls = [
-            self._create_package_item(pkg, idx)
-            for idx, pkg in enumerate(self.state.packages)
-        ]
+        if self.state.packages:
+            package_controls = [
+                self._create_package_item(pkg, idx)
+                for idx, pkg in enumerate(self.state.packages)
+            ]
+        else:
+            package_controls = [
+                ft.Container(
+                    content=ft.Text(
+                        "No packages",
+                        size=UIConfig.TEXT_SIZE_SMALL,
+                        color=ft.Colors.GREY_600,
+                        italic=True,
+                    ),
+                    padding=ft.Padding(left=4, top=4, right=0, bottom=0),
+                )
+            ]
         self.controls.packages_container.content.controls = package_controls
         count = len(self.state.packages)
         self.controls.packages_label.value = f"Packages: {count}"
@@ -771,8 +784,13 @@ class Handlers:
         self.state.selected_item_type = None
         self.state.selected_package_idx = None
 
-        # Rebuild package list from current selections
-        self.state.packages = self._collect_state_packages()
+        # Rebuild package list: keep user-added packages, replace auto ones
+        new_auto = self._collect_state_packages()
+        prev_auto = set(self.state.auto_packages)
+        manual = [p for p in self.state.packages if p not in prev_auto]
+        new_auto_set = set(new_auto)
+        self.state.packages = new_auto + [p for p in manual if p not in new_auto_set]
+        self.state.auto_packages = new_auto
 
         self._update_folder_display()
         self._update_package_display()
@@ -963,6 +981,19 @@ class Handlers:
         dialog.open = True
         self.page.update()
 
+    async def on_clear_packages(self, _: ft.ControlEvent) -> None:
+        """Handle Clear All packages button click.
+
+        Removes all packages from the install list, including auto and manual.
+        """
+        if not self.state.packages:
+            return
+        self.state.packages = []
+        self.state.auto_packages = []
+        self.state.selected_package_idx = None
+        self._update_package_display()
+        self._set_status("All packages cleared.", "info", update=True)
+
     async def on_remove_package(self, _: ft.ControlEvent) -> None:
         """Handle Remove Package button click.
 
@@ -1105,6 +1136,7 @@ class Handlers:
             starter_files=self.state.include_starter_files,
             folder_count=folder_count,
             file_count=file_count,
+            packages=list(self.state.packages),
         )
 
         dialog = create_build_summary_dialog(
@@ -1317,6 +1349,7 @@ def attach_handlers(page: ft.Page, state: AppState) -> None:
     # --- Package Management Handlers ---
     controls.add_package_button.on_click = wrap_async(handlers.on_add_package)
     controls.remove_package_button.on_click = wrap_async(handlers.on_remove_package)
+    controls.clear_packages_button.on_click = wrap_async(handlers.on_clear_packages)
 
     # --- Main Action Handlers ---
     controls.build_project_button.on_click = wrap_async(handlers.on_build_project)

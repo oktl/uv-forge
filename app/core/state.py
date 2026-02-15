@@ -29,6 +29,7 @@ class AppState:
         selected_item_path: Path to selected item for folder/file removal.
         selected_item_type: Whether selected item is a "folder" or "file".
         packages: List of packages to install (pre-populated from framework/project type, user-editable).
+        auto_packages: Last set of packages derived from maps; used to distinguish user additions from auto ones.
         selected_package_idx: Index of selected package for removal, or None.
         is_dark_mode: Whether dark theme is active.
         path_valid: Whether the current path passes validation.
@@ -58,6 +59,7 @@ class AppState:
 
     # Package management
     packages: list[str] = field(default_factory=list)
+    auto_packages: list[str] = field(default_factory=list)  # map-derived; used to detect manual additions
     selected_package_idx: int | None = None
 
     # UI state
