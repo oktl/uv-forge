@@ -285,7 +285,7 @@ def create_controls(state: "AppState", colors: dict) -> Controls:
     )
 
     controls.clear_packages_button = ft.Button(
-        "Clear All",
+        "Clear Packages",
         tooltip="Remove all packages from the install list.",
         style=_split_btn_style,
     )
@@ -413,6 +413,13 @@ def create_sections(controls: Controls, state: "AppState") -> None:
                         ],
                         spacing=UIConfig.SPACING_SMALL,
                     ),
+                    ft.Container(
+                        content=ft.VerticalDivider(
+                            width=UIConfig.BORDER_WIDTH_DEFAULT,
+                            color=ft.Colors.GREY_700,
+                        ),
+                        height=320,
+                    ),
                     ft.Column(
                         controls=[
                             controls.packages_label,
@@ -428,7 +435,7 @@ def create_sections(controls: Controls, state: "AppState") -> None:
                         spacing=UIConfig.SPACING_SMALL,
                     ),
                 ],
-                spacing=8,
+                spacing=UIConfig.SPACING_LARGE,
                 alignment=ft.MainAxisAlignment.CENTER,
                 vertical_alignment=ft.CrossAxisAlignment.START,
             ),

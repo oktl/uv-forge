@@ -56,7 +56,7 @@ class UIConfig:
     APPBAR_TOOLBAR_HEIGHT = 30
     SECTION_WIDTH = 700
     SPLIT_CONTAINER_WIDTH = (
-        310  # fits two containers + 8px gap within SECTION_WIDTH border/padding
+        300  # fits two containers + 8px gap within SECTION_WIDTH border/padding
     )
     SUBFOLDERS_HEIGHT = 200
     BUTTON_WIDTH_BUILD = 300
