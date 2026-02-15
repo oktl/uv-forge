@@ -139,8 +139,15 @@ class Handlers:
             message: Message to display.
             is_error: True for red background, False for green.
         """
+        icon = ft.Icons.ERROR if is_error else ft.Icons.CHECK_CIRCLE
         snackbar = ft.SnackBar(
-            content=ft.Text(message, color=ft.Colors.WHITE),
+            content=ft.Row(
+                [
+                    ft.Icon(icon, color=ft.Colors.WHITE, size=18),
+                    ft.Text(message, color=ft.Colors.WHITE),
+                ],
+                spacing=8,
+            ),
             bgcolor=UIConfig.COLOR_ERROR if is_error else UIConfig.COLOR_SUCCESS,
         )
         self.page.show_dialog(snackbar)
@@ -168,7 +175,7 @@ class Handlers:
         """
         type_styles = {
             "info":    (UIConfig.COLOR_INFO,    ft.Icons.INFO_OUTLINE),
-            "success": (UIConfig.COLOR_SUCCESS, ft.Icons.CHECK_CIRCLE_OUTLINE),
+            "success": (UIConfig.COLOR_SUCCESS, ft.Icons.CHECK_CIRCLE),
             "error":   (UIConfig.COLOR_ERROR,   ft.Icons.ERROR_OUTLINE),
         }
         color, icon = type_styles.get(status_type, type_styles["info"])
