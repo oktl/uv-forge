@@ -24,6 +24,7 @@ class Controls:
     Attributes:
         project_path_label: Label for project path input.
         project_path_input: TextField for entering project path.
+        copy_path_button: IconButton to copy the full project path to clipboard.
         browse_button: Button to open directory picker.
         warning_banner: Text for displaying warnings.
         project_name_label: Label for project name input.
@@ -60,6 +61,7 @@ class Controls:
     def __init__(self) -> None:
         self.project_path_label: ft.Text
         self.project_path_input: ft.TextField
+        self.copy_path_button: ft.IconButton
         self.browse_button: ft.Button
         self.warning_banner: ft.Text
         self.project_name_label: ft.Text
@@ -163,6 +165,14 @@ def create_controls(state: "AppState", colors: dict) -> Controls:
         value=state.project_path,
         hint_text="Project Root Directory",
         expand=True,
+    )
+
+    controls.copy_path_button = ft.IconButton(
+        icon=ft.Icons.CONTENT_COPY,
+        icon_size=UIConfig.ICON_SIZE_DEFAULT,
+        tooltip="Copy full project path to clipboard",
+        disabled=True,
+        opacity=0.4,
     )
 
     controls.browse_button = ft.Button("Browse...")
@@ -360,6 +370,7 @@ def create_sections(controls: Controls, state: "AppState") -> None:
                     ft.Row(
                         controls=[
                             controls.project_path_input,
+                            controls.copy_path_button,
                             controls.browse_button,
                         ],
                     ),

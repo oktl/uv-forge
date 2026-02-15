@@ -112,7 +112,7 @@ class Handlers:
             field.suffix = ft.Icon(ft.Icons.CANCEL, color=UIConfig.COLOR_VALIDATION_ERROR)
 
     def _update_build_button_state(self) -> None:
-        """Enable/disable build button based on validation state."""
+        """Enable/disable build button and copy-path button based on validation state."""
         is_ready = self.state.path_valid and self.state.name_valid
         btn = self.controls.build_project_button
         btn.disabled = not is_ready
@@ -121,6 +121,15 @@ class Handlers:
             btn.tooltip = "Build project (Ctrl+Enter)"
         else:
             btn.tooltip = "Enter a valid path and project name to enable"
+
+        copy_btn = self.controls.copy_path_button
+        copy_btn.disabled = not is_ready
+        copy_btn.opacity = 1.0 if is_ready else 0.4
+        if is_ready:
+            full_path = str(Path(self.state.project_path) / self.state.project_name)
+            copy_btn.tooltip = f"Copy to clipboard:\n{full_path}"
+        else:
+            copy_btn.tooltip = "Copy full project path to clipboard"
 
     def _show_snackbar(self, message: str, is_error: bool = False) -> None:
         """Show an auto-dismissing snackbar notification.
@@ -490,6 +499,24 @@ class Handlers:
         return True
 
     # --- Path & Name Handlers ---
+
+    async def on_copy_path(self, _: ft.ControlEvent) -> None:
+        """Copy the full project path (base + name) to the system clipboard."""
+        full_path = str(Path(self.state.project_path) / self.state.project_name)
+        try:
+            if sys.platform == "darwin":
+                subprocess.run(["pbcopy"], input=full_path.encode(), check=True)
+            elif sys.platform == "win32":
+                subprocess.run(["clip"], input=full_path.encode(), check=True)
+            else:
+                subprocess.run(
+                    ["xclip", "-selection", "clipboard"],
+                    input=full_path.encode(),
+                    check=True,
+                )
+            self._set_status(f"Copied: {full_path}", "info", update=True)
+        except (FileNotFoundError, subprocess.CalledProcessError):
+            self._set_status("Could not copy to clipboard.", "error", update=True)
 
     async def on_browse_click(self, _: ft.ControlEvent) -> None:
         """Handle the Browse button click.
@@ -1362,6 +1389,7 @@ def attach_handlers(page: ft.Page, state: AppState) -> None:
         handlers._style_selected_checkbox(checkbox)
 
     # --- Path & Name Handlers ---
+    controls.copy_path_button.on_click = wrap_async(handlers.on_copy_path)
     controls.browse_button.on_click = wrap_async(handlers.on_browse_click)
     controls.project_path_input.on_change = wrap_async(handlers.on_path_change)
     controls.project_name_input.on_change = wrap_async(handlers.on_project_name_change)

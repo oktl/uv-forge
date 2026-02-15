@@ -69,6 +69,7 @@ class MockControls:
         self.warning_banner = MockText()
         self.status_icon = MockControl()
         self.status_text = MockText()
+        self.copy_path_button = MockControl()
         self.project_path_input = MockControl(value="/test/path")
         self.project_name_input = MockControl(value="")
         self.python_version_dropdown = MockControl(value=DEFAULT_PYTHON_VERSION)
