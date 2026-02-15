@@ -504,6 +504,7 @@ def create_project_type_dialog(
         )
 
         # Radio buttons for this category with tooltips
+        selected_bgcolor = ft.Colors.BLUE_900 if is_dark_mode else ft.Colors.BLUE_50
         for label, value, description in category_data["items"]:
             packages = PROJECT_TYPE_PACKAGE_MAP.get(value, [])
             tooltip_text = create_tooltip(description, packages)
@@ -518,6 +519,7 @@ def create_project_type_dialog(
                 tooltip=tooltip_text,
                 border_radius=4,
                 ink=True,
+                bgcolor=selected_bgcolor if value == current_selection else None,
             )
             dialog_controls.append(radio_container)
 
@@ -629,6 +631,7 @@ def create_framework_dialog(
             )
         )
 
+        selected_bgcolor = ft.Colors.BLUE_900 if is_dark_mode else ft.Colors.BLUE_50
         for label, value, description in category_data["items"]:
             package = FRAMEWORK_PACKAGE_MAP.get(value)
             tooltip_text = create_tooltip(description, package)
@@ -644,6 +647,7 @@ def create_framework_dialog(
                     tooltip=tooltip_text,
                     border_radius=4,
                     ink=True,
+                    bgcolor=selected_bgcolor if value == current_selection else None,
                 )
             )
 
