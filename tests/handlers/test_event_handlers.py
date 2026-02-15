@@ -28,6 +28,9 @@ class MockControl:
         self.opacity = 1.0
         self.tooltip = None
 
+    async def focus(self):
+        pass
+
 
 class MockContainer:
     """Mock Flet container"""

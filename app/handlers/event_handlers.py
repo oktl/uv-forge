@@ -1261,6 +1261,7 @@ class Handlers:
         self._reload_and_merge_templates()
 
         self._set_status("All fields reset.", "info", update=True)
+        await self.controls.project_path_input.focus()
 
     async def on_keyboard_event(self, e: ft.KeyboardEvent) -> None:
         """Handle keyboard shortcuts.

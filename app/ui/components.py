@@ -165,6 +165,7 @@ def create_controls(state: "AppState", colors: dict) -> Controls:
         value=state.project_path,
         hint_text="Project Root Directory",
         expand=True,
+        autofocus=True,
     )
 
     controls.copy_path_button = ft.IconButton(
