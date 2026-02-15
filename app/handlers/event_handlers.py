@@ -1358,7 +1358,9 @@ class Handlers:
     async def on_keyboard_event(self, e: ft.KeyboardEvent) -> None:
         """Handle keyboard shortcuts.
 
-        Ctrl+Enter or Cmd+Enter triggers the build when inputs are valid.
+        Ctrl+Enter / Cmd+Enter — build project
+        Ctrl+R / Cmd+R — reset
+        Escape — exit (opens confirmation dialog)
         """
         if e.key == "Enter" and (e.ctrl or e.meta):
             # Only trigger if inputs are valid and button is not already disabled
@@ -1369,6 +1371,10 @@ class Handlers:
                 and not self.controls.build_project_button.disabled
             ):
                 await self.on_build_project(e)
+        elif e.key == "R" and (e.ctrl or e.meta):
+            await self.on_reset(e)
+        elif e.key == "Escape":
+            await self.on_exit(e)
 
     async def on_exit(self, _: ft.ControlEvent) -> None:
         """Handle Exit button click — shows confirmation dialog first."""

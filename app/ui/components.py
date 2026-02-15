@@ -328,7 +328,7 @@ def create_controls(state: "AppState", colors: dict) -> Controls:
     controls.reset_button = ft.Button(
         content="Reset",
         icon=ft.Icons.REFRESH,
-        tooltip="Resets all controls and values\nto their original state.",
+        tooltip="Resets all controls and values\nto their original state.\n\n⌘R / Ctrl+R",
         bgcolor=UIConfig.COLOR_BTN_RESET,
         color=ft.Colors.WHITE,
         width=UIConfig.BUTTON_WIDTH_ACTION,
@@ -337,6 +337,7 @@ def create_controls(state: "AppState", colors: dict) -> Controls:
     controls.exit_button = ft.Button(
         content="Exit",
         icon=ft.Icons.EXIT_TO_APP,
+        tooltip="Exit the application.\n\nEsc",
         bgcolor=UIConfig.COLOR_BTN_EXIT,
         color=ft.Colors.WHITE,
         width=UIConfig.BUTTON_WIDTH_ACTION,
