@@ -506,7 +506,7 @@ def create_framework_dialog(
     Returns:
         Configured AlertDialog for framework selection.
     """
-    from app.core.constants import FRAMEWORK_PACKAGE_MAP, UI_FRAMEWORK_DETAILS
+    from app.core.constants import FRAMEWORK_PACKAGE_MAP, UI_FRAMEWORK_CATEGORIES
 
     colors = get_theme_colors(is_dark_mode)
 
@@ -515,23 +515,60 @@ def create_framework_dialog(
     # "None (Clear Selection)" option at top
     dialog_controls.extend(_create_none_option_container(is_dark_mode))
 
-    # Radio buttons for each framework
-    for label, value, description in UI_FRAMEWORK_DETAILS:
-        package = FRAMEWORK_PACKAGE_MAP.get(value)
-        tooltip_text = create_tooltip(description, package)
+    # Radio buttons grouped by category
+    category_names = list(UI_FRAMEWORK_CATEGORIES.keys())
+    for category_name, category_data in UI_FRAMEWORK_CATEGORIES.items():
+        light_color = getattr(ft.Colors, category_data["light_color"], ft.Colors.GREY_50)
+        dark_color = getattr(ft.Colors, category_data["dark_color"], ft.Colors.GREY_900)
+        bg_color = light_color if not is_dark_mode else dark_color
 
-        radio_container = ft.Container(
-            content=ft.Radio(
-                value=value,
-                label=label,
-                label_style=ft.TextStyle(size=13),
-            ),
-            padding=ft.Padding(left=12, top=2, bottom=2, right=0),
-            tooltip=tooltip_text,
-            border_radius=4,
-            ink=True,
+        dialog_controls.append(
+            ft.Container(
+                content=ft.Row(
+                    [
+                        ft.Text(category_data["icon"], size=16),
+                        ft.Text(
+                            category_name,
+                            size=14,
+                            weight=ft.FontWeight.BOLD,
+                            color=colors["section_title"],
+                        ),
+                    ],
+                    spacing=8,
+                ),
+                bgcolor=bg_color,
+                padding=ft.Padding(left=12, right=12, top=8, bottom=8),
+                border_radius=6,
+                margin=ft.Margin(top=8, bottom=4, left=0, right=0),
+            )
         )
-        dialog_controls.append(radio_container)
+
+        for label, value, description in category_data["items"]:
+            package = FRAMEWORK_PACKAGE_MAP.get(value)
+            tooltip_text = create_tooltip(description, package)
+
+            dialog_controls.append(
+                ft.Container(
+                    content=ft.Radio(
+                        value=value,
+                        label=label,
+                        label_style=ft.TextStyle(size=13),
+                    ),
+                    padding=ft.Padding(left=32, top=2, bottom=2, right=0),
+                    tooltip=tooltip_text,
+                    border_radius=4,
+                    ink=True,
+                )
+            )
+
+        if category_name != category_names[-1]:
+            dialog_controls.append(
+                ft.Divider(
+                    height=1,
+                    thickness=1,
+                    color=ft.Colors.GREY_300 if not is_dark_mode else ft.Colors.GREY_700,
+                )
+            )
 
     # Create radio group
     selected = current_selection or "_none_"
@@ -559,8 +596,8 @@ def create_framework_dialog(
         title=_create_dialog_title("Select UI Framework", colors, ft.Icons.WIDGETS),
         content=ft.Container(
             content=radio_group,
-            width=420,
-            height=420,
+            width=520,
+            height=550,
             padding=12,
         ),
         actions=_create_dialog_actions(

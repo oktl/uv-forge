@@ -294,57 +294,78 @@ PROJECT_TYPE_CATEGORIES = {
     },
 }
 
-# UI Framework details for dialog display
-# Structure: [(label, value, description)]
-UI_FRAMEWORK_DETAILS = [
-    (
-        "Flet",
-        "flet",
-        "Modern Flutter-based Python UI framework for cross-platform apps",
-    ),
-    (
-        "PyQt6",
-        "PyQt6",
-        "Comprehensive Qt6 bindings for Python with rich widget library",
-    ),
-    (
-        "PySide6",
-        "PySide6",
-        "Official Qt for Python bindings with full Qt6 feature set",
-    ),
-    (
-        "tkinter (built-in)",
-        "tkinter (built-in)",
-        "Python's built-in GUI toolkit — no installation needed",
-    ),
-    (
-        "customtkinter",
-        "customtkinter",
-        "Modern-looking extension of tkinter with custom widgets",
-    ),
-    (
-        "Kivy",
-        "kivy",
-        "Cross-platform NUI framework for multi-touch applications",
-    ),
-    (
-        "Pygame",
-        "pygame",
-        "Library for making games and multimedia applications",
-    ),
-    (
-        "NiceGUI",
-        "nicegui",
-        "Easy-to-use web-based UI framework with Python",
-    ),
-    (
-        "Streamlit",
-        "streamlit",
-        "Rapid prototyping framework for data apps and dashboards",
-    ),
-    (
-        "Gradio",
-        "gradio",
-        "Build ML demos and web interfaces with minimal code",
-    ),
-]
+# UI Framework categories for dialog display
+# Structure: {category_name: {icon, light_color, dark_color, items: [(label, value, description)]}}
+UI_FRAMEWORK_CATEGORIES = {
+    "Desktop GUI": {
+        "icon": "🖥️",
+        "light_color": "GREEN_50",
+        "dark_color": "GREEN_900",
+        "items": [
+            (
+                "Flet",
+                "flet",
+                "Modern Flutter-based Python UI framework for cross-platform apps",
+            ),
+            (
+                "PyQt6",
+                "PyQt6",
+                "Comprehensive Qt6 bindings for Python with rich widget library",
+            ),
+            (
+                "PySide6",
+                "PySide6",
+                "Official Qt for Python bindings with full Qt6 feature set",
+            ),
+            (
+                "tkinter (built-in)",
+                "tkinter (built-in)",
+                "Python's built-in GUI toolkit — no installation needed",
+            ),
+            (
+                "customtkinter",
+                "customtkinter",
+                "Modern-looking extension of tkinter with custom widgets",
+            ),
+            (
+                "Kivy",
+                "kivy",
+                "Cross-platform NUI framework for multi-touch applications",
+            ),
+        ],
+    },
+    "Web & Data": {
+        "icon": "🌐",
+        "light_color": "BLUE_50",
+        "dark_color": "BLUE_900",
+        "items": [
+            (
+                "NiceGUI",
+                "nicegui",
+                "Easy-to-use web-based UI framework with Python",
+            ),
+            (
+                "Streamlit",
+                "streamlit",
+                "Rapid prototyping framework for data apps and dashboards",
+            ),
+            (
+                "Gradio",
+                "gradio",
+                "Build ML demos and web interfaces with minimal code",
+            ),
+        ],
+    },
+    "Game & Multimedia": {
+        "icon": "🎮",
+        "light_color": "ORANGE_50",
+        "dark_color": "ORANGE_900",
+        "items": [
+            (
+                "Pygame",
+                "pygame",
+                "Library for making games and multimedia applications",
+            ),
+        ],
+    },
+}
