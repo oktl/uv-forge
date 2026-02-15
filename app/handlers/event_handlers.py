@@ -209,6 +209,8 @@ class Handlers:
                         size=UIConfig.TEXT_SIZE_SMALL,
                         font_family="monospace",
                         color=text_color,
+                        overflow=ft.TextOverflow.ELLIPSIS,
+                        expand=True,
                     ),
                 ],
                 spacing=4,
