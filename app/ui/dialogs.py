@@ -719,6 +719,69 @@ def create_add_item_dialog(
     return dialog
 
 
+def create_build_error_dialog(
+    error_message: str,
+    on_close_callback,
+    is_dark_mode: bool,
+) -> ft.AlertDialog:
+    """Create a dialog displaying a build failure with its full error output.
+
+    Args:
+        error_message: Full error detail string from the failed build.
+        on_close_callback: Callback when the Close button is clicked.
+        is_dark_mode: Whether dark mode is active.
+
+    Returns:
+        Configured AlertDialog showing the build error.
+    """
+    colors = get_theme_colors(is_dark_mode)
+
+    return ft.AlertDialog(
+        modal=True,
+        title=ft.Row(
+            [
+                ft.Icon(ft.Icons.ERROR_OUTLINE, color=ft.Colors.RED_600, size=24),
+                ft.Text(
+                    "Build Failed",
+                    size=UIConfig.DIALOG_TITLE_SIZE,
+                    color=ft.Colors.RED_600,
+                    weight=ft.FontWeight.BOLD,
+                ),
+            ],
+            spacing=8,
+        ),
+        content=ft.Container(
+            content=ft.Column(
+                [
+                    ft.Text(
+                        "The build did not complete. Full error details:",
+                        size=13,
+                        color=colors.get("section_title"),
+                    ),
+                    ft.Container(height=8),
+                    ft.TextField(
+                        value=error_message,
+                        read_only=True,
+                        multiline=True,
+                        min_lines=6,
+                        max_lines=12,
+                        text_style=ft.TextStyle(
+                            size=12, font_family="monospace"
+                        ),
+                        border_color=ft.Colors.RED_400,
+                        width=500,
+                    ),
+                ],
+                tight=True,
+            ),
+            width=540,
+            padding=UIConfig.DIALOG_CONTENT_PADDING,
+        ),
+        actions=[ft.TextButton("Close", on_click=on_close_callback)],
+        actions_alignment=ft.MainAxisAlignment.END,
+    )
+
+
 def create_add_packages_dialog(
     on_add_callback,
     on_close_callback,
@@ -776,7 +839,7 @@ def create_add_packages_dialog(
             content=ft.Column(
                 [
                     ft.Text(
-                        "Enter package names to add to the install list.",
+                        "Enter package names to add to the install list.\nEnsure each package is spelled correctly — uv will fail at build time if a package cannot be found.",
                         size=13,
                         color=colors.get("section_title"),
                     ),

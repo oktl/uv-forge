@@ -29,6 +29,7 @@ from app.ui.dialogs import (
     create_help_dialog,
     create_add_item_dialog,
     create_add_packages_dialog,
+    create_build_error_dialog,
     create_build_summary_dialog,
     create_framework_dialog,
 )
@@ -1048,8 +1049,19 @@ class Handlers:
             if open_vscode:
                 self._open_in_vscode(project_path)
         else:
-            self._set_status(result.message, "error", update=False)
-            self._show_snackbar(result.message, is_error=True)
+            self._set_status("Build failed. See error details.", "error", update=False)
+
+            def close_error_dialog(_):
+                error_dialog.open = False
+                self.page.update()
+
+            error_dialog = create_build_error_dialog(
+                error_message=result.message,
+                on_close_callback=close_error_dialog,
+                is_dark_mode=self.state.is_dark_mode,
+            )
+            self.page.overlay.append(error_dialog)
+            error_dialog.open = True
 
         self.page.update()
 
