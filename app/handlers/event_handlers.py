@@ -316,10 +316,29 @@ class Handlers:
     # --- Package Display ---
 
     def _create_package_item(self, pkg: str, idx: int) -> ft.Container:
-        """Create a clickable package item container."""
+        """Create a clickable package item container.
+
+        Auto-derived packages (from framework/project type maps) show a muted
+        'auto' badge on the right to distinguish them from manually added ones.
+        """
         is_selected = self.state.selected_package_idx == idx
+        is_auto = pkg in self.state.auto_packages
+
+        row_controls: list[ft.Control] = [
+            ft.Text(
+                pkg,
+                size=UIConfig.TEXT_SIZE_SMALL,
+                font_family="monospace",
+                expand=True,
+            )
+        ]
+        if is_auto:
+            row_controls.append(
+                ft.Text("auto", size=10, color=ft.Colors.GREY_500, italic=True)
+            )
+
         return ft.Container(
-            content=ft.Text(pkg, size=UIConfig.TEXT_SIZE_SMALL, font_family="monospace"),
+            content=ft.Row(row_controls, spacing=4),
             data={"idx": idx, "name": pkg},
             bgcolor=UIConfig.SELECTED_ITEM_BGCOLOR if is_selected else None,
             border=(
