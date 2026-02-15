@@ -635,8 +635,12 @@ def create_project_type_dialog(
             padding=12,
         ),
         actions=_create_dialog_actions(
-            "Select", on_select_click, on_close_callback, ft.Icons.CHECK_CIRCLE_OUTLINE,
-            is_dark_mode, primary_autofocus=False,
+            "Select",
+            on_select_click,
+            on_close_callback,
+            ft.Icons.CHECK_CIRCLE_OUTLINE,
+            is_dark_mode,
+            primary_autofocus=False,
         ),
         actions_alignment=ft.MainAxisAlignment.END,
     )
@@ -674,7 +678,9 @@ def create_framework_dialog(
     # Radio buttons grouped by category
     category_names = list(UI_FRAMEWORK_CATEGORIES.keys())
     for category_name, category_data in UI_FRAMEWORK_CATEGORIES.items():
-        light_color = getattr(ft.Colors, category_data["light_color"], ft.Colors.GREY_50)
+        light_color = getattr(
+            ft.Colors, category_data["light_color"], ft.Colors.GREY_50
+        )
         dark_color = getattr(ft.Colors, category_data["dark_color"], ft.Colors.GREY_900)
         bg_color = light_color if not is_dark_mode else dark_color
 
@@ -724,7 +730,9 @@ def create_framework_dialog(
                 ft.Divider(
                     height=1,
                     thickness=1,
-                    color=ft.Colors.GREY_300 if not is_dark_mode else ft.Colors.GREY_700,
+                    color=ft.Colors.GREY_300
+                    if not is_dark_mode
+                    else ft.Colors.GREY_700,
                 )
             )
 
@@ -761,8 +769,12 @@ def create_framework_dialog(
             padding=12,
         ),
         actions=_create_dialog_actions(
-            "Select", on_select_click, on_close_callback, ft.Icons.CHECK_CIRCLE_OUTLINE,
-            is_dark_mode, primary_autofocus=False,
+            "Select",
+            on_select_click,
+            on_close_callback,
+            ft.Icons.CHECK_CIRCLE_OUTLINE,
+            is_dark_mode,
+            primary_autofocus=False,
         ),
         actions_alignment=ft.MainAxisAlignment.END,
     )
@@ -1121,7 +1133,10 @@ def create_build_summary_dialog(
                                 size=13,
                                 color=colors.get("section_title"),
                             ),
-                            *[ft.Text(f"  • {pkg}", size=12) for pkg in config.packages],
+                            *[
+                                ft.Text(f"  • {pkg}", size=12)
+                                for pkg in config.packages
+                            ],
                         ],
                         spacing=2,
                         tight=True,
@@ -1136,7 +1151,9 @@ def create_build_summary_dialog(
 
     def on_checkbox_change(e):
         e.control.label_style = (
-            ft.TextStyle(color=UIConfig.COLOR_CHECKBOX_ACTIVE) if e.control.value else None
+            ft.TextStyle(color=UIConfig.COLOR_CHECKBOX_ACTIVE)
+            if e.control.value
+            else None
         )
         e.page.update()
 
@@ -1144,8 +1161,7 @@ def create_build_summary_dialog(
 
     open_folder_checkbox = ft.Checkbox(
         label="Open project folder after build",
-        value=True,
-        label_style=green,
+        value=False,
         on_change=on_checkbox_change,
     )
 
@@ -1208,7 +1224,11 @@ def create_build_summary_dialog(
             padding=20,
         ),
         actions=_create_dialog_actions(
-            "Build", on_build_callback, on_cancel_callback, ft.Icons.ROCKET_LAUNCH, is_dark_mode
+            "Build",
+            on_build_callback,
+            on_cancel_callback,
+            ft.Icons.ROCKET_LAUNCH,
+            is_dark_mode,
         ),
         actions_alignment=ft.MainAxisAlignment.END,
     )
