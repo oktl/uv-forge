@@ -509,44 +509,47 @@ def create_preview_formatted_dialog(
     )
 
 
-def create_project_type_dialog(
+def _create_categorized_radio_dialog(
+    title: str,
+    icon: str,
+    categories: dict,
+    package_map: dict,
     on_select_callback,
     on_close_callback,
     current_selection: str | None,
     is_dark_mode: bool,
 ) -> ft.AlertDialog:
-    """Create dialog for selecting project type with rich tooltips and styling.
+    """Create a categorized radio-button selection dialog.
+
+    Shared implementation for project type and UI framework dialogs.
 
     Args:
-        on_select_callback: Callback function(project_type) when Select is clicked
+        title: Dialog title text (e.g., "Select Project Type")
+        icon: Flet Icons constant for the title
+        categories: Category dict (e.g., PROJECT_TYPE_CATEGORIES)
+        package_map: Package mapping dict for tooltip generation
+        on_select_callback: Callback function(selected_value) when Select is clicked.
+            Receives None if "None (Clear Selection)" is chosen.
         on_close_callback: Callback function when Cancel is clicked
-        current_selection: Currently selected project type (or None)
+        current_selection: Currently selected value (or None)
         is_dark_mode: Whether dark mode is active
 
     Returns:
-        Configured AlertDialog for project type selection
+        Configured AlertDialog for selection
     """
-    from app.core.constants import PROJECT_TYPE_CATEGORIES, PROJECT_TYPE_PACKAGE_MAP
-
     colors = get_theme_colors(is_dark_mode)
 
-    # Build radio buttons organized by category
     dialog_controls = []
-
-    # "None (Clear Selection)" option at top
     dialog_controls.extend(_create_none_option_container(is_dark_mode))
 
-    # Iterate through categories from constants
-    category_names = list(PROJECT_TYPE_CATEGORIES.keys())
-    for category_name, category_data in PROJECT_TYPE_CATEGORIES.items():
-        # Get color attribute from ft.Colors dynamically
+    category_names = list(categories.keys())
+    for category_name, category_data in categories.items():
         light_color = getattr(
             ft.Colors, category_data["light_color"], ft.Colors.GREY_50
         )
         dark_color = getattr(ft.Colors, category_data["dark_color"], ft.Colors.GREY_900)
         bg_color = light_color if not is_dark_mode else dark_color
 
-        # Category header with icon and background
         dialog_controls.append(
             ft.Container(
                 content=ft.Row(
@@ -568,147 +571,10 @@ def create_project_type_dialog(
             )
         )
 
-        # Radio buttons for this category with tooltips
         selected_bgcolor = ft.Colors.BLUE_900 if is_dark_mode else ft.Colors.BLUE_50
         for label, value, description in category_data["items"]:
-            packages = PROJECT_TYPE_PACKAGE_MAP.get(value, [])
+            packages = package_map.get(value) or []
             tooltip_text = create_tooltip(description, packages)
-
-            radio_container = ft.Container(
-                content=ft.Radio(
-                    value=value,
-                    label=label,
-                    label_style=ft.TextStyle(size=13),
-                ),
-                padding=ft.Padding(left=32, top=2, bottom=2, right=0),
-                tooltip=tooltip_text,
-                border_radius=4,
-                ink=True,
-                bgcolor=selected_bgcolor if value == current_selection else None,
-            )
-            dialog_controls.append(radio_container)
-
-        # Add divider after each category except the last
-        if category_name != category_names[-1]:
-            dialog_controls.append(
-                ft.Divider(
-                    height=1,
-                    thickness=1,
-                    color=ft.Colors.GREY_300
-                    if not is_dark_mode
-                    else ft.Colors.GREY_700,
-                )
-            )
-
-    # Create radio group with all controls
-    selected = current_selection or "_none_"
-    _autofocus_selected_radio(dialog_controls, selected)
-
-    radio_column = ft.Column(
-        controls=dialog_controls,
-        scroll=ft.ScrollMode.AUTO,
-        spacing=0,
-    )
-
-    radio_group = ft.RadioGroup(
-        content=radio_column,
-        value=selected,
-    )
-
-    def on_select_click(e):
-        """Handle Select button click."""
-        selected_value = radio_group.value
-        if selected_value == "_none_":
-            on_select_callback(None)
-        else:
-            on_select_callback(selected_value)
-
-    dialog = ft.AlertDialog(
-        modal=True,
-        title=_create_dialog_title(
-            "Select Project Type", colors, ft.Icons.FOLDER_SPECIAL
-        ),
-        content=ft.Container(
-            content=radio_group,
-            width=520,
-            height=550,
-            padding=12,
-        ),
-        actions=_create_dialog_actions(
-            "Select",
-            on_select_click,
-            on_close_callback,
-            ft.Icons.CHECK_CIRCLE_OUTLINE,
-            is_dark_mode,
-            primary_autofocus=False,
-        ),
-        actions_alignment=ft.MainAxisAlignment.END,
-    )
-
-    return dialog
-
-
-def create_framework_dialog(
-    on_select_callback,
-    on_close_callback,
-    current_selection: str | None,
-    is_dark_mode: bool,
-) -> ft.AlertDialog:
-    """Create dialog for selecting UI framework with rich tooltips.
-
-    Args:
-        on_select_callback: Callback function(framework) when Select is clicked.
-            Receives None if "None (Clear Selection)" is chosen.
-        on_close_callback: Callback function when Cancel is clicked.
-        current_selection: Currently selected framework (or None).
-        is_dark_mode: Whether dark mode is active.
-
-    Returns:
-        Configured AlertDialog for framework selection.
-    """
-    from app.core.constants import FRAMEWORK_PACKAGE_MAP, UI_FRAMEWORK_CATEGORIES
-
-    colors = get_theme_colors(is_dark_mode)
-
-    dialog_controls = []
-
-    # "None (Clear Selection)" option at top
-    dialog_controls.extend(_create_none_option_container(is_dark_mode))
-
-    # Radio buttons grouped by category
-    category_names = list(UI_FRAMEWORK_CATEGORIES.keys())
-    for category_name, category_data in UI_FRAMEWORK_CATEGORIES.items():
-        light_color = getattr(
-            ft.Colors, category_data["light_color"], ft.Colors.GREY_50
-        )
-        dark_color = getattr(ft.Colors, category_data["dark_color"], ft.Colors.GREY_900)
-        bg_color = light_color if not is_dark_mode else dark_color
-
-        dialog_controls.append(
-            ft.Container(
-                content=ft.Row(
-                    [
-                        ft.Text(category_data["icon"], size=16),
-                        ft.Text(
-                            category_name,
-                            size=14,
-                            weight=ft.FontWeight.BOLD,
-                            color=colors["section_title"],
-                        ),
-                    ],
-                    spacing=8,
-                ),
-                bgcolor=bg_color,
-                padding=ft.Padding(left=12, right=12, top=8, bottom=8),
-                border_radius=6,
-                margin=ft.Margin(top=8, bottom=4, left=0, right=0),
-            )
-        )
-
-        selected_bgcolor = ft.Colors.BLUE_900 if is_dark_mode else ft.Colors.BLUE_50
-        for label, value, description in category_data["items"]:
-            package = FRAMEWORK_PACKAGE_MAP.get(value)
-            tooltip_text = create_tooltip(description, package)
 
             dialog_controls.append(
                 ft.Container(
@@ -736,7 +602,6 @@ def create_framework_dialog(
                 )
             )
 
-    # Create radio group
     selected = current_selection or "_none_"
     _autofocus_selected_radio(dialog_controls, selected)
 
@@ -752,16 +617,12 @@ def create_framework_dialog(
     )
 
     def on_select_click(e):
-        """Handle Select button click."""
         selected_value = radio_group.value
-        if selected_value == "_none_":
-            on_select_callback(None)
-        else:
-            on_select_callback(selected_value)
+        on_select_callback(None if selected_value == "_none_" else selected_value)
 
-    dialog = ft.AlertDialog(
+    return ft.AlertDialog(
         modal=True,
-        title=_create_dialog_title("Select UI Framework", colors, ft.Icons.WIDGETS),
+        title=_create_dialog_title(title, colors, icon),
         content=ft.Container(
             content=radio_group,
             width=520,
@@ -779,7 +640,47 @@ def create_framework_dialog(
         actions_alignment=ft.MainAxisAlignment.END,
     )
 
-    return dialog
+
+def create_project_type_dialog(
+    on_select_callback,
+    on_close_callback,
+    current_selection: str | None,
+    is_dark_mode: bool,
+) -> ft.AlertDialog:
+    """Create dialog for selecting project type with rich tooltips and styling."""
+    from app.core.constants import PROJECT_TYPE_CATEGORIES, PROJECT_TYPE_PACKAGE_MAP
+
+    return _create_categorized_radio_dialog(
+        title="Select Project Type",
+        icon=ft.Icons.FOLDER_SPECIAL,
+        categories=PROJECT_TYPE_CATEGORIES,
+        package_map=PROJECT_TYPE_PACKAGE_MAP,
+        on_select_callback=on_select_callback,
+        on_close_callback=on_close_callback,
+        current_selection=current_selection,
+        is_dark_mode=is_dark_mode,
+    )
+
+
+def create_framework_dialog(
+    on_select_callback,
+    on_close_callback,
+    current_selection: str | None,
+    is_dark_mode: bool,
+) -> ft.AlertDialog:
+    """Create dialog for selecting UI framework with rich tooltips."""
+    from app.core.constants import FRAMEWORK_PACKAGE_MAP, UI_FRAMEWORK_CATEGORIES
+
+    return _create_categorized_radio_dialog(
+        title="Select UI Framework",
+        icon=ft.Icons.WIDGETS,
+        categories=UI_FRAMEWORK_CATEGORIES,
+        package_map=FRAMEWORK_PACKAGE_MAP,
+        on_select_callback=on_select_callback,
+        on_close_callback=on_close_callback,
+        current_selection=current_selection,
+        is_dark_mode=is_dark_mode,
+    )
 
 
 def create_add_item_dialog(
