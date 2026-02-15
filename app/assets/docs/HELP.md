@@ -4,15 +4,17 @@ This application helps you create new Python projects using UV with automatic fo
 
 ## Getting Started
 
-### 1. **Set Project Path**
-Browse or enter the directory where you want to create your project. This is where your project folder will be created.
-
-### 2. **Project Name**
+### 1. **Project Name**
 Enter a valid Python package name:
 - Must start with a letter or underscore
 - Can contain letters, numbers, and underscores
 - Cannot be a Python keyword (e.g., `class`, `def`, `import`)
 - Cannot already exist at the target location
+
+A live path preview appears below the name field showing the full resolved project path as you type.
+
+### 2. **Set Project Path**
+Browse or enter the directory where you want to create your project. This is where your project folder will be created. The default path is pre-filled and rarely needs changing.
 
 ### 3. **Python Version**
 Select the Python version for your project:
@@ -37,16 +39,16 @@ Check this option to initialize a Git repository in your project with automatic 
 
 ### 5. **UI Project** (Optional)
 Check this option if you're creating a user interface application.
-- A dialog will open letting you select from 10 UI frameworks:
-  - **Flet** - Modern, cross-platform with Flutter
-  - **PyQt6 / PySide6** - Professional Qt bindings
-  - **tkinter** - Python's built-in GUI toolkit
-  - **customtkinter** - Modern-looking tkinter extension
-  - **Kivy** - Multi-touch and mobile-friendly
-  - **Pygame** - Games and multimedia
-  - **NiceGUI** - Web-based UI framework
-  - **Streamlit** - Data apps and dashboards
-  - **Gradio** - ML demos and interfaces
+- A dialog will open letting you select from 10 UI frameworks organized by category:
+
+**Desktop GUI:**
+- Flet, PyQt6, PySide6, tkinter, customtkinter, Kivy
+
+**Web & Data:**
+- NiceGUI, Streamlit, Gradio
+
+**Game & Multimedia:**
+- Pygame
 - **Selecting "None (Clear Selection)"** unchecks the option and clears your choice
 - **Click the checkbox again** to reopen the dialog and change your selection
 - The framework package will be automatically installed in your project
@@ -118,16 +120,25 @@ Click "Build Project" to create your project with all configured settings. The b
 A **confirmation dialog** will appear showing a summary of your project settings. Before confirming, you can choose post-build actions:
 - **Open project folder after build** — Opens the created project in Finder/Explorer (checked by default)
 - **Open in VS Code** — Opens the project in VS Code immediately after creation (checked by default; requires VS Code to be installed)
+- **Open terminal at project root** — Opens a terminal window in the project directory
 
-**Keyboard Shortcut:** Press `Ctrl+Enter` (or `Cmd+Enter` on Mac) to build when inputs are valid.
+## Keyboard Shortcuts
+
+| Shortcut | Action |
+|---|---|
+| `⌘Enter` / `Ctrl+Enter` | Build project (when inputs are valid) |
+| `⌘F` / `Ctrl+F` | Open Add Folder/File dialog |
+| `⌘P` / `Ctrl+P` | Open Add Packages dialog |
+| `⌘R` / `Ctrl+R` | Reset all fields (opens confirmation) |
+| `Esc` | Exit application (opens confirmation) |
 
 ## Tips & Tricks
 
-- **Reset Button** - Restore all settings to defaults (preserves dark/light mode preference)
+- **Reset Button** (`⌘R`) - Restore all settings to defaults (preserves dark/light mode preference)
 - **Theme Toggle** - Click the sun/moon icon to switch between light and dark mode
 - **Help Button** - Click the "?" icon to view this help documentation
 - **Real-time Validation** - The app shows validation status with ✓ (valid) and ✗ (invalid) icons
-- **Warning Banner** - Any issues are displayed at the top of the window
+- **Warning Banner** - Any issues are displayed below the project name field
 - **Status Messages** - See what's happening in the status bar during build
 
 ## Combining UI Framework + Project Type
