@@ -93,7 +93,7 @@ class Handlers:
     def _style_selected_checkbox(checkbox: ft.Checkbox) -> None:
         """Set checkbox label green when checked, default when unchecked."""
         checkbox.label_style = (
-            ft.TextStyle(color=ft.Colors.GREEN) if checkbox.value else None
+            ft.TextStyle(color=UIConfig.COLOR_CHECKBOX_ACTIVE) if checkbox.value else None
         )
 
     @staticmethod
@@ -107,9 +107,9 @@ class Handlers:
         if is_valid is None:
             field.suffix = None
         elif is_valid:
-            field.suffix = ft.Icon(ft.Icons.CHECK_CIRCLE, color=ft.Colors.GREEN)
+            field.suffix = ft.Icon(ft.Icons.CHECK_CIRCLE, color=UIConfig.COLOR_VALIDATION_OK)
         else:
-            field.suffix = ft.Icon(ft.Icons.CANCEL, color=ft.Colors.RED)
+            field.suffix = ft.Icon(ft.Icons.CANCEL, color=UIConfig.COLOR_VALIDATION_ERROR)
 
     def _update_build_button_state(self) -> None:
         """Enable/disable build button based on validation state."""
@@ -131,7 +131,7 @@ class Handlers:
         """
         snackbar = ft.SnackBar(
             content=ft.Text(message, color=ft.Colors.WHITE),
-            bgcolor=ft.Colors.RED_600 if is_error else ft.Colors.GREEN_600,
+            bgcolor=UIConfig.COLOR_ERROR if is_error else UIConfig.COLOR_SUCCESS,
         )
         self.page.show_dialog(snackbar)
 
@@ -157,9 +157,9 @@ class Handlers:
             update: Whether to call page.update() after setting.
         """
         type_styles = {
-            "info":    (ft.Colors.BLUE_600,  ft.Icons.INFO_OUTLINE),
-            "success": (ft.Colors.GREEN_600, ft.Icons.CHECK_CIRCLE_OUTLINE),
-            "error":   (ft.Colors.RED_600,   ft.Icons.ERROR_OUTLINE),
+            "info":    (UIConfig.COLOR_INFO,    ft.Icons.INFO_OUTLINE),
+            "success": (UIConfig.COLOR_SUCCESS, ft.Icons.CHECK_CIRCLE_OUTLINE),
+            "error":   (UIConfig.COLOR_ERROR,   ft.Icons.ERROR_OUTLINE),
         }
         color, icon = type_styles.get(status_type, type_styles["info"])
         self.controls.status_text.value = message
@@ -191,14 +191,14 @@ class Handlers:
 
         if item_type == "folder":
             icon = ft.Icons.FOLDER
-            icon_color = ft.Colors.AMBER_400
+            icon_color = UIConfig.COLOR_FOLDER_ICON
             display_text = f"{name}/"
             text_color = None
         else:
             icon = ft.Icons.INSERT_DRIVE_FILE
-            icon_color = ft.Colors.GREY_500
+            icon_color = UIConfig.COLOR_FILE_ICON
             display_text = name
-            text_color = ft.Colors.GREY_400
+            text_color = UIConfig.COLOR_FILE_TEXT
 
         return ft.Container(
             content=ft.Row(

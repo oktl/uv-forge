@@ -584,7 +584,7 @@ def create_add_item_dialog(
     # Warning banner for validation errors (defined first so it can be referenced)
     warning_text = ft.Text(
         value="",
-        color=ft.Colors.ORANGE_600,
+        color=UIConfig.COLOR_WARNING,
         size=13,
         visible=False,
         weight=ft.FontWeight.W_500,
@@ -738,11 +738,11 @@ def create_build_error_dialog(
         modal=True,
         title=ft.Row(
             [
-                ft.Icon(ft.Icons.ERROR_OUTLINE, color=ft.Colors.RED_600, size=24),
+                ft.Icon(ft.Icons.ERROR_OUTLINE, color=UIConfig.COLOR_ERROR, size=24),
                 ft.Text(
                     "Build Failed",
                     size=UIConfig.DIALOG_TITLE_SIZE,
-                    color=ft.Colors.RED_600,
+                    color=UIConfig.COLOR_ERROR,
                     weight=ft.FontWeight.BOLD,
                 ),
             ],
@@ -764,7 +764,7 @@ def create_build_error_dialog(
                         min_lines=6,
                         max_lines=12,
                         text_style=ft.TextStyle(size=12, font_family="monospace"),
-                        border_color=ft.Colors.RED_400,
+                        border_color=UIConfig.COLOR_ERROR,
                         width=500,
                     ),
                 ],
@@ -797,7 +797,7 @@ def create_add_packages_dialog(
 
     warning_text = ft.Text(
         value="",
-        color=ft.Colors.ORANGE_600,
+        color=UIConfig.COLOR_WARNING,
         size=13,
         visible=False,
         weight=ft.FontWeight.W_500,
@@ -924,11 +924,11 @@ def create_build_summary_dialog(
 
     def on_checkbox_change(e):
         e.control.label_style = (
-            ft.TextStyle(color=ft.Colors.GREEN) if e.control.value else None
+            ft.TextStyle(color=UIConfig.COLOR_CHECKBOX_ACTIVE) if e.control.value else None
         )
         e.page.update()
 
-    green = ft.TextStyle(color=ft.Colors.GREEN)
+    green = ft.TextStyle(color=UIConfig.COLOR_CHECKBOX_ACTIVE)
 
     open_folder_checkbox = ft.Checkbox(
         label="Open project folder after build",

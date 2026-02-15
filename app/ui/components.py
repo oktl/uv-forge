@@ -169,7 +169,7 @@ def create_controls(state: "AppState", colors: dict) -> Controls:
 
     controls.warning_banner = ft.Text(
         "",
-        color=ft.Colors.ORANGE,
+        color=UIConfig.COLOR_WARNING,
         weight=ft.FontWeight.BOLD,
         size=14,
     )
@@ -180,7 +180,7 @@ def create_controls(state: "AppState", colors: dict) -> Controls:
     controls.project_name_input = ft.TextField(
         hint_text="Enter project name...",
         expand=True,
-        border_color=ft.Colors.BLUE,
+        border_color=UIConfig.COLOR_INFO,
         border_width=1,
     )
 
@@ -191,7 +191,7 @@ def create_controls(state: "AppState", colors: dict) -> Controls:
         options=[ft.dropdown.Option(v) for v in PYTHON_VERSIONS],
         tooltip="Choose a version, default is 3.14",
         expand=True,
-        border_color=ft.Colors.BLUE,
+        border_color=UIConfig.COLOR_INFO,
     )
 
     # Checkbox controls
@@ -204,7 +204,7 @@ def create_controls(state: "AppState", colors: dict) -> Controls:
     controls.include_starter_files_checkbox = ft.Checkbox(
         label="Include Starter Files",
         value=state.include_starter_files,
-        label_style=ft.TextStyle(color=ft.Colors.GREEN)
+        label_style=ft.TextStyle(color=UIConfig.COLOR_CHECKBOX_ACTIVE)
         if state.include_starter_files
         else None,
         tooltip="Create template files with boilerplate starter content.\nDefault is no – only folders and __init__.py are created.",
@@ -298,7 +298,7 @@ def create_controls(state: "AppState", colors: dict) -> Controls:
     controls.build_project_button = ft.Button(
         content="Build Project",
         tooltip="Enter a valid path and project name to enable.",
-        bgcolor=ft.Colors.GREEN,
+        bgcolor=UIConfig.COLOR_BTN_BUILD,
         color=ft.Colors.WHITE,
         width=UIConfig.BUTTON_WIDTH_BUILD,
         disabled=True,
@@ -309,7 +309,7 @@ def create_controls(state: "AppState", colors: dict) -> Controls:
         content="Reset",
         icon=ft.Icons.REFRESH,
         tooltip="Resets all controls and values\nto their original state.",
-        bgcolor=ft.Colors.ORANGE,
+        bgcolor=UIConfig.COLOR_BTN_RESET,
         color=ft.Colors.WHITE,
         width=UIConfig.BUTTON_WIDTH_ACTION,
     )
@@ -317,7 +317,7 @@ def create_controls(state: "AppState", colors: dict) -> Controls:
     controls.exit_button = ft.Button(
         content="Exit",
         icon=ft.Icons.EXIT_TO_APP,
-        bgcolor=ft.Colors.RED,
+        bgcolor=UIConfig.COLOR_BTN_EXIT,
         color=ft.Colors.WHITE,
         width=UIConfig.BUTTON_WIDTH_ACTION,
     )
