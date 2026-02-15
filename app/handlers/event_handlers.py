@@ -603,6 +603,7 @@ class Handlers:
                 self.controls.ui_project_checkbox.label = (
                     f"UI Framework: {framework}"
                 )
+                self._style_selected_checkbox(self.controls.ui_project_checkbox)
                 self._reload_and_merge_templates()
                 self._set_status(
                     f"Framework set to {framework}. Template loaded.",
@@ -673,6 +674,7 @@ class Handlers:
                 # Update checkbox label with selected type
                 type_name = project_type.replace("_", " ").title()
                 self.controls.other_projects_checkbox.label = f"Project: {type_name}"
+                self._style_selected_checkbox(self.controls.other_projects_checkbox)
                 self._set_status(
                     f"Project Type: {type_name}. Template loaded.",
                     "success",
