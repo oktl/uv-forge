@@ -210,7 +210,7 @@ class Handlers:
         if path and name and self.state.path_valid and self.state.name_valid:
             self.controls.path_preview_text.value = f"→ {Path(path) / name}"
         else:
-            self.controls.path_preview_text.value = ""
+            self.controls.path_preview_text.value = "\u00a0"
 
     def _create_item_container(
         self, name: str, item_path: list[int | str], item_type: str, indent: int = 0
@@ -1318,7 +1318,7 @@ class Handlers:
         self._style_selected_checkbox(self.controls.include_starter_files_checkbox)
         self._style_selected_checkbox(self.controls.create_git_checkbox)
         self.controls.warning_banner.value = ""
-        self.controls.path_preview_text.value = ""
+        self.controls.path_preview_text.value = "\u00a0"
         self.controls.progress_ring.visible = False
         self.page.title = "UV Project Creator"
 

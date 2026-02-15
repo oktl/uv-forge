@@ -167,7 +167,7 @@ def create_controls(state: "AppState", colors: dict) -> Controls:
         value=state.project_path,
         hint_text="Project Root Directory",
         expand=True,
-        autofocus=True,
+        focused_border_color=ft.Colors.TRANSPARENT,
     )
 
     controls.copy_path_button = ft.IconButton(
@@ -193,12 +193,13 @@ def create_controls(state: "AppState", colors: dict) -> Controls:
     controls.project_name_input = ft.TextField(
         hint_text="Enter project name...",
         expand=True,
+        autofocus=True,
         border_color=UIConfig.COLOR_INFO,
         border_width=1,
     )
 
     controls.path_preview_text = ft.Text(
-        "",
+        "\u00a0",
         size=12,
         color=ft.Colors.GREY_500,
         italic=True,
@@ -377,6 +378,10 @@ def create_sections(controls: Controls, state: "AppState") -> None:
         [
             ft.Column(
                 controls=[
+                    controls.project_name_label,
+                    controls.project_name_input,
+                    controls.path_preview_text,
+                    controls.warning_banner,
                     controls.project_path_label,
                     ft.Row(
                         controls=[
@@ -385,10 +390,6 @@ def create_sections(controls: Controls, state: "AppState") -> None:
                             controls.browse_button,
                         ],
                     ),
-                    controls.warning_banner,
-                    controls.project_name_label,
-                    controls.project_name_input,
-                    controls.path_preview_text,
                 ],
             ),
         ],
