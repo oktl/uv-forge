@@ -180,28 +180,35 @@ class Handlers:
         Returns:
             Configured Container with click handler and selection highlighting.
         """
-        prefix = UIConfig.FOLDER_TREE_INDENT_UNIT * indent + (
-            UIConfig.FOLDER_TREE_BRANCH_PREFIX if indent > 0 else ""
-        )
         is_selected = (
             self.state.selected_item_path == item_path
             and self.state.selected_item_type == item_type
         )
 
-        # Format display text and color based on type
         if item_type == "folder":
-            display_text = f"{prefix}{name}/"
-            text_color = None  # Use default color
-        else:  # file
-            display_text = f"{prefix}{name}"
+            icon = ft.Icons.FOLDER
+            icon_color = ft.Colors.AMBER_400
+            display_text = f"{name}/"
+            text_color = None
+        else:
+            icon = ft.Icons.INSERT_DRIVE_FILE
+            icon_color = ft.Colors.GREY_500
+            display_text = name
             text_color = ft.Colors.GREY_400
 
         return ft.Container(
-            content=ft.Text(
-                display_text,
-                size=UIConfig.TEXT_SIZE_SMALL,
-                font_family="monospace",
-                color=text_color,
+            content=ft.Row(
+                [
+                    ft.Icon(icon, size=13, color=icon_color),
+                    ft.Text(
+                        display_text,
+                        size=UIConfig.TEXT_SIZE_SMALL,
+                        font_family="monospace",
+                        color=text_color,
+                    ),
+                ],
+                spacing=4,
+                tight=True,
             ),
             data={"path": item_path, "type": item_type, "name": name},
             bgcolor=UIConfig.SELECTED_ITEM_BGCOLOR if is_selected else None,
@@ -213,7 +220,12 @@ class Handlers:
                 else None
             ),
             on_click=self._on_item_click,
-            padding=UIConfig.FOLDER_ITEM_PADDING,
+            padding=ft.Padding(
+                left=4 + indent * UIConfig.FOLDER_TREE_INDENT_PX,
+                right=4,
+                top=1,
+                bottom=1,
+            ),
             border_radius=2,
             margin=0,
         )
