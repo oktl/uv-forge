@@ -1064,8 +1064,11 @@ class Handlers:
             packages=list(self.state.packages),
         )
 
-        # Build project asynchronously
-        result = await AsyncExecutor.run(build_project, config)
+        # Build project asynchronously, forwarding step updates to the status text
+        def _on_build_progress(msg: str) -> None:
+            self._set_status(msg, "info", update=True)
+
+        result = await AsyncExecutor.run(build_project, config, _on_build_progress)
 
         # Hide progress and update button state
         self.controls.progress_ring.visible = False

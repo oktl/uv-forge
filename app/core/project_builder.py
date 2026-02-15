@@ -6,6 +6,7 @@ and error handling with rollback.
 """
 
 import shutil
+from collections.abc import Callable
 from pathlib import Path
 from subprocess import CalledProcessError
 
@@ -74,7 +75,11 @@ def _collect_packages_to_install(config: ProjectConfig) -> list[str]:
     return packages
 
 
-def _create_project_scaffold(config: ProjectConfig, project_path: Path) -> None:
+def _create_project_scaffold(
+    config: ProjectConfig,
+    project_path: Path,
+    on_progress: Callable[[str], None] | None = None,
+) -> None:
     """Initialize project structure: UV init, git, folders, and pyproject.
 
     Runs the core scaffolding steps that produce the on-disk project layout
@@ -83,8 +88,17 @@ def _create_project_scaffold(config: ProjectConfig, project_path: Path) -> None:
     Args:
         config: ProjectConfig containing all project settings.
         project_path: Absolute path to the project directory.
+        on_progress: Optional callback invoked with a status string before each step.
     """
+    def _p(msg: str) -> None:
+        if on_progress:
+            on_progress(msg)
+
+    _p("Initializing UV project...")
     run_uv_init(project_path, config.python_version)
+
+    if config.git_enabled:
+        _p("Setting up Git repository...")
     handle_git_init(project_path, config.git_enabled)
 
     resolver = (
@@ -97,6 +111,7 @@ def _create_project_scaffold(config: ProjectConfig, project_path: Path) -> None:
         else None
     )
 
+    _p("Creating folder structure...")
     setup_app_structure(
         project_path,
         config.folders,
@@ -111,18 +126,36 @@ def _create_project_scaffold(config: ProjectConfig, project_path: Path) -> None:
     )
 
 
-def _install_dependencies(config: ProjectConfig, project_path: Path) -> None:
+def _install_dependencies(
+    config: ProjectConfig,
+    project_path: Path,
+    on_progress: Callable[[str], None] | None = None,
+) -> None:
     """Create virtual environment and install all required packages.
 
     Args:
         config: ProjectConfig containing python version and package settings.
         project_path: Absolute path to the project directory.
+        on_progress: Optional callback invoked with a status string before each step.
     """
+    def _p(msg: str) -> None:
+        if on_progress:
+            on_progress(msg)
+
+    _p("Creating virtual environment...")
     setup_virtual_env(project_path, config.python_version)
-    install_packages(project_path, _collect_packages_to_install(config))
+
+    packages = _collect_packages_to_install(config)
+    if packages:
+        n = len(packages)
+        _p(f"Installing {n} package{'s' if n != 1 else ''}...")
+    install_packages(project_path, packages)
 
 
-def build_project(config: ProjectConfig) -> BuildResult:
+def build_project(
+    config: ProjectConfig,
+    on_progress: Callable[[str], None] | None = None,
+) -> BuildResult:
     """Build a new UV project with all configured settings.
 
     Orchestrates the complete project creation pipeline:
@@ -158,10 +191,12 @@ def build_project(config: ProjectConfig) -> BuildResult:
 
     try:
         project_path.mkdir(parents=True)
-        _create_project_scaffold(config, project_path)
-        _install_dependencies(config, project_path)
+        _create_project_scaffold(config, project_path, on_progress)
+        _install_dependencies(config, project_path, on_progress)
 
         # Finalize git after all files and packages are installed
+        if config.git_enabled and on_progress:
+            on_progress("Finalizing Git...")
         finalize_git_setup(project_path, config.git_enabled)
 
         return BuildResult(
