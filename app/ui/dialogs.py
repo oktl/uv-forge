@@ -685,10 +685,8 @@ def create_add_item_dialog(
 
     dialog = ft.AlertDialog(
         modal=True,
-        title=ft.Text(
-            "Add Folder or File",
-            size=UIConfig.DIALOG_TITLE_SIZE,
-            color=colors["main_title"],
+        title=_create_dialog_title(
+            "Add File or Folder", colors, icon=ft.Icons.ADD_CIRCLE_OUTLINE
         ),
         content=ft.Container(
             content=ft.Column(
@@ -765,9 +763,7 @@ def create_build_error_dialog(
                         multiline=True,
                         min_lines=6,
                         max_lines=12,
-                        text_style=ft.TextStyle(
-                            size=12, font_family="monospace"
-                        ),
+                        text_style=ft.TextStyle(size=12, font_family="monospace"),
                         border_color=ft.Colors.RED_400,
                         width=500,
                     ),
@@ -900,8 +896,31 @@ def create_build_summary_dialog(
         )
     )
 
-    pkg_display = ", ".join(config.packages) if config.packages else "None"
-    rows.append(_create_summary_row("Packages:", pkg_display))
+    if config.packages:
+        n = len(config.packages)
+        rows.append(
+            ft.Row(
+                [
+                    ft.Text("Packages:", weight=ft.FontWeight.BOLD, size=13, width=130),
+                    ft.Column(
+                        [
+                            ft.Text(
+                                f"{n} package{'s' if n != 1 else ''}",
+                                size=13,
+                                color=colors.get("section_title"),
+                            ),
+                            *[ft.Text(f"  • {pkg}", size=12) for pkg in config.packages],
+                        ],
+                        spacing=2,
+                        tight=True,
+                    ),
+                ],
+                spacing=8,
+                vertical_alignment=ft.CrossAxisAlignment.START,
+            )
+        )
+    else:
+        rows.append(_create_summary_row("Packages:", "None"))
 
     def on_checkbox_change(e):
         e.control.label_style = (
