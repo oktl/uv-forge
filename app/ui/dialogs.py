@@ -854,7 +854,7 @@ def create_add_packages_dialog(
 
     packages_field = ft.TextField(
         label="Packages",
-        hint_text="One package per line, or comma-separated\ne.g.\nrequests\nhttpx>=0.25\ndjango",
+        hint_text="One package per line, or comma-separated\ne.g.\nrequests\nhttpx>=0.25\ndjango[postgres]\npytest==8.0",
         multiline=True,
         min_lines=4,
         max_lines=8,
@@ -884,7 +884,7 @@ def create_add_packages_dialog(
             content=ft.Column(
                 [
                     ft.Text(
-                        "Enter package names to add to the install list.\nEnsure each package is spelled correctly — uv will fail at build time if a package cannot be found.",
+                        "Enter package names to add to the install list.\nEnsure each package is spelled correctly — uv will fail at build time if a package cannot be found.\nVersion specifiers (>=, ==, <) and extras ([postgres], [dev]) are supported.",
                         size=13,
                         color=colors.get("section_title"),
                     ),
