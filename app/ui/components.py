@@ -80,6 +80,7 @@ class Controls:
         self.remove_package_button: ft.Button
         self.clear_packages_button: ft.Button
         self.include_starter_files_checkbox: ft.Checkbox
+        self.status_icon: ft.Icon
         self.status_text: ft.Text
         self.build_project_button: ft.Button
         self.reset_button: ft.Button
@@ -291,6 +292,7 @@ def create_controls(state: "AppState", colors: dict) -> Controls:
     )
 
     # Status and action controls
+    controls.status_icon = ft.Icon(ft.Icons.INFO_OUTLINE, size=16, visible=False)
     controls.status_text = ft.Text("")
 
     controls.build_project_button = ft.Button(
@@ -499,7 +501,7 @@ def create_layout(controls: Controls) -> ft.Column:
             controls.section_containers[2],  # Add or Remove Folders
             ft.Container(
                 content=ft.Row(
-                    controls=[controls.progress_ring, controls.status_text],
+                    controls=[controls.progress_ring, controls.status_icon, controls.status_text],
                     alignment=ft.MainAxisAlignment.CENTER,
                     spacing=8,
                 )

@@ -149,20 +149,24 @@ class Handlers:
     def _set_status(
         self, message: str, status_type: str = "info", update: bool = False
     ) -> None:
-        """Update status text message and color.
+        """Update status text message, color, and icon.
 
         Args:
             message: Status message to display.
             status_type: One of "info", "success", or "error".
             update: Whether to call page.update() after setting.
         """
-        colors = {
-            "info": ft.Colors.BLUE_600,
-            "success": ft.Colors.GREEN_600,
-            "error": ft.Colors.RED_600,
+        type_styles = {
+            "info":    (ft.Colors.BLUE_600,  ft.Icons.INFO_OUTLINE),
+            "success": (ft.Colors.GREEN_600, ft.Icons.CHECK_CIRCLE_OUTLINE),
+            "error":   (ft.Colors.RED_600,   ft.Icons.ERROR_OUTLINE),
         }
+        color, icon = type_styles.get(status_type, type_styles["info"])
         self.controls.status_text.value = message
-        self.controls.status_text.color = colors.get(status_type, ft.Colors.BLUE_600)
+        self.controls.status_text.color = color
+        self.controls.status_icon.name = icon
+        self.controls.status_icon.color = color
+        self.controls.status_icon.visible = bool(message)
         if update:
             self.page.update()
 
