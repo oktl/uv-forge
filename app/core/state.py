@@ -28,6 +28,8 @@ class AppState:
         auto_save_folders: Whether to auto-save folder changes to config.
         selected_item_path: Path to selected item for folder/file removal.
         selected_item_type: Whether selected item is a "folder" or "file".
+        packages: List of packages to install (pre-populated from framework/project type, user-editable).
+        selected_package_idx: Index of selected package for removal, or None.
         is_dark_mode: Whether dark theme is active.
         path_valid: Whether the current path passes validation.
         name_valid: Whether the current project name passes validation.
@@ -53,6 +55,10 @@ class AppState:
     # Selection tracking for folder/file removal
     selected_item_path: list[int | str] | None = None
     selected_item_type: Literal["folder", "file"] | None = None
+
+    # Package management
+    packages: list[str] = field(default_factory=list)
+    selected_package_idx: int | None = None
 
     # UI state
     is_dark_mode: bool = True

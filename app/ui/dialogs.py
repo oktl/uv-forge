@@ -264,7 +264,7 @@ def create_edit_file_dialog(
     # Extract filename from path for display - add safety check
     try:
         filename = Path(file_path).name
-    except (ValueError, TypeError):
+    except ValueError, TypeError:
         filename = str(file_path)
 
     # Create editable text field
@@ -678,7 +678,7 @@ def create_add_item_dialog(
         else:
             try:
                 parent_path = ast.literal_eval(parent_value)
-            except (ValueError, SyntaxError):
+            except ValueError, SyntaxError:
                 parent_path = None
 
         on_add_callback(name, item_type, parent_path)
@@ -715,6 +715,85 @@ def create_add_item_dialog(
 
     # Store warning text reference on dialog for callback access
     dialog.warning_text = warning_text
+
+    return dialog
+
+
+def create_add_packages_dialog(
+    on_add_callback,
+    on_close_callback,
+    is_dark_mode: bool,
+) -> ft.AlertDialog:
+    """Create dialog for adding one or more packages to the install list.
+
+    Args:
+        on_add_callback: Callback function(packages: list[str]) called with parsed names.
+        on_close_callback: Callback function when Cancel is clicked.
+        is_dark_mode: Whether dark mode is active.
+
+    Returns:
+        Configured AlertDialog for adding packages.
+    """
+    colors = get_theme_colors(is_dark_mode)
+
+    warning_text = ft.Text(
+        value="",
+        color=ft.Colors.ORANGE_600,
+        size=13,
+        visible=False,
+        weight=ft.FontWeight.W_500,
+    )
+
+    packages_field = ft.TextField(
+        label="Packages",
+        hint_text="One package per line, or comma-separated\ne.g.\nrequests\nhttpx>=0.25\ndjango",
+        multiline=True,
+        min_lines=4,
+        max_lines=8,
+        width=400,
+        autofocus=True,
+    )
+
+    def on_add_click(e):
+        raw = packages_field.value or ""
+        # Split on newlines and commas, strip whitespace, drop empty tokens
+        tokens = [t.strip() for part in raw.splitlines() for t in part.split(",")]
+        packages = [t for t in tokens if t]
+        if not packages:
+            warning_text.value = "Enter at least one package name."
+            warning_text.visible = True
+            e.page.update()
+            return
+        warning_text.visible = False
+        on_add_callback(packages)
+
+    dialog = ft.AlertDialog(
+        modal=True,
+        title=_create_dialog_title(
+            "Add Packages", colors, icon=ft.Icons.ADD_CIRCLE_OUTLINE
+        ),
+        content=ft.Container(
+            content=ft.Column(
+                [
+                    ft.Text(
+                        "Enter package names to add to the install list.",
+                        size=13,
+                        color=colors.get("section_title"),
+                    ),
+                    ft.Container(height=8),
+                    packages_field,
+                    warning_text,
+                ],
+                tight=True,
+            ),
+            width=450,
+            padding=UIConfig.DIALOG_CONTENT_PADDING,
+        ),
+        actions=_create_dialog_actions(
+            "Add", on_add_click, on_close_callback, ft.Icons.ADD
+        ),
+        actions_alignment=ft.MainAxisAlignment.END,
+    )
 
     return dialog
 

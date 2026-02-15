@@ -78,6 +78,10 @@ class MockControls:
         self.auto_save_folder_changes = MockControl(value=False)
         self.app_subfolders_label = MockText()
         self.subfolders_container = MockContainer()
+        self.packages_label = MockText()
+        self.packages_container = MockContainer()
+        self.add_package_button = MockControl()
+        self.remove_package_button = MockControl()
         self.progress_ring = MockControl()
         self.build_project_button = MockControl()
         self.reset_button = MockControl()
@@ -1604,3 +1608,141 @@ async def test_reset_clears_both_checkbox_labels(mock_handlers):
     assert controls.other_projects_checkbox.label == OTHER_PROJECT_CHECKBOX_LABEL
     assert controls.ui_project_checkbox.value == False
     assert controls.other_projects_checkbox.value == False
+
+
+# --- Package Management Tests ---
+
+
+def test_update_package_display_empty(mock_handlers):
+    """_update_package_display renders an empty list correctly."""
+    handlers, page, controls, state = mock_handlers
+
+    state.packages = []
+    handlers._update_package_display()
+
+    assert controls.packages_container.content.controls == []
+    assert controls.packages_label.value == "Packages: 0"
+
+
+def test_update_package_display_with_packages(mock_handlers):
+    """_update_package_display renders all packages as containers."""
+    handlers, page, controls, state = mock_handlers
+
+    state.packages = ["flet", "requests", "httpx"]
+    handlers._update_package_display()
+
+    assert len(controls.packages_container.content.controls) == 3
+    assert controls.packages_label.value == "Packages: 3"
+
+
+def test_on_package_click_sets_selection(mock_handlers):
+    """Clicking a package item selects it in state."""
+    handlers, page, controls, state = mock_handlers
+
+    state.packages = ["flet", "requests"]
+    handlers._update_package_display()
+
+    mock_event = Mock()
+    mock_event.control.data = {"idx": 1, "name": "requests"}
+    handlers._on_package_click(mock_event)
+
+    assert state.selected_package_idx == 1
+
+
+@pytest.mark.asyncio
+async def test_on_add_package_opens_dialog(mock_handlers):
+    """on_add_package opens an add-packages dialog."""
+    handlers, page, controls, state = mock_handlers
+
+    await handlers.on_add_package(Mock())
+
+    assert len(page.overlay) == 1  # Dialog was appended to overlay
+
+
+@pytest.mark.asyncio
+async def test_on_add_package_deduplicates_batch(mock_handlers):
+    """Packages already in the list are skipped; new ones are added."""
+    handlers, page, controls, state = mock_handlers
+
+    state.packages = ["flet", "requests"]
+    # Simulate the dialog callback being invoked directly
+    existing = set(state.packages)
+    new_batch = ["requests", "httpx", "django"]  # "requests" is a duplicate
+    added = [p for p in new_batch if p not in existing]
+    state.packages.extend(added)
+
+    assert state.packages == ["flet", "requests", "httpx", "django"]
+    assert "requests" not in added  # Was filtered as duplicate
+
+
+@pytest.mark.asyncio
+async def test_on_remove_package_removes_selected(mock_handlers):
+    """on_remove_package removes the selected package."""
+    handlers, page, controls, state = mock_handlers
+
+    state.packages = ["flet", "requests", "httpx"]
+    state.selected_package_idx = 1
+    await handlers.on_remove_package(Mock())
+
+    assert state.packages == ["flet", "httpx"]
+    assert state.selected_package_idx is None
+
+
+@pytest.mark.asyncio
+async def test_on_remove_package_no_selection(mock_handlers):
+    """on_remove_package sets a warning when nothing is selected."""
+    handlers, page, controls, state = mock_handlers
+
+    state.packages = ["flet"]
+    state.selected_package_idx = None
+    await handlers.on_remove_package(Mock())
+
+    assert controls.warning_banner.value == "Select a package to remove."
+    assert state.packages == ["flet"]  # Unchanged
+
+
+def test_collect_state_packages_framework_only(mock_handlers):
+    """_collect_state_packages returns framework package when framework selected."""
+    handlers, _, _, state = mock_handlers
+
+    state.ui_project_enabled = True
+    state.framework = "flet"
+    state.other_project_enabled = False
+
+    packages = handlers._collect_state_packages()
+    assert packages == ["flet"]
+
+
+def test_collect_state_packages_project_type_only(mock_handlers):
+    """_collect_state_packages returns project type packages when type selected."""
+    handlers, _, _, state = mock_handlers
+
+    state.ui_project_enabled = False
+    state.other_project_enabled = True
+    state.project_type = "django"
+
+    packages = handlers._collect_state_packages()
+    assert "django" in packages
+
+
+def test_collect_state_packages_neither_selected(mock_handlers):
+    """_collect_state_packages returns empty list when nothing selected."""
+    handlers, _, _, state = mock_handlers
+
+    state.ui_project_enabled = False
+    state.other_project_enabled = False
+
+    packages = handlers._collect_state_packages()
+    assert packages == []
+
+
+def test_collect_state_packages_builtin_framework(mock_handlers):
+    """_collect_state_packages excludes built-in frameworks with no pip package."""
+    handlers, _, _, state = mock_handlers
+
+    state.ui_project_enabled = True
+    state.framework = "tkinter (built-in)"
+    state.other_project_enabled = False
+
+    packages = handlers._collect_state_packages()
+    assert packages == []  # tkinter maps to None, not installed

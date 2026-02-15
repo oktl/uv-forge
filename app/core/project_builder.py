@@ -56,6 +56,11 @@ def _collect_packages_to_install(config: ProjectConfig) -> list[str]:
     Returns:
         List of package name strings to install (may be empty).
     """
+    # If the user has an explicit package list, use it directly
+    if config.packages:
+        return list(config.packages)
+
+    # Fallback: derive from framework and project type maps
     packages: list[str] = []
 
     if config.ui_project_enabled:

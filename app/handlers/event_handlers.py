@@ -28,6 +28,7 @@ from app.ui.dialogs import (
     create_git_cheat_sheet_dialog,
     create_help_dialog,
     create_add_item_dialog,
+    create_add_packages_dialog,
     create_build_summary_dialog,
     create_framework_dialog,
 )
@@ -37,9 +38,11 @@ from app.utils.async_executor import AsyncExecutor
 from app.core.constants import (
     DEFAULT_FOLDERS,
     DEFAULT_PYTHON_VERSION,
+    FRAMEWORK_PACKAGE_MAP,
     GIT_CHEAT_SHEET_FILE,
     HELP_FILE,
     OTHER_PROJECT_CHECKBOX_LABEL,
+    PROJECT_TYPE_PACKAGE_MAP,
     UI_PROJECT_CHECKBOX_LABEL,
 )
 
@@ -292,6 +295,57 @@ class Handlers:
         )
 
         self.page.update()
+
+    # --- Package Display ---
+
+    def _create_package_item(self, pkg: str, idx: int) -> ft.Container:
+        """Create a clickable package item container."""
+        is_selected = self.state.selected_package_idx == idx
+        return ft.Container(
+            content=ft.Text(pkg, size=UIConfig.TEXT_SIZE_SMALL, font_family="monospace"),
+            data={"idx": idx, "name": pkg},
+            bgcolor=UIConfig.SELECTED_ITEM_BGCOLOR if is_selected else None,
+            border=(
+                ft.Border.all(
+                    UIConfig.BORDER_WIDTH_DEFAULT, UIConfig.SELECTED_ITEM_BORDER_COLOR
+                )
+                if is_selected
+                else None
+            ),
+            on_click=self._on_package_click,
+            padding=UIConfig.FOLDER_ITEM_PADDING,
+            border_radius=2,
+            margin=0,
+        )
+
+    def _update_package_display(self) -> None:
+        """Update the packages container with the current package list."""
+        package_controls = [
+            self._create_package_item(pkg, idx)
+            for idx, pkg in enumerate(self.state.packages)
+        ]
+        self.controls.packages_container.content.controls = package_controls
+        count = len(self.state.packages)
+        self.controls.packages_label.value = f"Packages: {count}"
+        self.page.update()
+
+    def _on_package_click(self, e: ft.ControlEvent) -> None:
+        """Handle click on a package item to select it."""
+        self.state.selected_package_idx = e.control.data["idx"]
+        pkg_name = e.control.data["name"]
+        self._set_status(f"Selected package: {pkg_name}", "info", update=False)
+        self._update_package_display()
+
+    def _collect_state_packages(self) -> list[str]:
+        """Build the package list from current framework/project type selections."""
+        packages: list[str] = []
+        if self.state.ui_project_enabled and self.state.framework:
+            fw_pkg = FRAMEWORK_PACKAGE_MAP.get(self.state.framework)
+            if fw_pkg:
+                packages.append(fw_pkg)
+        if self.state.other_project_enabled and self.state.project_type:
+            packages.extend(PROJECT_TYPE_PACKAGE_MAP.get(self.state.project_type, []))
+        return packages
 
     def _on_item_click(self, e: ft.ControlEvent) -> None:
         """Handle click on folder/file item to select it."""
@@ -711,11 +765,16 @@ class Handlers:
         else:
             self.state.folders = self._load_template_folders(None)
 
-        # Clear selection since folder structure changed
+        # Clear selections since structure changed
         self.state.selected_item_path = None
         self.state.selected_item_type = None
+        self.state.selected_package_idx = None
+
+        # Rebuild package list from current selections
+        self.state.packages = self._collect_state_packages()
 
         self._update_folder_display()
+        self._update_package_display()
 
     # --- Folder Management Handlers ---
 
@@ -861,6 +920,65 @@ class Handlers:
         status = "enabled" if self.state.auto_save_folders else "disabled"
         self._set_status(f"Auto-save folder changes {status}.", "info", update=True)
 
+    # --- Package Management Handlers ---
+
+    async def on_add_package(self, _: ft.ControlEvent) -> None:
+        """Handle Add Packages button click.
+
+        Opens a dialog where the user can enter one or more package names
+        (one per line or comma-separated). Deduplicates against the existing list.
+        """
+        existing = set(self.state.packages)
+
+        def on_packages_entered(new_packages: list[str]) -> None:
+            added = [p for p in new_packages if p not in existing]
+            self.state.packages.extend(added)
+            existing.update(added)
+            dialog.open = False
+            self._update_package_display()
+            if added:
+                self._set_status(
+                    f"Added {len(added)} package(s): {', '.join(added)}",
+                    "success",
+                    update=True,
+                )
+            else:
+                self._set_status(
+                    "All entered packages are already in the list.",
+                    "info",
+                    update=True,
+                )
+
+        def on_close(_):
+            dialog.open = False
+            self.page.update()
+
+        dialog = create_add_packages_dialog(
+            on_add_callback=on_packages_entered,
+            on_close_callback=on_close,
+            is_dark_mode=self.state.is_dark_mode,
+        )
+        self.page.overlay.append(dialog)
+        dialog.open = True
+        self.page.update()
+
+    async def on_remove_package(self, _: ft.ControlEvent) -> None:
+        """Handle Remove Package button click.
+
+        Removes the currently selected package from the install list.
+        """
+        if self.state.selected_package_idx is None:
+            self._set_warning("Select a package to remove.", update=True)
+            return
+        idx = self.state.selected_package_idx
+        if 0 <= idx < len(self.state.packages):
+            pkg = self.state.packages.pop(idx)
+            self.state.selected_package_idx = None
+            self._update_package_display()
+            self._set_status(f"Package '{pkg}' removed.", "success", update=True)
+        else:
+            self._set_warning("Cannot remove package: index out of range.", update=True)
+
     # --- Main Actions ---
 
     @staticmethod
@@ -911,6 +1029,7 @@ class Handlers:
             folders=self.state.folders
             if self.state.folders
             else DEFAULT_FOLDERS.copy(),
+            packages=list(self.state.packages),
         )
 
         # Build project asynchronously
@@ -1025,7 +1144,7 @@ class Handlers:
         self._set_validation_icon(self.controls.project_name_input, None)
         self._update_build_button_state()
 
-        # Reset folder display to default template
+        # Reset folder/package displays to default template
         self._reload_and_merge_templates()
 
         self._set_status("All fields reset.", "info", update=True)
@@ -1140,8 +1259,9 @@ def attach_handlers(page: ft.Page, state: AppState) -> None:
     controls = _get_controls(page)
     handlers = Handlers(page, controls, state)
 
-    # Load default folder template on startup
+    # Load default folder template and package list on startup
     handlers._load_framework_template(None)
+    handlers._update_package_display()
 
     # Set initial UI state (path icon if default path exists, button disabled)
     if state.path_valid:
@@ -1181,6 +1301,10 @@ def attach_handlers(page: ft.Page, state: AppState) -> None:
     controls.auto_save_folder_changes.on_change = wrap_async(
         handlers.on_auto_save_toggle
     )
+
+    # --- Package Management Handlers ---
+    controls.add_package_button.on_click = wrap_async(handlers.on_add_package)
+    controls.remove_package_button.on_click = wrap_async(handlers.on_remove_package)
 
     # --- Main Action Handlers ---
     controls.build_project_button.on_click = wrap_async(handlers.on_build_project)

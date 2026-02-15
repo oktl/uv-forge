@@ -117,6 +117,8 @@ class ProjectConfig:
         folders: List of folder specifications defining the project structure. Can mix
             strings (folder names) and FolderSpec objects. Falls back to DEFAULT_FOLDERS
             if empty (default: []).
+        packages: Explicit list of packages to install. When non-empty, overrides the
+            packages derived from framework/project type maps (default: []).
     """
 
     project_name: str
@@ -129,6 +131,7 @@ class ProjectConfig:
     project_type: Optional[str] = None
     include_starter_files: bool = True
     folders: list[str | dict[str, Any] | FolderSpec] = field(default_factory=list)
+    packages: list[str] = field(default_factory=list)
 
     @property
     def full_path(self) -> Path:

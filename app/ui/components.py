@@ -38,6 +38,10 @@ class Controls:
         auto_save_folder_changes: Checkbox for auto-save option.
         add_folder_button: Button to add a folder.
         remove_folder_button: Button to remove a folder.
+        packages_label: Label for packages display.
+        packages_container: Container showing packages list.
+        add_package_button: Button to open the add-packages dialog.
+        remove_package_button: Button to remove the selected package.
         include_starter_files_checkbox: Checkbox to include starter files in template.
         status_text: Text for displaying status messages.
         build_project_button: Button to build the project.
@@ -69,6 +73,10 @@ class Controls:
         self.auto_save_folder_changes: ft.Checkbox
         self.add_folder_button: ft.Button
         self.remove_folder_button: ft.Button
+        self.packages_label: ft.Text
+        self.packages_container: ft.Container
+        self.add_package_button: ft.Button
+        self.remove_package_button: ft.Button
         self.include_starter_files_checkbox: ft.Checkbox
         self.status_text: ft.Text
         self.build_project_button: ft.Button
@@ -221,7 +229,7 @@ def create_controls(state: "AppState", colors: dict) -> Controls:
         border_radius=4,
         padding=10,
         height=UIConfig.SUBFOLDERS_HEIGHT,
-        width=UIConfig.SECTION_WIDTH,
+        width=UIConfig.SPLIT_CONTAINER_WIDTH,
     )
 
     controls.auto_save_folder_changes = ft.Checkbox(
@@ -230,14 +238,48 @@ def create_controls(state: "AppState", colors: dict) -> Controls:
         tooltip="Select to save changes to the template.",
     )
 
+    _split_btn_style = ft.ButtonStyle(
+        text_style=ft.TextStyle(size=UIConfig.TEXT_SIZE_SMALL)
+    )
+
     controls.add_folder_button = ft.Button(
         "Add Folder/File",
         tooltip="Add a folder or file to the template\nlist in the display.",
+        style=_split_btn_style,
     )
 
     controls.remove_folder_button = ft.Button(
         "Remove Folder/File",
         tooltip="To remove folder or file from the displayed template\n click the folder or file in the display\nand then click this button.",
+        style=_split_btn_style,
+    )
+
+    # Package management controls
+    controls.packages_label = ft.Text("Packages: 0")
+
+    controls.packages_container = ft.Container(
+        content=ft.Column(
+            controls=[],
+            spacing=0,
+            scroll=ft.ScrollMode.AUTO,
+        ),
+        border=ft.Border.all(1, ft.Colors.GREY_700),
+        border_radius=4,
+        padding=10,
+        height=UIConfig.SUBFOLDERS_HEIGHT,
+        width=UIConfig.SPLIT_CONTAINER_WIDTH,
+    )
+
+    controls.add_package_button = ft.Button(
+        "Add Packages...",
+        tooltip="Open dialog to add one or more packages to the install list.",
+        style=_split_btn_style,
+    )
+
+    controls.remove_package_button = ft.Button(
+        "Remove Package",
+        tooltip="Click a package in the list to select it,\nthen click Remove to delete it.",
+        style=_split_btn_style,
     )
 
     # Status and action controls
@@ -343,22 +385,43 @@ def create_sections(controls: Controls, state: "AppState") -> None:
     controls.section_containers.append(options_container)
     controls.section_titles.append(options_title)
 
-    # Folders section
+    # Folders + Packages section (side by side)
     folders_container, folders_title = create_section_box(
-        "Add or Remove Project Folders",
+        "Project Structure",
         [
-            ft.Column(
+            ft.Row(
                 controls=[
-                    controls.app_subfolders_label,
-                    controls.subfolders_container,
-                    ft.Row(
+                    ft.Column(
                         controls=[
-                            controls.add_folder_button,
-                            controls.remove_folder_button,
+                            controls.app_subfolders_label,
+                            controls.subfolders_container,
+                            ft.Row(
+                                controls=[
+                                    controls.add_folder_button,
+                                    controls.remove_folder_button,
+                                ],
+                            ),
+                            controls.auto_save_folder_changes,
                         ],
+                        spacing=UIConfig.SPACING_SMALL,
                     ),
-                    controls.auto_save_folder_changes,
+                    ft.Column(
+                        controls=[
+                            controls.packages_label,
+                            controls.packages_container,
+                            ft.Row(
+                                controls=[
+                                    controls.add_package_button,
+                                    controls.remove_package_button,
+                                ],
+                            ),
+                        ],
+                        spacing=UIConfig.SPACING_SMALL,
+                    ),
                 ],
+                spacing=8,
+                alignment=ft.MainAxisAlignment.CENTER,
+                vertical_alignment=ft.CrossAxisAlignment.START,
             ),
         ],
         state.is_dark_mode,
