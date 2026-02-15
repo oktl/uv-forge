@@ -267,7 +267,7 @@ def create_controls(state: "AppState", colors: dict) -> Controls:
 
     controls.add_folder_button = ft.Button(
         "Add Folder/File",
-        tooltip="Add a folder or file to the template\nlist in the display.",
+        tooltip="Add a folder or file to the template\nlist in the display.\n\n⌘F / Ctrl+F",
         style=_split_btn_style,
     )
 
@@ -295,7 +295,7 @@ def create_controls(state: "AppState", colors: dict) -> Controls:
 
     controls.add_package_button = ft.Button(
         "Add Packages...",
-        tooltip="Open dialog to add one or more packages to the install list.",
+        tooltip="Open dialog to add one or more packages to the install list.\n\n⌘P / Ctrl+P",
         style=_split_btn_style,
     )
 

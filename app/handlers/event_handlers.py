@@ -1360,6 +1360,8 @@ class Handlers:
         """Handle keyboard shortcuts.
 
         Ctrl+Enter / Cmd+Enter — build project
+        Ctrl+F / Cmd+F — add folder/file
+        Ctrl+P / Cmd+P — add packages
         Ctrl+R / Cmd+R — reset
         Escape — exit (opens confirmation dialog)
         """
@@ -1372,6 +1374,10 @@ class Handlers:
                 and not self.controls.build_project_button.disabled
             ):
                 await self.on_build_project(e)
+        elif e.key == "F" and (e.ctrl or e.meta):
+            await self.on_add_folder(e)
+        elif e.key == "P" and (e.ctrl or e.meta):
+            await self.on_add_package(e)
         elif e.key == "R" and (e.ctrl or e.meta):
             await self.on_reset(e)
         elif e.key == "Escape":
