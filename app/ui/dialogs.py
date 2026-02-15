@@ -993,6 +993,24 @@ def create_build_summary_dialog(
         on_change=on_checkbox_change,
     )
 
+    open_folder_row = ft.Row(
+        [
+            ft.Icon(ft.Icons.FOLDER_OPEN, size=16, color=UIConfig.COLOR_FOLDER_ICON),
+            open_folder_checkbox,
+        ],
+        spacing=6,
+        vertical_alignment=ft.CrossAxisAlignment.CENTER,
+    )
+
+    open_vscode_row = ft.Row(
+        [
+            ft.Icon(ft.Icons.CODE, size=16, color=UIConfig.COLOR_INFO),
+            open_vscode_checkbox,
+        ],
+        spacing=6,
+        vertical_alignment=ft.CrossAxisAlignment.CENTER,
+    )
+
     dialog = ft.AlertDialog(
         modal=True,
         title=_create_dialog_title("Confirm Build", colors, ft.Icons.BUILD_CIRCLE),
@@ -1001,8 +1019,8 @@ def create_build_summary_dialog(
                 rows
                 + [
                     ft.Divider(height=16, thickness=1),
-                    open_folder_checkbox,
-                    open_vscode_checkbox,
+                    open_folder_row,
+                    open_vscode_row,
                 ],
                 tight=True,
                 spacing=8,
