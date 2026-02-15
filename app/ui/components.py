@@ -396,6 +396,33 @@ def create_sections(controls: Controls, state: "AppState") -> None:
                     controls.create_git_checkbox,
                     controls.ui_project_checkbox,
                     controls.other_projects_checkbox,
+                    ft.Row(
+                        controls=[
+                            ft.Icon(
+                                ft.Icons.MERGE_TYPE,
+                                size=12,
+                                color=ft.Colors.GREY_500,
+                            ),
+                            ft.Text(
+                                "Select both to merge templates",
+                                size=11,
+                                italic=True,
+                                color=ft.Colors.GREY_500,
+                            ),
+                            ft.Icon(
+                                ft.Icons.INFO_OUTLINE,
+                                size=12,
+                                color=UIConfig.COLOR_INFO,
+                                tooltip=(
+                                    "When both a UI Framework and a Project Type are selected, "
+                                    "their folder structures are merged automatically.\n"
+                                    "Matching folders are combined, unique folders from each are "
+                                    "included, and file lists are unioned."
+                                ),
+                            ),
+                        ],
+                        spacing=4,
+                    ),
                     controls.include_starter_files_checkbox,
                 ],
                 alignment=ft.MainAxisAlignment.CENTER,
@@ -422,7 +449,24 @@ def create_sections(controls: Controls, state: "AppState") -> None:
                                     controls.remove_folder_button,
                                 ],
                             ),
-                            controls.auto_save_folder_changes,
+                            ft.Row(
+                                controls=[
+                                    controls.auto_save_folder_changes,
+                                    ft.Icon(
+                                        ft.Icons.INFO_OUTLINE,
+                                        size=14,
+                                        color=UIConfig.COLOR_INFO,
+                                        tooltip=(
+                                            "When enabled, any folder structure changes "
+                                            "(add, remove) are automatically saved to the "
+                                            "project template config.\n"
+                                            "Your customisations persist for future projects "
+                                            "of the same framework or type."
+                                        ),
+                                    ),
+                                ],
+                                spacing=4,
+                            ),
                         ],
                         spacing=UIConfig.SPACING_SMALL,
                     ),
