@@ -221,6 +221,6 @@ def test_create_project_type_dialog_actions():
 
     assert len(dialog.actions) == 2
 
-    # Check button types - Select is FilledButton, Cancel is TextButton
+    # Check button types - Select is FilledButton, Cancel is OutlinedButton
     assert isinstance(dialog.actions[0], ft.FilledButton)  # Select button
-    assert isinstance(dialog.actions[1], ft.TextButton)  # Cancel button
+    assert isinstance(dialog.actions[1], ft.OutlinedButton)  # Cancel button

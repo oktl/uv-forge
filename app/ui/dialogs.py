@@ -76,22 +76,64 @@ def _create_dialog_actions(
     primary_callback,
     cancel_callback,
     primary_icon: str | None = None,
+    is_dark_mode: bool = True,
+    primary_autofocus: bool = True,
 ) -> list[ft.Control]:
     """Create standardized dialog action buttons.
+
+    Both buttons show an obvious focused state (brighter shade + white border)
+    matching the style used in confirmation dialogs.
 
     Args:
         primary_label: Label for primary action button
         primary_callback: Callback for primary action
         cancel_callback: Callback for cancel button
         primary_icon: Optional icon for primary button
+        is_dark_mode: Whether dark mode is active
+        primary_autofocus: Whether to autofocus the primary button (default True)
 
     Returns:
-        List of action buttons [FilledButton, TextButton]
+        List of action buttons [FilledButton, OutlinedButton]
     """
-    primary = ft.FilledButton(primary_label, on_click=primary_callback)
+    primary = ft.FilledButton(
+        primary_label,
+        on_click=primary_callback,
+        autofocus=primary_autofocus,
+        style=ft.ButtonStyle(
+            bgcolor={
+                ft.ControlState.DEFAULT: ft.Colors.BLUE_600,
+                ft.ControlState.FOCUSED: ft.Colors.BLUE_400,
+                ft.ControlState.HOVERED: ft.Colors.BLUE_500,
+                ft.ControlState.PRESSED: ft.Colors.BLUE_700,
+            },
+            side={
+                ft.ControlState.DEFAULT: ft.BorderSide(0, ft.Colors.TRANSPARENT),
+                ft.ControlState.FOCUSED: ft.BorderSide(2, ft.Colors.WHITE),
+                ft.ControlState.HOVERED: ft.BorderSide(0, ft.Colors.TRANSPARENT),
+            },
+        ),
+    )
     if primary_icon:
         primary.icon = primary_icon
-    return [primary, ft.TextButton("Cancel", on_click=cancel_callback)]
+
+    cancel_bg_focused = ft.Colors.GREY_700 if is_dark_mode else ft.Colors.GREY_300
+    cancel = ft.OutlinedButton(
+        "Cancel",
+        on_click=cancel_callback,
+        style=ft.ButtonStyle(
+            bgcolor={
+                ft.ControlState.DEFAULT: ft.Colors.TRANSPARENT,
+                ft.ControlState.FOCUSED: cancel_bg_focused,
+                ft.ControlState.HOVERED: cancel_bg_focused,
+            },
+            side={
+                ft.ControlState.DEFAULT: ft.BorderSide(1, ft.Colors.GREY_500),
+                ft.ControlState.FOCUSED: ft.BorderSide(2, ft.Colors.WHITE),
+                ft.ControlState.HOVERED: ft.BorderSide(1, ft.Colors.GREY_400),
+            },
+        ),
+    )
+    return [primary, cancel]
 
 
 def _create_summary_row(label: str, value: str) -> ft.Row:
@@ -111,6 +153,29 @@ def _create_summary_row(label: str, value: str) -> ft.Row:
         ],
         spacing=8,
     )
+
+
+def _autofocus_selected_radio(controls: list[ft.Control], selected_value: str) -> None:
+    """Set autofocus on the Radio whose value matches selected_value.
+
+    Walks a flat list of Container controls, finds the Radio inside each,
+    and sets autofocus=True on the one matching selected_value.
+    """
+    for control in controls:
+        if not isinstance(control, ft.Container) or control.content is None:
+            continue
+        # Radio is either directly in the container or inside a Row
+        radio = None
+        if isinstance(control.content, ft.Radio):
+            radio = control.content
+        elif isinstance(control.content, ft.Row):
+            for child in control.content.controls:
+                if isinstance(child, ft.Radio):
+                    radio = child
+                    break
+        if radio and radio.value == selected_value:
+            radio.autofocus = True
+            return
 
 
 def _create_none_option_container(is_dark_mode: bool) -> list[ft.Control]:
@@ -537,6 +602,8 @@ def create_project_type_dialog(
 
     # Create radio group with all controls
     selected = current_selection or "_none_"
+    _autofocus_selected_radio(dialog_controls, selected)
+
     radio_column = ft.Column(
         controls=dialog_controls,
         scroll=ft.ScrollMode.AUTO,
@@ -568,7 +635,8 @@ def create_project_type_dialog(
             padding=12,
         ),
         actions=_create_dialog_actions(
-            "Select", on_select_click, on_close_callback, ft.Icons.CHECK_CIRCLE_OUTLINE
+            "Select", on_select_click, on_close_callback, ft.Icons.CHECK_CIRCLE_OUTLINE,
+            is_dark_mode, primary_autofocus=False,
         ),
         actions_alignment=ft.MainAxisAlignment.END,
     )
@@ -662,6 +730,8 @@ def create_framework_dialog(
 
     # Create radio group
     selected = current_selection or "_none_"
+    _autofocus_selected_radio(dialog_controls, selected)
+
     radio_column = ft.Column(
         controls=dialog_controls,
         scroll=ft.ScrollMode.AUTO,
@@ -691,7 +761,8 @@ def create_framework_dialog(
             padding=12,
         ),
         actions=_create_dialog_actions(
-            "Select", on_select_click, on_close_callback, ft.Icons.CHECK_CIRCLE_OUTLINE
+            "Select", on_select_click, on_close_callback, ft.Icons.CHECK_CIRCLE_OUTLINE,
+            is_dark_mode, primary_autofocus=False,
         ),
         actions_alignment=ft.MainAxisAlignment.END,
     )
@@ -990,7 +1061,7 @@ def create_add_packages_dialog(
             padding=UIConfig.DIALOG_CONTENT_PADDING,
         ),
         actions=_create_dialog_actions(
-            "Add", on_add_click, on_close_callback, ft.Icons.ADD
+            "Add", on_add_click, on_close_callback, ft.Icons.ADD, is_dark_mode
         ),
         actions_alignment=ft.MainAxisAlignment.END,
     )
@@ -1137,7 +1208,7 @@ def create_build_summary_dialog(
             padding=20,
         ),
         actions=_create_dialog_actions(
-            "Build", on_build_callback, on_cancel_callback, ft.Icons.ROCKET_LAUNCH
+            "Build", on_build_callback, on_cancel_callback, ft.Icons.ROCKET_LAUNCH, is_dark_mode
         ),
         actions_alignment=ft.MainAxisAlignment.END,
     )
