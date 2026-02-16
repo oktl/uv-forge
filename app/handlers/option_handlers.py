@@ -90,9 +90,10 @@ class OptionHandlersMixin:
                 )
 
             dialog.open = False
+            self.state.active_dialog = None
             self.page.update()
 
-        def on_close(e) -> None:
+        def on_close(_=None) -> None:
             """Handle dialog close/cancel."""
             if not self.state.framework:
                 self.state.ui_project_enabled = False
@@ -102,6 +103,7 @@ class OptionHandlersMixin:
                 self._set_status("No framework selected.", "info", update=False)
 
             dialog.open = False
+            self.state.active_dialog = None
             self.page.update()
 
         dialog = create_framework_dialog(
@@ -113,6 +115,7 @@ class OptionHandlersMixin:
 
         self.page.overlay.append(dialog)
         dialog.open = True
+        self.state.active_dialog = on_close
         self.page.update()
 
     # --- Project Type Dialog ---
@@ -160,9 +163,10 @@ class OptionHandlersMixin:
                 )
 
             dialog.open = False
+            self.state.active_dialog = None
             self.page.update()
 
-        def on_close(e) -> None:
+        def on_close(_=None) -> None:
             """Handle dialog close/cancel."""
             if not self.state.project_type:
                 self.state.other_project_enabled = False
@@ -174,6 +178,7 @@ class OptionHandlersMixin:
                 self._set_status("No project type selected.", "info", update=False)
 
             dialog.open = False
+            self.state.active_dialog = None
             self.page.update()
 
         dialog = create_project_type_dialog(
@@ -185,6 +190,7 @@ class OptionHandlersMixin:
 
         self.page.overlay.append(dialog)
         dialog.open = True
+        self.state.active_dialog = on_close
         self.page.update()
 
     # --- Template Loading & Merging ---

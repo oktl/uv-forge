@@ -2030,3 +2030,239 @@ async def test_escape_closes_help_dialog_end_to_end(mock_handlers):
 
     assert help_dialog.open is False
     assert state.active_dialog is None
+
+
+# ========== Escape Closes Confirm Dialogs Tests ==========
+
+
+@pytest.mark.asyncio
+async def test_escape_closes_exit_confirm_dialog(mock_handlers):
+    """Test Escape closes the Exit confirmation dialog."""
+    handlers, page, controls, state = mock_handlers
+
+    # Open exit dialog
+    await handlers.on_exit(Mock())
+    assert state.active_dialog is not None
+
+    # Press Escape — should dismiss the confirm dialog, not open another
+    mock_event = Mock()
+    mock_event.key = "Escape"
+    mock_event.ctrl = False
+    mock_event.meta = False
+
+    await handlers.on_keyboard_event(mock_event)
+    assert state.active_dialog is None
+
+
+@pytest.mark.asyncio
+async def test_escape_closes_reset_confirm_dialog(mock_handlers):
+    """Test Escape closes the Reset confirmation dialog."""
+    handlers, page, controls, state = mock_handlers
+
+    # Open reset dialog
+    await handlers.on_reset(Mock())
+    assert state.active_dialog is not None
+
+    # Press Escape
+    mock_event = Mock()
+    mock_event.key = "Escape"
+    mock_event.ctrl = False
+    mock_event.meta = False
+
+    await handlers.on_keyboard_event(mock_event)
+    assert state.active_dialog is None
+
+
+@pytest.mark.asyncio
+async def test_exit_confirm_cancel_clears_active_dialog(mock_handlers):
+    """Test cancelling Exit dialog clears active_dialog."""
+    handlers, page, controls, state = mock_handlers
+
+    await handlers.on_exit(Mock())
+    assert state.active_dialog is not None
+
+    # Call the cancel callback directly
+    state.active_dialog()
+    assert state.active_dialog is None
+
+
+@pytest.mark.asyncio
+async def test_reset_confirm_cancel_clears_active_dialog(mock_handlers):
+    """Test cancelling Reset dialog clears active_dialog."""
+    handlers, page, controls, state = mock_handlers
+
+    await handlers.on_reset(Mock())
+    assert state.active_dialog is not None
+
+    state.active_dialog()
+    assert state.active_dialog is None
+
+
+# ========== Cmd+/ Opens Help Tests ==========
+
+
+@pytest.mark.asyncio
+async def test_keyboard_cmd_slash_opens_help(mock_handlers):
+    """Test Cmd+/ opens the Help dialog."""
+    handlers, page, controls, state = mock_handlers
+
+    mock_event = Mock()
+    mock_event.key = "/"
+    mock_event.ctrl = False
+    mock_event.meta = True
+
+    with patch.object(handlers, "on_help_click") as mock_help:
+        await handlers.on_keyboard_event(mock_event)
+        mock_help.assert_called_once_with(mock_event)
+
+
+@pytest.mark.asyncio
+async def test_keyboard_ctrl_slash_opens_help(mock_handlers):
+    """Test Ctrl+/ opens the Help dialog."""
+    handlers, page, controls, state = mock_handlers
+
+    mock_event = Mock()
+    mock_event.key = "/"
+    mock_event.ctrl = True
+    mock_event.meta = False
+
+    with patch.object(handlers, "on_help_click") as mock_help:
+        await handlers.on_keyboard_event(mock_event)
+        mock_help.assert_called_once_with(mock_event)
+
+
+# ========== Escape Closes All Dialogs Tests ==========
+
+
+@pytest.mark.asyncio
+async def test_add_package_dialog_sets_active_dialog(mock_handlers):
+    """Test opening Add Package dialog sets state.active_dialog."""
+    handlers, page, controls, state = mock_handlers
+
+    await handlers.on_add_package(Mock())
+    assert state.active_dialog is not None
+    assert callable(state.active_dialog)
+
+
+@pytest.mark.asyncio
+async def test_add_package_dialog_close_clears_active_dialog(mock_handlers):
+    """Test closing Add Package dialog clears state.active_dialog."""
+    handlers, page, controls, state = mock_handlers
+
+    await handlers.on_add_package(Mock())
+    assert state.active_dialog is not None
+
+    state.active_dialog()
+    assert state.active_dialog is None
+
+
+@pytest.mark.asyncio
+async def test_clear_packages_shows_confirm_dialog(mock_handlers):
+    """Test Clear Packages shows a confirmation dialog."""
+    handlers, page, controls, state = mock_handlers
+    state.packages = ["flet", "httpx"]
+
+    await handlers.on_clear_packages(Mock())
+
+    # Should show confirm dialog, not clear immediately
+    assert state.active_dialog is not None
+    assert state.packages == ["flet", "httpx"]  # Not cleared yet
+
+
+@pytest.mark.asyncio
+async def test_clear_packages_no_op_when_empty(mock_handlers):
+    """Test Clear Packages does nothing when package list is empty."""
+    handlers, page, controls, state = mock_handlers
+    state.packages = []
+
+    await handlers.on_clear_packages(Mock())
+    assert state.active_dialog is None
+
+
+@pytest.mark.asyncio
+async def test_clear_packages_cancel_preserves_packages(mock_handlers):
+    """Test cancelling Clear Packages preserves the package list."""
+    handlers, page, controls, state = mock_handlers
+    state.packages = ["flet", "httpx"]
+
+    await handlers.on_clear_packages(Mock())
+    assert state.active_dialog is not None
+
+    # Cancel via Escape (active_dialog)
+    state.active_dialog()
+    assert state.active_dialog is None
+    assert state.packages == ["flet", "httpx"]
+
+
+@pytest.mark.asyncio
+async def test_clear_packages_confirm_clears_all(mock_handlers):
+    """Test confirming Clear Packages removes all packages."""
+    handlers, page, controls, state = mock_handlers
+    state.packages = ["flet", "httpx"]
+    state.auto_packages = ["flet"]
+    state.selected_package_idx = 0
+
+    await handlers.on_clear_packages(Mock())
+
+    # Find the confirm dialog and call the confirm callback
+    dialog = page.opened_controls[-1]
+    # The confirm button is the first action
+    confirm_button = dialog.actions[0]
+    confirm_button.on_click(Mock())
+
+    assert state.packages == []
+    assert state.auto_packages == []
+    assert state.selected_package_idx is None
+    assert state.active_dialog is None
+
+
+@pytest.mark.asyncio
+async def test_framework_dialog_sets_active_dialog(mock_handlers):
+    """Test opening UI Framework dialog sets state.active_dialog."""
+    handlers, page, controls, state = mock_handlers
+
+    mock_event = Mock()
+    mock_event.control = controls.ui_project_checkbox
+    await handlers.on_ui_project_toggle(mock_event)
+
+    assert state.active_dialog is not None
+    assert callable(state.active_dialog)
+
+
+@pytest.mark.asyncio
+async def test_framework_dialog_close_clears_active_dialog(mock_handlers):
+    """Test closing UI Framework dialog clears state.active_dialog."""
+    handlers, page, controls, state = mock_handlers
+
+    mock_event = Mock()
+    mock_event.control = controls.ui_project_checkbox
+    await handlers.on_ui_project_toggle(mock_event)
+
+    state.active_dialog()
+    assert state.active_dialog is None
+
+
+@pytest.mark.asyncio
+async def test_project_type_dialog_sets_active_dialog(mock_handlers):
+    """Test opening Project Type dialog sets state.active_dialog."""
+    handlers, page, controls, state = mock_handlers
+
+    mock_event = Mock()
+    mock_event.control = controls.other_projects_checkbox
+    await handlers.on_other_project_toggle(mock_event)
+
+    assert state.active_dialog is not None
+    assert callable(state.active_dialog)
+
+
+@pytest.mark.asyncio
+async def test_project_type_dialog_close_clears_active_dialog(mock_handlers):
+    """Test closing Project Type dialog clears state.active_dialog."""
+    handlers, page, controls, state = mock_handlers
+
+    mock_event = Mock()
+    mock_event.control = controls.other_projects_checkbox
+    await handlers.on_other_project_toggle(mock_event)
+
+    state.active_dialog()
+    assert state.active_dialog is None

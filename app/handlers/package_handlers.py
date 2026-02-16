@@ -2,7 +2,7 @@
 
 import flet as ft
 
-from app.ui.dialogs import create_add_packages_dialog
+from app.ui.dialogs import create_add_packages_dialog, create_confirm_dialog
 from app.ui.ui_config import UIConfig
 
 
@@ -95,6 +95,7 @@ class PackageHandlersMixin:
             self.state.packages.extend(added)
             existing.update(added)
             dialog.open = False
+            self.state.active_dialog = None
             self._update_package_display()
             if added:
                 self._set_status(
@@ -109,8 +110,9 @@ class PackageHandlersMixin:
                     update=True,
                 )
 
-        def on_close(_):
+        def on_close(_=None):
             dialog.open = False
+            self.state.active_dialog = None
             self.page.update()
 
         dialog = create_add_packages_dialog(
@@ -120,20 +122,49 @@ class PackageHandlersMixin:
         )
         self.page.overlay.append(dialog)
         dialog.open = True
+        self.state.active_dialog = on_close
         self.page.update()
 
     async def on_clear_packages(self, _: ft.ControlEvent) -> None:
         """Handle Clear All packages button click.
 
-        Removes all packages from the install list, including auto and manual.
+        Shows a confirmation dialog, then removes all packages from the
+        install list (both auto and manual) if confirmed.
         """
         if not self.state.packages:
             return
-        self.state.packages = []
-        self.state.auto_packages = []
-        self.state.selected_package_idx = None
-        self._update_package_display()
-        self._set_status("All packages cleared.", "info", update=True)
+
+        count = len(self.state.packages)
+
+        def do_clear(_):
+            dialog.open = False
+            self.state.active_dialog = None
+            self.state.packages = []
+            self.state.auto_packages = []
+            self.state.selected_package_idx = None
+            self._update_package_display()
+            self._set_status("All packages cleared.", "info", update=True)
+
+        def cancel(_=None):
+            dialog.open = False
+            self.state.active_dialog = None
+            self.page.update()
+
+        dialog = create_confirm_dialog(
+            title="Clear All Packages?",
+            message=(
+                f"This will remove all {count} package(s) from the install list, "
+                "including any you added manually. Framework and project type "
+                "packages will be restored on the next template reload."
+            ),
+            confirm_label="Clear All",
+            on_confirm=do_clear,
+            on_cancel=cancel,
+            is_dark_mode=self.state.is_dark_mode,
+            confirm_icon=ft.Icons.DELETE_SWEEP,
+        )
+        self.state.active_dialog = cancel
+        self.page.show_dialog(dialog)
 
     async def on_remove_package(self, _: ft.ControlEvent) -> None:
         """Handle Remove Package button click.

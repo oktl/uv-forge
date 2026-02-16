@@ -131,8 +131,9 @@ class BuildHandlersMixin:
         else:
             self._set_status("Build failed. See error details.", "error", update=False)
 
-            def close_error_dialog(_):
+            def close_error_dialog(_=None):
                 error_dialog.open = False
+                self.state.active_dialog = None
                 self.page.update()
 
             error_dialog = create_build_error_dialog(
@@ -142,6 +143,7 @@ class BuildHandlersMixin:
             )
             self.page.overlay.append(error_dialog)
             error_dialog.open = True
+            self.state.active_dialog = close_error_dialog
 
         self.page.update()
 
@@ -160,6 +162,7 @@ class BuildHandlersMixin:
             open_vscode = dialog.open_vscode_checkbox.value
             open_terminal = dialog.open_terminal_checkbox.value
             dialog.open = False
+            self.state.active_dialog = None
             self.page.update()
             await self._execute_build(
                 open_folder=open_folder,
@@ -167,8 +170,9 @@ class BuildHandlersMixin:
                 open_terminal=open_terminal,
             )
 
-        def on_cancel(_):
+        def on_cancel(_=None):
             dialog.open = False
+            self.state.active_dialog = None
             self.page.update()
 
         build_config = BuildSummaryConfig(
@@ -197,6 +201,7 @@ class BuildHandlersMixin:
 
         self.page.overlay.append(dialog)
         dialog.open = True
+        self.state.active_dialog = on_cancel
         self.page.update()
 
     async def _do_reset(self) -> None:
@@ -244,11 +249,13 @@ class BuildHandlersMixin:
 
         async def do_reset(_):
             dialog.open = False
+            self.state.active_dialog = None
             self.page.update()
             await self._do_reset()
 
-        def cancel(_):
+        def cancel(_=None):
             dialog.open = False
+            self.state.active_dialog = None
             self.page.update()
 
         dialog = create_confirm_dialog(
@@ -260,6 +267,7 @@ class BuildHandlersMixin:
             is_dark_mode=self.state.is_dark_mode,
             confirm_icon=ft.Icons.REFRESH,
         )
+        self.state.active_dialog = cancel
         self.page.show_dialog(dialog)
 
     async def on_keyboard_event(self, e: ft.KeyboardEvent) -> None:
@@ -269,7 +277,8 @@ class BuildHandlersMixin:
         Ctrl+F / Cmd+F — add folder/file
         Ctrl+P / Cmd+P — add packages
         Ctrl+R / Cmd+R — reset
-        Escape — exit (opens confirmation dialog)
+        Ctrl+/ / Cmd+/ — open help
+        Escape — close dialog or exit (opens confirmation)
         """
         if e.key == "Enter" and (e.ctrl or e.meta):
             if (
@@ -284,6 +293,8 @@ class BuildHandlersMixin:
             await self.on_add_package(e)
         elif e.key == "R" and (e.ctrl or e.meta):
             await self.on_reset(e)
+        elif e.key == "/" and (e.ctrl or e.meta):
+            await self.on_help_click(e)
         elif e.key == "Escape":
             if self.state.active_dialog:
                 self.state.active_dialog()
@@ -296,8 +307,9 @@ class BuildHandlersMixin:
         async def do_exit(_):
             await self.page.window.close()
 
-        def cancel(_):
+        def cancel(_=None):
             dialog.open = False
+            self.state.active_dialog = None
             self.page.update()
 
         dialog = create_confirm_dialog(
@@ -309,4 +321,5 @@ class BuildHandlersMixin:
             is_dark_mode=self.state.is_dark_mode,
             confirm_icon=ft.Icons.EXIT_TO_APP,
         )
+        self.state.active_dialog = cancel
         self.page.show_dialog(dialog)

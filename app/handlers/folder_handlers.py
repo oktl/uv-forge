@@ -268,13 +268,15 @@ class FolderHandlersMixin:
             dialog.warning_text.value = ""
             dialog.warning_text.visible = False
             dialog.open = False
+            self.state.active_dialog = None
 
             self._set_status(
                 f"{item_type.title()} '{name}' added.", "success", update=True
             )
 
-        def close_dialog(_):
+        def close_dialog(_=None):
             dialog.open = False
+            self.state.active_dialog = None
             self.page.update()
 
         parent_folders = self._get_folder_hierarchy()
@@ -290,6 +292,7 @@ class FolderHandlersMixin:
 
         self.page.overlay.append(dialog)
         dialog.open = True
+        self.state.active_dialog = close_dialog
         self.page.update()
 
     async def on_remove_folder(self, _: ft.ControlEvent) -> None:

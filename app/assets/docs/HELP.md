@@ -135,6 +135,7 @@ A **confirmation dialog** will appear showing a summary of your project settings
 | `⌘F` / `Ctrl+F` | Open Add Folder/File dialog |
 | `⌘P` / `Ctrl+P` | Open Add Packages dialog |
 | `⌘R` / `Ctrl+R` | Reset all fields (opens confirmation) |
+| `⌘/` / `Ctrl+/` | Open this Help dialog |
 | `Esc` | Close current dialog / Exit application |
 
 ## Tips & Tricks
