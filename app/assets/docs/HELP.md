@@ -106,6 +106,7 @@ Files are populated from boilerplate in this priority order:
 You can customize the structure by:
 - **Add Folder/File** - Add custom folders or files at any level
 - **Remove Folder/File** - Select an item and click Remove to delete it
+- **Clear Packages** - Removes all packages (shows confirmation first); framework/project type packages are restored on the next template reload
 - **Auto-save Folder Changes** - Optionally save your custom structure back to the template
 
 ### 8. **Build Project**
@@ -122,7 +123,7 @@ Click "Build Project" to create your project with all configured settings. The b
 9. Install selected project type packages (if any)
 10. Finalize Git Phase 2 (if enabled): Stage, commit, and push to hub
 
-A **confirmation dialog** will appear showing a summary of your project settings. Before confirming, you can choose post-build actions:
+A **confirmation dialog** will appear showing a summary of your project settings, including a collapsible **Structure** preview showing the complete project tree with all folders and files that will be created. Click the Structure tile to expand the tree. Before confirming, you can choose post-build actions:
 - **Open project folder after build** — Opens the created project in Finder/Explorer (checked by default)
 - **Open in VS Code** — Opens the project in VS Code immediately after creation (checked by default; requires VS Code to be installed)
 - **Open terminal at project root** — Opens a terminal window in the project directory
