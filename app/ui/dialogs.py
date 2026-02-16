@@ -397,20 +397,39 @@ def _create_markdown_dialog(
 
 
 def create_help_dialog(
-    content: str, on_close, page: ft.Page, is_dark_mode: bool
+    content: str,
+    on_close,
+    page: ft.Page,
+    is_dark_mode: bool,
+    on_internal_link: collections.abc.Callable[[str], None] | None = None,
 ) -> ft.AlertDialog:
     """Create theme-aware help dialog with scrollable content."""
     return _create_markdown_dialog(
-        "Help & Documentation", content, on_close, page, is_dark_mode
+        "Help & Documentation",
+        content,
+        on_close,
+        page,
+        is_dark_mode,
+        on_internal_link=on_internal_link,
     )
 
 
 def create_git_cheat_sheet_dialog(
-    content: str, on_close, page: ft.Page, is_dark_mode: bool
+    content: str,
+    on_close,
+    page: ft.Page,
+    is_dark_mode: bool,
+    on_internal_link: collections.abc.Callable[[str], None] | None = None,
 ) -> ft.AlertDialog:
     """Create theme-aware dialog displaying the Git cheat sheet."""
     return _create_markdown_dialog(
-        "Git Cheat Sheet", content, on_close, page, is_dark_mode, width=900
+        "Git Cheat Sheet",
+        content,
+        on_close,
+        page,
+        is_dark_mode,
+        width=900,
+        on_internal_link=on_internal_link,
     )
 
 

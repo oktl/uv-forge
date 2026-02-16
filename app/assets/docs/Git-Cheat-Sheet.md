@@ -53,3 +53,10 @@ In the IDE: right-click a changed file → **Discard Changes**, or click **−**
 **Commit often, with clear messages.** Small commits like `"Fix orphaned bare repo cleanup on build error"` are far more useful than one giant `"A bunch of changes"` at the end of the day. For a personal project, committing after each meaningful change (feature, fix, or refactor) is the right rhythm.
 
 For more information, visit the official Git documentation at [Git Docs](https://git-scm.com/doc)
+
+---
+
+## See Also
+
+- [Help & Documentation](app://help) — Usage guide and keyboard shortcuts
+- [About UV Project Creator](app://about) — App info, tech stack, and features

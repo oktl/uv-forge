@@ -135,7 +135,7 @@ A **confirmation dialog** will appear showing a summary of your project settings
 | `⌘F` / `Ctrl+F` | Open Add Folder/File dialog |
 | `⌘P` / `Ctrl+P` | Open Add Packages dialog |
 | `⌘R` / `Ctrl+R` | Reset all fields (opens confirmation) |
-| `Esc` | Exit application (opens confirmation) |
+| `Esc` | Close current dialog / Exit application |
 
 ## Tips & Tricks
 
@@ -177,3 +177,10 @@ You can select **both** a UI framework and a project type! The templates will be
 - Check your internet connection (for package installation)
 - Ensure you have disk space
 - The partial project will be automatically cleaned up
+
+---
+
+## See Also
+
+- [About UV Project Creator](app://about) — App info, tech stack, and features
+- [Git Cheat Sheet](app://git-cheat-sheet) — Quick reference for common Git commands

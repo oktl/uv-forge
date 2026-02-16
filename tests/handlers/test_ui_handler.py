@@ -1816,6 +1816,70 @@ async def test_on_about_internal_link_git_cheat_sheet(mock_handlers):
     assert about_dialog.open is True
 
 
+# ========== Help Dialog Internal Link Tests ==========
+
+
+@pytest.mark.asyncio
+async def test_help_dialog_internal_link_about(mock_handlers):
+    """Test Help dialog internal link navigates to About dialog."""
+    handlers, page, controls, state = mock_handlers
+
+    with patch("app.handlers.feature_handlers.HELP_FILE") as mock_file:
+        mock_file.read_text.return_value = "# Help\n[About](app://about)"
+        await handlers.on_help_click(None)
+
+    help_dialog = page.overlay[0]
+    md_widget = help_dialog.content.content.controls[0]
+    assert md_widget.on_tap_link is not None
+
+
+@pytest.mark.asyncio
+async def test_help_dialog_internal_link_git_cheat_sheet(mock_handlers):
+    """Test Help dialog internal link navigates to Git Cheat Sheet dialog."""
+    handlers, page, controls, state = mock_handlers
+
+    with patch("app.handlers.feature_handlers.HELP_FILE") as mock_file:
+        mock_file.read_text.return_value = (
+            "# Help\n[Git Cheat Sheet](app://git-cheat-sheet)"
+        )
+        await handlers.on_help_click(None)
+
+    help_dialog = page.overlay[0]
+    md_widget = help_dialog.content.content.controls[0]
+    assert md_widget.on_tap_link is not None
+
+
+# ========== Git Cheat Sheet Dialog Internal Link Tests ==========
+
+
+@pytest.mark.asyncio
+async def test_git_cheat_sheet_dialog_internal_link_help(mock_handlers):
+    """Test Git Cheat Sheet dialog internal link navigates to Help dialog."""
+    handlers, page, controls, state = mock_handlers
+
+    with patch("app.handlers.feature_handlers.GIT_CHEAT_SHEET_FILE") as mock_file:
+        mock_file.read_text.return_value = "# Git\n[Help](app://help)"
+        await handlers.on_git_cheat_sheet_click(None)
+
+    dialog = page.overlay[0]
+    md_widget = dialog.content.content.controls[0]
+    assert md_widget.on_tap_link is not None
+
+
+@pytest.mark.asyncio
+async def test_git_cheat_sheet_dialog_internal_link_about(mock_handlers):
+    """Test Git Cheat Sheet dialog internal link navigates to About dialog."""
+    handlers, page, controls, state = mock_handlers
+
+    with patch("app.handlers.feature_handlers.GIT_CHEAT_SHEET_FILE") as mock_file:
+        mock_file.read_text.return_value = "# Git\n[About](app://about)"
+        await handlers.on_git_cheat_sheet_click(None)
+
+    dialog = page.overlay[0]
+    md_widget = dialog.content.content.controls[0]
+    assert md_widget.on_tap_link is not None
+
+
 # ========== Escape Key Closes Dialogs Tests ==========
 
 
