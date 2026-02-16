@@ -56,8 +56,9 @@ For more information, visit: https://docs.astral.sh/uv/
                 f"Warning: Help file not found ({e})", "error", update=False
             )
 
-        def close_dialog(_):
+        def close_dialog(_=None):
             help_dialog.open = False
+            self.state.active_dialog = None
             self.page.update()
 
         help_dialog = create_help_dialog(
@@ -66,6 +67,7 @@ For more information, visit: https://docs.astral.sh/uv/
 
         self.page.overlay.append(help_dialog)
         help_dialog.open = True
+        self.state.active_dialog = close_dialog
         self.page.update()
 
     async def on_git_cheat_sheet_click(self, _: ft.ControlEvent) -> None:
@@ -78,8 +80,9 @@ For more information, visit: https://docs.astral.sh/uv/
                 f"Warning: Cheat sheet file not found ({e})", "error", update=False
             )
 
-        def close_dialog(_):
+        def close_dialog(_=None):
             cheat_sheet_dialog.open = False
+            self.state.active_dialog = None
             self.page.update()
 
         cheat_sheet_dialog = create_git_cheat_sheet_dialog(
@@ -88,6 +91,7 @@ For more information, visit: https://docs.astral.sh/uv/
 
         self.page.overlay.append(cheat_sheet_dialog)
         cheat_sheet_dialog.open = True
+        self.state.active_dialog = close_dialog
         self.page.update()
 
     async def on_about_click(self, _: ft.ControlEvent) -> None:
@@ -106,6 +110,7 @@ For more information, visit: https://docs.astral.sh/uv/
 
         def close_dialog(_=None):
             about_dialog.open = False
+            self.state.active_dialog = None
             self.page.update()
 
         def handle_internal_link(path: str) -> None:
@@ -125,4 +130,5 @@ For more information, visit: https://docs.astral.sh/uv/
 
         self.page.overlay.append(about_dialog)
         about_dialog.open = True
+        self.state.active_dialog = close_dialog
         self.page.update()

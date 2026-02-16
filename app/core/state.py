@@ -66,6 +66,7 @@ class AppState:
 
     # UI state
     is_dark_mode: bool = True
+    active_dialog: Any | None = None  # Currently open dismissible dialog
 
     # Validation state
     path_valid: bool = True  # Default path is valid

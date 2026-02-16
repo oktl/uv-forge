@@ -1814,3 +1814,155 @@ async def test_on_about_internal_link_git_cheat_sheet(mock_handlers):
 
     about_dialog = page.overlay[0]
     assert about_dialog.open is True
+
+
+# ========== Escape Key Closes Dialogs Tests ==========
+
+
+@pytest.mark.asyncio
+async def test_escape_closes_active_dialog(mock_handlers):
+    """Test Escape closes an active dialog instead of triggering exit."""
+    handlers, page, controls, state = mock_handlers
+
+    # Simulate an open dialog by setting active_dialog to a close callback
+    closed = []
+
+    def close_dialog(_=None):
+        closed.append(True)
+
+    state.active_dialog = close_dialog
+
+    mock_event = Mock()
+    mock_event.key = "Escape"
+    mock_event.ctrl = False
+    mock_event.meta = False
+
+    with patch.object(handlers, "on_exit") as mock_exit:
+        await handlers.on_keyboard_event(mock_event)
+        mock_exit.assert_not_called()
+
+    assert len(closed) == 1
+
+
+@pytest.mark.asyncio
+async def test_escape_triggers_exit_when_no_active_dialog(mock_handlers):
+    """Test Escape triggers exit when no dialog is open."""
+    handlers, page, controls, state = mock_handlers
+
+    assert state.active_dialog is None
+
+    mock_event = Mock()
+    mock_event.key = "Escape"
+    mock_event.ctrl = False
+    mock_event.meta = False
+
+    with patch.object(handlers, "on_exit") as mock_exit:
+        await handlers.on_keyboard_event(mock_event)
+        mock_exit.assert_called_once_with(mock_event)
+
+
+@pytest.mark.asyncio
+async def test_help_dialog_sets_active_dialog(mock_handlers):
+    """Test opening Help dialog sets state.active_dialog."""
+    handlers, page, controls, state = mock_handlers
+
+    with patch("app.handlers.feature_handlers.HELP_FILE") as mock_file:
+        mock_file.read_text.return_value = "# Help\nTest"
+        await handlers.on_help_click(None)
+
+    assert state.active_dialog is not None
+    assert callable(state.active_dialog)
+
+
+@pytest.mark.asyncio
+async def test_help_dialog_close_clears_active_dialog(mock_handlers):
+    """Test closing Help dialog clears state.active_dialog."""
+    handlers, page, controls, state = mock_handlers
+
+    with patch("app.handlers.feature_handlers.HELP_FILE") as mock_file:
+        mock_file.read_text.return_value = "# Help\nTest"
+        await handlers.on_help_click(None)
+
+    assert state.active_dialog is not None
+    # Call the close callback
+    state.active_dialog()
+    assert state.active_dialog is None
+
+
+@pytest.mark.asyncio
+async def test_git_cheat_sheet_dialog_sets_active_dialog(mock_handlers):
+    """Test opening Git Cheat Sheet dialog sets state.active_dialog."""
+    handlers, page, controls, state = mock_handlers
+
+    with patch("app.handlers.feature_handlers.GIT_CHEAT_SHEET_FILE") as mock_file:
+        mock_file.read_text.return_value = "# Git\nTest"
+        await handlers.on_git_cheat_sheet_click(None)
+
+    assert state.active_dialog is not None
+    assert callable(state.active_dialog)
+
+
+@pytest.mark.asyncio
+async def test_git_cheat_sheet_close_clears_active_dialog(mock_handlers):
+    """Test closing Git Cheat Sheet dialog clears state.active_dialog."""
+    handlers, page, controls, state = mock_handlers
+
+    with patch("app.handlers.feature_handlers.GIT_CHEAT_SHEET_FILE") as mock_file:
+        mock_file.read_text.return_value = "# Git\nTest"
+        await handlers.on_git_cheat_sheet_click(None)
+
+    state.active_dialog()
+    assert state.active_dialog is None
+
+
+@pytest.mark.asyncio
+async def test_about_dialog_sets_active_dialog(mock_handlers):
+    """Test opening About dialog sets state.active_dialog."""
+    handlers, page, controls, state = mock_handlers
+
+    with patch("app.handlers.feature_handlers.ABOUT_FILE") as mock_file:
+        mock_file.read_text.return_value = "# About\nTest"
+        await handlers.on_about_click(None)
+
+    assert state.active_dialog is not None
+    assert callable(state.active_dialog)
+
+
+@pytest.mark.asyncio
+async def test_about_dialog_close_clears_active_dialog(mock_handlers):
+    """Test closing About dialog clears state.active_dialog."""
+    handlers, page, controls, state = mock_handlers
+
+    with patch("app.handlers.feature_handlers.ABOUT_FILE") as mock_file:
+        mock_file.read_text.return_value = "# About\nTest"
+        await handlers.on_about_click(None)
+
+    state.active_dialog()
+    assert state.active_dialog is None
+
+
+@pytest.mark.asyncio
+async def test_escape_closes_help_dialog_end_to_end(mock_handlers):
+    """Test Escape key closes an open Help dialog end-to-end."""
+    handlers, page, controls, state = mock_handlers
+
+    with patch("app.handlers.feature_handlers.HELP_FILE") as mock_file:
+        mock_file.read_text.return_value = "# Help\nTest"
+        await handlers.on_help_click(None)
+
+    help_dialog = page.overlay[0]
+    assert help_dialog.open is True
+    assert state.active_dialog is not None
+
+    # Press Escape
+    mock_event = Mock()
+    mock_event.key = "Escape"
+    mock_event.ctrl = False
+    mock_event.meta = False
+
+    with patch.object(handlers, "on_exit") as mock_exit:
+        await handlers.on_keyboard_event(mock_event)
+        mock_exit.assert_not_called()
+
+    assert help_dialog.open is False
+    assert state.active_dialog is None

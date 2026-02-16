@@ -285,7 +285,10 @@ class BuildHandlersMixin:
         elif e.key == "R" and (e.ctrl or e.meta):
             await self.on_reset(e)
         elif e.key == "Escape":
-            await self.on_exit(e)
+            if self.state.active_dialog:
+                self.state.active_dialog()
+            else:
+                await self.on_exit(e)
 
     async def on_exit(self, _: ft.ControlEvent) -> None:
         """Handle Exit button click — shows confirmation dialog first."""
