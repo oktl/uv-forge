@@ -12,6 +12,7 @@ Key capabilities:
 - 10 UI frameworks + 21 project types with automatic template merging when both selected
 - JSON template system with fallback hierarchy (framework → default → hardcoded)
 - Smart scaffolding: boilerplate resolver populates files with starter content instead of empty `.touch()`
+- PyPI name availability checker via manual button (async httpx, PEP 503 normalization)
 - Async operations via thread pool (UV/git subprocess calls run off the UI thread)
 - Error handling with rollback (cleanup_on_error removes partial projects)
 
@@ -22,7 +23,7 @@ Key capabilities:
 ```bash
 uv run create_project        # Via entry point
 python app/main.py            # Direct execution
-uv run pytest                 # Run 377 tests (coverage automatic)
+uv run pytest                 # Run 390 tests (coverage automatic)
 ```
 
 ---
@@ -40,6 +41,7 @@ app/
 │   ├── template_loader.py    # TemplateLoader: loads JSON templates, fallback chain
 │   ├── boilerplate_resolver.py # BoilerplateResolver: populates files with starter content
 │   ├── template_merger.py    # normalize_folder(), merge_folder_lists(), _merge_files()
+│   ├── pypi_checker.py       # normalize_pypi_name(), check_pypi_availability() — async httpx
 │   ├── async_executor.py    # AsyncExecutor.run() — ThreadPoolExecutor wrapper
 │   └── logging_config.py    # Loguru setup: console + file handlers with rotation
 ├── handlers/
@@ -147,6 +149,7 @@ Files use `{{project_name}}` placeholders, substituted at build time with a norm
 - **`_reload_and_merge_templates()`** is the single entry point for all template loading — framework change, project type change, reset, toggle off
 - **`normalize_framework_name()`** in `boilerplate_resolver.py` is the shared function for framework name normalization — used by both `ConfigManager` and `BoilerplateResolver`
 - **`normalize_project_name()`** in `boilerplate_resolver.py` converts project names to title case with spaces for `{{project_name}}` substitution (e.g. `my_app` → `My App`)
+- **PyPI checker** (`pypi_checker.py`): Manual trigger via icon button, uses `httpx.AsyncClient` directly (no `AsyncExecutor` needed). PEP 503 name normalization ensures `my_app` and `my-app` are treated as the same package. Tri-state return: `True` (available) / `False` (taken) / `None` (error).
 - **Two-phase git setup** (if git enabled):
   - Phase 1 (`handle_git_init`): Creates local repo + bare hub at `~/Projects/git-repos/<name>.git`, connects via remote origin
   - Phase 2 (`finalize_git_setup`): Called after all files created; stages, commits, and pushes to hub automatically
@@ -157,7 +160,7 @@ Files use `{{project_name}}` placeholders, substituted at build time with a norm
 
 ## Development Guidelines
 
-- **Run `uv run pytest` before committing** — 377 tests, coverage automatic
+- **Run `uv run pytest` before committing** — 390 tests, coverage automatic
 - **Add tests** in `tests/core/`, `tests/handlers/`, or `tests/utils/` for new functionality
 - **Use `wrap_async()` for new async handlers** wrapping coroutines for Flet callbacks
 - **Use `uv add <package>`** for dependencies, never pip
@@ -167,7 +170,7 @@ Files use `{{project_name}}` placeholders, substituted at build time with a norm
 
 ## Dependencies
 
-**Runtime:** Python 3.14+, UV (external), Flet 0.80.5+, Git (optional)
+**Runtime:** Python 3.14+, UV (external), Flet 0.80.5+, httpx 0.28+, Git (optional)
 
 **Dev:** pytest >=8.0, pytest-asyncio >=0.23, pytest-cov >=7.0
 
