@@ -24,6 +24,8 @@ Key capabilities:
 uv run create_project        # Via entry point
 python app/main.py            # Direct execution
 uv run pytest                 # Run 390 tests (coverage automatic)
+uv run ruff check app         # Lint app/ (runs automatically on commit)
+uv run ruff format app        # Auto-format app/
 ```
 
 ---
@@ -158,9 +160,21 @@ Files use `{{project_name}}` placeholders, substituted at build time with a norm
 
 ---
 
+## Linting
+
+Ruff is configured in `pyproject.toml` and enforced via a git pre-commit hook (`.git/hooks/pre-commit`).
+
+- **Rules:** `E` (pycodestyle), `F` (pyflakes), `I` (isort), `W` (warnings), `UP` (pyupgrade), `B` (bugbear), `SIM` (simplify)
+- **Scope:** Pre-commit hook lints and format-checks `app/` only (not tests)
+- **Auto-fix:** `uv run ruff check --fix app` to fix what it can, `uv run ruff format app` to auto-format
+- **Style:** Use `str | None` not `Optional[str]`, `collections.abc.Callable` not `typing.Callable`
+
+---
+
 ## Development Guidelines
 
 - **Run `uv run pytest` before committing** — 390 tests, coverage automatic
+- **Ruff runs automatically on commit** via pre-commit hook — fix any errors before committing
 - **Add tests** in `tests/core/`, `tests/handlers/`, or `tests/utils/` for new functionality
 - **Use `wrap_async()` for new async handlers** wrapping coroutines for Flet callbacks
 - **Use `uv add <package>`** for dependencies, never pip
@@ -172,7 +186,7 @@ Files use `{{project_name}}` placeholders, substituted at build time with a norm
 
 **Runtime:** Python 3.14+, UV (external), Flet 0.80.5+, httpx 0.28+, Git (optional)
 
-**Dev:** pytest >=8.0, pytest-asyncio >=0.23, pytest-cov >=7.0
+**Dev:** pytest >=8.0, pytest-asyncio >=0.23, pytest-cov >=7.0, ruff >=0.15
 
 ---
 
