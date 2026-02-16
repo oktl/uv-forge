@@ -22,7 +22,7 @@ Key capabilities:
 ```bash
 uv run create_project        # Via entry point
 python app/main.py            # Direct execution
-uv run pytest                 # Run 387 tests (coverage automatic)
+uv run pytest                 # Run 377 tests (coverage automatic)
 ```
 
 ---
@@ -43,7 +43,14 @@ app/
 │   ├── async_executor.py    # AsyncExecutor.run() — ThreadPoolExecutor wrapper
 │   └── logging_config.py    # Loguru setup: console + file handlers with rotation
 ├── handlers/
-│   ├── ui_handler.py         # Handlers class + attach_handlers() — all UI event wiring
+│   ├── ui_handler.py         # Handlers class (mixin composition) + attach_handlers() wiring
+│   ├── handler_base.py       # HandlerBase mixin — shared UI helpers (snackbar, status, validation)
+│   ├── input_handlers.py     # InputHandlersMixin — path & name input handlers
+│   ├── option_handlers.py    # OptionHandlersMixin — checkboxes, dialogs, template loading/merging
+│   ├── folder_handlers.py    # FolderHandlersMixin — folder tree display and management
+│   ├── package_handlers.py   # PackageHandlersMixin — package list display and management
+│   ├── build_handlers.py     # BuildHandlersMixin — build, reset, exit, keyboard shortcuts
+│   ├── feature_handlers.py   # FeatureHandlersMixin — theme toggle, help, git cheat sheet
 │   ├── project_builder.py    # build_project() orchestration — UV init, git, folders, packages
 │   ├── filesystem_handler.py # setup_app_structure(), folder creation, cleanup_on_error()
 │   ├── uv_handler.py         # run_uv_init(), install_package(), setup_virtual_env()
@@ -150,7 +157,7 @@ Files use `{{project_name}}` placeholders, substituted at build time with a norm
 
 ## Development Guidelines
 
-- **Run `uv run pytest` before committing** — 387 tests, coverage automatic
+- **Run `uv run pytest` before committing** — 377 tests, coverage automatic
 - **Add tests** in `tests/core/`, `tests/handlers/`, or `tests/utils/` for new functionality
 - **Use `wrap_async()` for new async handlers** wrapping coroutines for Flet callbacks
 - **Use `uv add <package>`** for dependencies, never pip

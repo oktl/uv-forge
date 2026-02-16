@@ -798,7 +798,7 @@ def test_reload_and_merge_templates_both_selected(mock_handlers):
             {"folders": [{"name": "api", "subfolders": [], "files": []}]},
         ]
 
-        with patch('app.handlers.ui_handler.merge_folder_lists') as mock_merge:
+        with patch('app.handlers.option_handlers.merge_folder_lists') as mock_merge:
             mock_merge.return_value = [
                 {"name": "ui", "subfolders": [], "files": []},
                 {"name": "api", "subfolders": [], "files": []},
@@ -864,7 +864,7 @@ def test_show_framework_dialog_adds_to_overlay(mock_handlers):
     """Test that framework dialog is added to page overlay"""
     handlers, page, controls, state = mock_handlers
 
-    with patch('app.handlers.ui_handler.create_framework_dialog') as mock_create:
+    with patch('app.handlers.option_handlers.create_framework_dialog') as mock_create:
         mock_dialog = Mock()
         mock_dialog.open = False
         mock_create.return_value = mock_dialog
@@ -1454,7 +1454,7 @@ def test_framework_dialog_on_select_sets_state(mock_handlers):
     """Test framework dialog on_select callback sets framework and reloads templates"""
     handlers, page, controls, state = mock_handlers
 
-    with patch('app.handlers.ui_handler.create_framework_dialog') as mock_create:
+    with patch('app.handlers.option_handlers.create_framework_dialog') as mock_create:
         mock_dialog = Mock()
         mock_dialog.open = True
         mock_create.return_value = mock_dialog
@@ -1483,7 +1483,7 @@ def test_framework_dialog_on_select_none_clears_state(mock_handlers):
     controls.ui_project_checkbox.value = True
     controls.ui_project_checkbox.label = "UI Project: flet"
 
-    with patch('app.handlers.ui_handler.create_framework_dialog') as mock_create:
+    with patch('app.handlers.option_handlers.create_framework_dialog') as mock_create:
         mock_dialog = Mock()
         mock_dialog.open = True
         mock_create.return_value = mock_dialog
@@ -1512,7 +1512,7 @@ def test_framework_dialog_on_close_unchecks_when_no_prior_selection(mock_handler
     state.framework = None
     controls.ui_project_checkbox.value = True
 
-    with patch('app.handlers.ui_handler.create_framework_dialog') as mock_create:
+    with patch('app.handlers.option_handlers.create_framework_dialog') as mock_create:
         mock_dialog = Mock()
         mock_dialog.open = True
         mock_create.return_value = mock_dialog
@@ -1539,7 +1539,7 @@ def test_framework_dialog_on_close_keeps_prior_selection(mock_handlers):
     controls.ui_project_checkbox.value = True
     controls.ui_project_checkbox.label = "UI Project: PyQt6"
 
-    with patch('app.handlers.ui_handler.create_framework_dialog') as mock_create:
+    with patch('app.handlers.option_handlers.create_framework_dialog') as mock_create:
         mock_dialog = Mock()
         mock_dialog.open = True
         mock_create.return_value = mock_dialog
