@@ -13,6 +13,11 @@ Enter a valid Python package name:
 
 A live path preview appears below the name field showing the full resolved project path as you type.
 
+**PyPI Name Check:** Click the globe icon (🌐) next to the name field to check if your project name is available on PyPI. The button is enabled once the name passes local validation. Results appear below the field:
+- **Green** — name is available on PyPI
+- **Red** — name is already taken (names are normalized per PEP 503, so `my_app` and `my-app` are treated as the same package)
+- **Orange** — could not reach PyPI (check your internet connection)
+
 ### 2. **Set Project Path**
 Browse or enter the directory where you want to create your project. This is where your project folder will be created. The default path is pre-filled and rarely needs changing.
 
