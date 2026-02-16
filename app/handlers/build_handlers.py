@@ -190,6 +190,7 @@ class BuildHandlersMixin:
             folder_count=folder_count,
             file_count=file_count,
             packages=list(self.state.packages),
+            folders=list(self.state.folders),
         )
 
         dialog = create_build_summary_dialog(

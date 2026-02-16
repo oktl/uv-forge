@@ -13,11 +13,16 @@ from app.core.models import FolderSpec
 type FolderInput = str | dict[str, Any] | FolderSpec
 
 
-def normalize_folder(folder: FolderInput) -> dict[str, Any]:
+def normalize_folder(
+    folder: FolderInput, parent_create_init: bool = True
+) -> dict[str, Any]:
     """Convert any folder form to a canonical dict.
 
     Args:
         folder: A string name, dict, or FolderSpec instance.
+        parent_create_init: Parent folder's create_init value. String subfolders
+            inherit this instead of defaulting to True, matching the behavior
+            of create_folders() in filesystem_handler.py.
 
     Returns:
         Dict with keys: name, create_init, root_level, subfolders, files.
@@ -25,28 +30,33 @@ def normalize_folder(folder: FolderInput) -> dict[str, Any]:
     if isinstance(folder, str):
         return {
             "name": folder,
-            "create_init": True,
+            "create_init": parent_create_init,
             "root_level": False,
             "subfolders": [],
             "files": [],
         }
 
     if isinstance(folder, FolderSpec):
+        create_init = folder.create_init
         return {
             "name": folder.name,
-            "create_init": folder.create_init,
+            "create_init": create_init,
             "root_level": folder.root_level,
-            "subfolders": [normalize_folder(sf) for sf in (folder.subfolders or [])],
+            "subfolders": [
+                normalize_folder(sf, create_init) for sf in (folder.subfolders or [])
+            ],
             "files": list(folder.files) if folder.files else [],
         }
 
     # dict
+    create_init = folder.get("create_init", True)
     return {
         "name": folder.get("name", ""),
-        "create_init": folder.get("create_init", True),
+        "create_init": create_init,
         "root_level": folder.get("root_level", False),
         "subfolders": [
-            normalize_folder(sf) for sf in folder.get("subfolders", []) or []
+            normalize_folder(sf, create_init)
+            for sf in folder.get("subfolders", []) or []
         ],
         "files": list(folder.get("files", []) or []),
     }

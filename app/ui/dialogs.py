@@ -156,6 +156,116 @@ def _create_summary_row(label: str, value: str) -> ft.Row:
     )
 
 
+def _build_project_tree_lines(config: BuildSummaryConfig) -> list[str]:
+    """Build a Unicode box-drawing tree of the full project structure.
+
+    Includes root-level files created by UV init (pyproject.toml, README.md, etc.),
+    the app/ directory with __init__.py and main.py, and all template folders/files.
+
+    Args:
+        config: BuildSummaryConfig with project name, git_enabled, and folders.
+
+    Returns:
+        List of strings, one per tree line.
+    """
+    lines: list[str] = [f"{config.project_name}/"]
+
+    # Separate root-level and app-level template folders
+    root_folders = []
+    app_folders = []
+    for folder in config.folders:
+        if isinstance(folder, dict) and folder.get("root_level", False):
+            root_folders.append(folder)
+        else:
+            app_folders.append(folder)
+
+    # Root-level files created by UV init
+    root_files = [".python-version", "README.md", "pyproject.toml"]
+    if config.git_enabled:
+        root_files.insert(0, ".gitignore")
+
+    # All root-level entries: files first, then app/, then root template folders
+    root_entries: list[dict | str] = []
+    root_entries.extend(root_files)
+    root_entries.append("__app__")  # Sentinel for app/ directory
+    root_entries.extend(root_folders)
+
+    def _add_entries(
+        entries: list[dict | str], prefix: str, parent_create_init: bool = True
+    ) -> None:
+        """Recursively add tree entries with box-drawing prefixes."""
+        for i, entry in enumerate(entries):
+            is_last = i == len(entries) - 1
+            connector = "└── " if is_last else "├── "
+            child_prefix = prefix + ("    " if is_last else "│   ")
+
+            if isinstance(entry, str):
+                if entry == "__app__":
+                    _add_app_dir(prefix, connector, child_prefix)
+                else:
+                    lines.append(f"{prefix}{connector}{entry}")
+            elif isinstance(entry, dict):
+                _add_folder(entry, prefix, connector, child_prefix)
+
+    def _add_subfolder(
+        name: str,
+        parent_create_init: bool,
+        prefix: str,
+        connector: str,
+        child_prefix: str,
+    ) -> None:
+        """Add a string subfolder (inherits parent's create_init)."""
+        lines.append(f"{prefix}{connector}{name}/")
+        if parent_create_init:
+            lines.append(f"{child_prefix}└── __init__.py")
+
+    def _add_folder(
+        folder: dict, prefix: str, connector: str, child_prefix: str
+    ) -> None:
+        """Add a template folder and its contents to the tree."""
+        name = folder.get("name", "")
+        lines.append(f"{prefix}{connector}{name}/")
+
+        create_init = folder.get("create_init", True)
+
+        # Collect all children: __init__.py, files, then subfolders
+        file_children: list[str] = []
+        if create_init:
+            file_children.append("__init__.py")
+        file_children.extend(folder.get("files", []) or [])
+
+        subfolders = folder.get("subfolders", []) or []
+        total = len(file_children) + len(subfolders)
+        idx = 0
+
+        for f in file_children:
+            idx += 1
+            is_last = idx == total
+            conn = "└── " if is_last else "├── "
+            lines.append(f"{child_prefix}{conn}{f}")
+
+        for sf in subfolders:
+            idx += 1
+            is_last = idx == total
+            conn = "└── " if is_last else "├── "
+            sf_child_prefix = child_prefix + ("    " if is_last else "│   ")
+            if isinstance(sf, str):
+                _add_subfolder(sf, create_init, child_prefix, conn, sf_child_prefix)
+            elif isinstance(sf, dict):
+                _add_folder(sf, child_prefix, conn, sf_child_prefix)
+
+    def _add_app_dir(prefix: str, connector: str, child_prefix: str) -> None:
+        """Add the app/ directory with __init__.py, main.py, and template folders."""
+        lines.append(f"{prefix}{connector}app/")
+
+        app_children: list[dict | str] = ["__init__.py", "main.py"]
+        app_children.extend(app_folders)
+        _add_entries(app_children, child_prefix)
+
+    _add_entries(root_entries, "")
+    return lines
+
+
 def _autofocus_selected_radio(controls: list[ft.Control], selected_value: str) -> None:
     """Set autofocus on the Radio whose value matches selected_value.
 
@@ -1061,11 +1171,35 @@ def create_build_summary_dialog(
         type_name = config.project_type.replace("_", " ").title()
         rows.append(_create_summary_row("Project Type:", type_name))
 
-    rows.append(
-        _create_summary_row(
-            "Structure:", f"{config.folder_count} folders, {config.file_count} files"
-        )
+    # Collapsible project tree preview
+    tree_lines = _build_project_tree_lines(config)
+    tree_text = "\n".join(tree_lines)
+    tree_container = ft.Container(
+        content=ft.Column(
+            [
+                ft.Text(
+                    tree_text,
+                    size=11,
+                    font_family="monospace",
+                    no_wrap=True,
+                )
+            ],
+            scroll=ft.ScrollMode.AUTO,
+        ),
+        height=200,
+        padding=ft.Padding(left=8, top=4, right=4, bottom=4),
     )
+
+    structure_label = f"{config.folder_count} folders, {config.file_count} files"
+    tree_tile = ft.ExpansionTile(
+        title=ft.Text("Structure", weight=ft.FontWeight.BOLD, size=13),
+        subtitle=ft.Text(structure_label, size=12),
+        controls=[tree_container],
+        expanded=False,
+        tile_padding=ft.Padding(left=0, top=0, right=0, bottom=0),
+        controls_padding=ft.Padding(left=0, top=0, right=0, bottom=0),
+    )
+    rows.append(tree_tile)
 
     if config.packages:
         n = len(config.packages)

@@ -6,7 +6,12 @@ from unittest.mock import AsyncMock, Mock
 import flet as ft
 import pytest
 
-from app.ui.dialogs import create_about_dialog, create_project_type_dialog
+from app.core.models import BuildSummaryConfig
+from app.ui.dialogs import (
+    _build_project_tree_lines,
+    create_about_dialog,
+    create_project_type_dialog,
+)
 
 
 def test_create_project_type_dialog_basic():
@@ -298,3 +303,216 @@ def test_create_about_dialog_has_markdown_content():
     assert isinstance(column, ft.Column)
     assert len(column.controls) == 1
     assert isinstance(column.controls[0], ft.Markdown)
+
+
+# ========== Project Tree Preview Tests ==========
+
+
+def _make_config(**overrides) -> BuildSummaryConfig:
+    """Create a BuildSummaryConfig with sensible defaults."""
+    defaults = dict(
+        project_name="my_project",
+        project_path="/tmp",
+        python_version="3.14",
+        git_enabled=True,
+        ui_project_enabled=False,
+        framework=None,
+        other_project_enabled=False,
+        project_type=None,
+        starter_files=True,
+        folder_count=2,
+        file_count=5,
+        packages=[],
+        folders=[
+            {
+                "name": "core",
+                "create_init": True,
+                "subfolders": [],
+                "files": ["state.py", "models.py"],
+            },
+            {
+                "name": "ui",
+                "create_init": True,
+                "subfolders": [],
+                "files": ["components.py"],
+            },
+        ],
+    )
+    defaults.update(overrides)
+    return BuildSummaryConfig(**defaults)
+
+
+def test_tree_root_line():
+    """Tree starts with project_name/."""
+    config = _make_config()
+    lines = _build_project_tree_lines(config)
+    assert lines[0] == "my_project/"
+
+
+def test_tree_includes_root_files_with_git():
+    """Tree includes .gitignore when git is enabled."""
+    config = _make_config(git_enabled=True)
+    lines = _build_project_tree_lines(config)
+    text = "\n".join(lines)
+    assert ".gitignore" in text
+    assert ".python-version" in text
+    assert "README.md" in text
+    assert "pyproject.toml" in text
+
+
+def test_tree_excludes_gitignore_without_git():
+    """Tree excludes .gitignore when git is disabled."""
+    config = _make_config(git_enabled=False)
+    lines = _build_project_tree_lines(config)
+    text = "\n".join(lines)
+    assert ".gitignore" not in text
+    assert "pyproject.toml" in text
+
+
+def test_tree_includes_app_dir():
+    """Tree includes app/ with __init__.py and main.py."""
+    config = _make_config()
+    lines = _build_project_tree_lines(config)
+    text = "\n".join(lines)
+    assert "app/" in text
+    assert "__init__.py" in text
+    assert "main.py" in text
+
+
+def test_tree_includes_template_folders():
+    """Tree includes template folders inside app/."""
+    config = _make_config()
+    lines = _build_project_tree_lines(config)
+    text = "\n".join(lines)
+    assert "core/" in text
+    assert "state.py" in text
+    assert "models.py" in text
+    assert "ui/" in text
+    assert "components.py" in text
+
+
+def test_tree_create_init_true_shows_init_py():
+    """Folders with create_init=True show __init__.py."""
+    config = _make_config(
+        folders=[{"name": "core", "create_init": True, "subfolders": [], "files": []}]
+    )
+    lines = _build_project_tree_lines(config)
+    # Find __init__.py under core/
+    core_idx = next(i for i, l in enumerate(lines) if "core/" in l)
+    assert "__init__.py" in lines[core_idx + 1]
+
+
+def test_tree_create_init_false_no_init_py():
+    """Folders with create_init=False don't show __init__.py."""
+    config = _make_config(
+        folders=[
+            {
+                "name": "assets",
+                "create_init": False,
+                "subfolders": [],
+                "files": ["logo.png"],
+            }
+        ]
+    )
+    lines = _build_project_tree_lines(config)
+    # Find the line after assets/
+    assets_idx = next(i for i, l in enumerate(lines) if "assets/" in l)
+    assert "logo.png" in lines[assets_idx + 1]
+    # No __init__.py between assets/ and logo.png
+    assert "__init__" not in lines[assets_idx + 1]
+
+
+def test_tree_create_init_false_inherited_by_string_subfolders():
+    """String subfolders inherit create_init=False from parent — no __init__.py."""
+    from app.core.template_merger import normalize_folder
+
+    raw_folder = {
+        "name": "assets",
+        "create_init": False,
+        "subfolders": ["icons", "images"],
+        "files": [],
+    }
+    config = _make_config(folders=[normalize_folder(raw_folder)])
+    lines = _build_project_tree_lines(config)
+    text = "\n".join(lines)
+    # icons/ and images/ should appear but not contain __init__.py
+    assert "icons/" in text
+    assert "images/" in text
+    # Count __init__.py occurrences — only app/ should have one
+    init_count = text.count("__init__.py")
+    assert init_count == 1  # Only app/__init__.py
+
+
+def test_tree_root_level_folders():
+    """Root-level folders appear at project root, not inside app/."""
+    config = _make_config(
+        folders=[
+            {
+                "name": "tests",
+                "root_level": True,
+                "create_init": True,
+                "subfolders": [],
+                "files": [],
+            },
+            {
+                "name": "core",
+                "create_init": True,
+                "subfolders": [],
+                "files": [],
+            },
+        ]
+    )
+    lines = _build_project_tree_lines(config)
+    text = "\n".join(lines)
+    # tests/ should be at root level (same indent as app/)
+    # Find the app/ line and tests/ line — they should have the same prefix depth
+    app_line = next(l for l in lines if "app/" in l)
+    tests_line = next(l for l in lines if "tests/" in l)
+    app_prefix = len(app_line) - len(app_line.lstrip("│├└── "))
+    tests_prefix = len(tests_line) - len(tests_line.lstrip("│├└── "))
+    assert app_prefix == tests_prefix
+
+
+def test_tree_nested_subfolders():
+    """Tree handles nested subfolders correctly."""
+    config = _make_config(
+        folders=[
+            {
+                "name": "core",
+                "create_init": True,
+                "subfolders": [
+                    {
+                        "name": "utils",
+                        "create_init": True,
+                        "subfolders": [],
+                        "files": ["helpers.py"],
+                    }
+                ],
+                "files": ["state.py"],
+            }
+        ]
+    )
+    lines = _build_project_tree_lines(config)
+    text = "\n".join(lines)
+    assert "core/" in text
+    assert "utils/" in text
+    assert "helpers.py" in text
+    assert "state.py" in text
+
+
+def test_tree_empty_folders():
+    """Tree works with no template folders."""
+    config = _make_config(folders=[])
+    lines = _build_project_tree_lines(config)
+    text = "\n".join(lines)
+    assert "my_project/" in text
+    assert "app/" in text
+    assert "main.py" in text
+
+
+def test_tree_box_drawing_characters():
+    """Tree uses Unicode box-drawing characters."""
+    config = _make_config()
+    lines = _build_project_tree_lines(config)
+    all_text = "\n".join(lines)
+    assert "├── " in all_text or "└── " in all_text

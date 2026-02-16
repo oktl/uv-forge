@@ -201,6 +201,7 @@ class BuildSummaryConfig:
         folder_count: Number of folders to be created in the project.
         file_count: Number of files to be created in the project.
         packages: List of packages that will be installed (default: []).
+        folders: Normalized folder structure for tree preview display.
 
     Note:
         ui_project_enabled and other_project_enabled are independent—both can be
@@ -220,3 +221,4 @@ class BuildSummaryConfig:
     folder_count: int
     file_count: int
     packages: list[str] = field(default_factory=list)
+    folders: list[str | dict] = field(default_factory=list)
