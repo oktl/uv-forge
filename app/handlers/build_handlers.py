@@ -223,6 +223,8 @@ class BuildHandlersMixin:
         self._style_selected_checkbox(self.controls.include_starter_files_checkbox)
         self._style_selected_checkbox(self.controls.create_git_checkbox)
         self.controls.warning_banner.value = ""
+        self.controls.pypi_status_text.value = ""
+        self.controls.check_pypi_button.disabled = True
         self.controls.path_preview_text.value = "\u00a0"
         self.controls.progress_ring.visible = False
         self.page.title = "UV Project Creator"

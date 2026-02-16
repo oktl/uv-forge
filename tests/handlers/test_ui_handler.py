@@ -94,6 +94,8 @@ class MockControls:
         self.reset_button = MockControl()
         self.exit_button = MockControl()
         self.theme_toggle_button = Mock(icon=None)
+        self.check_pypi_button = MockControl()
+        self.pypi_status_text = MockText()
         self.section_titles = []
         self.section_containers = []
 

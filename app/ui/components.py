@@ -94,6 +94,8 @@ class Controls:
         self.git_cheat_sheet_button: ft.IconButton
         self.theme_toggle_button: ft.IconButton
         self.main_title: ft.Text
+        self.check_pypi_button: ft.IconButton
+        self.pypi_status_text: ft.Text
         self.section_titles: list[ft.Text]
         self.section_containers: list[ft.Container]
 
@@ -196,6 +198,19 @@ def create_controls(state: "AppState", colors: dict) -> Controls:
         autofocus=True,
         border_color=UIConfig.COLOR_INFO,
         border_width=1,
+    )
+
+    controls.check_pypi_button = ft.IconButton(
+        icon=ft.Icons.TRAVEL_EXPLORE,
+        tooltip="Check name availability on PyPI",
+        disabled=True,
+        icon_size=UIConfig.ICON_SIZE_DEFAULT,
+    )
+
+    controls.pypi_status_text = ft.Text(
+        "",
+        size=UIConfig.TEXT_SIZE_SMALL,
+        italic=True,
     )
 
     controls.path_preview_text = ft.Text(
@@ -379,7 +394,14 @@ def create_sections(controls: Controls, state: "AppState") -> None:
             ft.Column(
                 controls=[
                     controls.project_name_label,
-                    controls.project_name_input,
+                    ft.Row(
+                        controls=[
+                            controls.project_name_input,
+                            controls.check_pypi_button,
+                        ],
+                        vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                    ),
+                    controls.pypi_status_text,
                     controls.path_preview_text,
                     controls.warning_banner,
                     controls.project_path_label,
@@ -488,7 +510,7 @@ def create_sections(controls: Controls, state: "AppState") -> None:
                             width=UIConfig.BORDER_WIDTH_DEFAULT,
                             color=ft.Colors.GREY_700,
                         ),
-                        height=320,
+                        height=280,
                     ),
                     ft.Column(
                         controls=[

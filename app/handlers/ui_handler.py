@@ -87,6 +87,7 @@ def attach_handlers(page: ft.Page, state: AppState) -> None:
     controls.browse_button.on_click = wrap_async(handlers.on_browse_click)
     controls.project_path_input.on_change = wrap_async(handlers.on_path_change)
     controls.project_name_input.on_change = wrap_async(handlers.on_project_name_change)
+    controls.check_pypi_button.on_click = wrap_async(handlers.on_check_pypi)
 
     # --- Options Handlers ---
     controls.python_version_dropdown.on_select = wrap_async(

@@ -58,7 +58,7 @@ class UIConfig:
     SPLIT_CONTAINER_WIDTH = (
         300  # fits two containers + 8px gap within SECTION_WIDTH border/padding
     )
-    SUBFOLDERS_HEIGHT = 200
+    SUBFOLDERS_HEIGHT = 160
     BUTTON_WIDTH_BUILD = 300
     BUTTON_WIDTH_ACTION = 110  # Reset and Exit buttons
 

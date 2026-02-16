@@ -6,7 +6,9 @@ from pathlib import Path
 
 import flet as ft
 
+from app.core.pypi_checker import check_pypi_availability, normalize_pypi_name
 from app.core.validator import validate_path, validate_project_name
+from app.ui.ui_config import UIConfig
 
 
 class InputHandlersMixin:
@@ -93,9 +95,13 @@ class InputHandlersMixin:
         name = e.control.value if e.control.value else ""
         self.state.project_name = name
 
+        # Clear stale PyPI status on every keystroke
+        self.controls.pypi_status_text.value = ""
+
         if not name:
             self.state.name_valid = False
             self._set_validation_icon(self.controls.project_name_input, None)
+            self.controls.check_pypi_button.disabled = True
             self._update_build_button_state()
             self._set_warning("Enter a project name.", update=False)
             self._update_path_preview()
@@ -122,9 +128,38 @@ class InputHandlersMixin:
             self._set_validation_icon(self.controls.project_name_input, False)
             self._set_warning(error_msg, update=False)
 
+        self.controls.check_pypi_button.disabled = not self.state.name_valid
         self._update_build_button_state()
         self._update_path_preview()
         self.page.title = (
             f"UV Project Creator — {name}" if self.state.name_valid else "UV Project Creator"
         )
+        self.page.update()
+
+    async def on_check_pypi(self, _: ft.ControlEvent) -> None:
+        """Check PyPI availability for the current project name."""
+        name = self.state.project_name
+        if not name or not self.state.name_valid:
+            return
+
+        # Show checking state
+        self.controls.pypi_status_text.value = "Checking PyPI..."
+        self.controls.pypi_status_text.color = UIConfig.COLOR_INFO
+        self.controls.check_pypi_button.disabled = True
+        self.page.update()
+
+        result = await check_pypi_availability(name)
+
+        normalized = normalize_pypi_name(name)
+        if result is True:
+            self.controls.pypi_status_text.value = f"✓ '{normalized}' is available on PyPI"
+            self.controls.pypi_status_text.color = UIConfig.COLOR_SUCCESS
+        elif result is False:
+            self.controls.pypi_status_text.value = f"✗ '{normalized}' is taken on PyPI"
+            self.controls.pypi_status_text.color = UIConfig.COLOR_ERROR
+        else:
+            self.controls.pypi_status_text.value = "⚠ Could not check PyPI (offline?)"
+            self.controls.pypi_status_text.color = UIConfig.COLOR_WARNING
+
+        self.controls.check_pypi_button.disabled = False
         self.page.update()
