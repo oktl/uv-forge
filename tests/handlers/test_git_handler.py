@@ -25,6 +25,16 @@ def check_git_available():
         pytest.skip("Git is not available - tests require git to be installed")
 
 
+@pytest.fixture(autouse=True)
+def _isolate_hub(tmp_path):
+    """Redirect bare hub repos to a temp directory so tests don't pollute
+    ~/Projects/git-repos/ with leftover tmp*.git directories."""
+    hub_dir = tmp_path / "git-repos"
+    hub_dir.mkdir()
+    with patch("app.handlers.git_handler.DEFAULT_GIT_HUB_ROOT", hub_dir):
+        yield
+
+
 class TestHandleGitInit:
     """Tests for handle_git_init function"""
 
@@ -121,10 +131,7 @@ class TestHandleGitInit:
         with tempfile.TemporaryDirectory() as tmpdir:
             project_path = Path(tmpdir) / "testproject"
             project_path.mkdir()
-            hub_dir = Path(tmpdir) / "hubs"
-
-            with patch("app.handlers.git_handler.DEFAULT_GIT_HUB_ROOT", hub_dir):
-                handle_git_init(project_path, use_git=True)
+            handle_git_init(project_path, use_git=True)
 
             head_content = (project_path / ".git" / "HEAD").read_text()
             assert "refs/heads/main" in head_content
