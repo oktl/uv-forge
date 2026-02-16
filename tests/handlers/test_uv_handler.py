@@ -3,15 +3,16 @@
 import subprocess
 import tempfile
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
 import pytest
 
 from app.handlers.uv_handler import (
+    _resolve_entry_point,
+    configure_pyproject,
     get_uv_path,
     run_uv_init,
     setup_virtual_env,
-    configure_pyproject,
-    _resolve_entry_point,
 )
 
 

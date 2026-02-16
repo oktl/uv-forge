@@ -32,7 +32,7 @@ class InputHandlersMixin:
                     check=True,
                 )
             self._set_status(f"Copied: {full_path}", "info", update=True)
-        except (FileNotFoundError, subprocess.CalledProcessError):
+        except FileNotFoundError, subprocess.CalledProcessError:
             self._set_status("Could not copy to clipboard.", "error", update=True)
 
     async def on_browse_click(self, _: ft.ControlEvent) -> None:
@@ -132,7 +132,9 @@ class InputHandlersMixin:
         self._update_build_button_state()
         self._update_path_preview()
         self.page.title = (
-            f"UV Project Creator — {name}" if self.state.name_valid else "UV Project Creator"
+            f"UV Project Creator — {name}"
+            if self.state.name_valid
+            else "UV Project Creator"
         )
         self.page.update()
 
@@ -152,7 +154,9 @@ class InputHandlersMixin:
 
         normalized = normalize_pypi_name(name)
         if result is True:
-            self.controls.pypi_status_text.value = f"✓ '{normalized}' is available on PyPI"
+            self.controls.pypi_status_text.value = (
+                f"✓ '{normalized}' is available on PyPI"
+            )
             self.controls.pypi_status_text.color = UIConfig.COLOR_SUCCESS
         elif result is False:
             self.controls.pypi_status_text.value = f"✗ '{normalized}' is taken on PyPI"

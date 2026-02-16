@@ -11,14 +11,14 @@ from pathlib import Path
 from subprocess import CalledProcessError
 
 from app.core.boilerplate_resolver import BoilerplateResolver
+from app.core.constants import FRAMEWORK_PACKAGE_MAP, PROJECT_TYPE_PACKAGE_MAP
 from app.core.models import BuildResult, ProjectConfig
 from app.core.validator import validate_project_name
-from app.core.constants import FRAMEWORK_PACKAGE_MAP, PROJECT_TYPE_PACKAGE_MAP
 from app.handlers.filesystem_handler import setup_app_structure
 from app.handlers.git_handler import (
+    finalize_git_setup,
     get_bare_repo_path,
     handle_git_init,
-    finalize_git_setup,
 )
 from app.handlers.uv_handler import (
     configure_pyproject,
@@ -90,6 +90,7 @@ def _create_project_scaffold(
         project_path: Absolute path to the project directory.
         on_progress: Optional callback invoked with a status string before each step.
     """
+
     def _p(msg: str) -> None:
         if on_progress:
             on_progress(msg)
@@ -138,6 +139,7 @@ def _install_dependencies(
         project_path: Absolute path to the project directory.
         on_progress: Optional callback invoked with a status string before each step.
     """
+
     def _p(msg: str) -> None:
         if on_progress:
             on_progress(msg)

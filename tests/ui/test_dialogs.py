@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Pytest tests for dialogs.py - Project type dialog creation"""
 
-import pytest
 import flet as ft
+import pytest
+
 from app.ui.dialogs import create_project_type_dialog
 
 
@@ -126,8 +127,7 @@ def test_create_project_type_dialog_has_project_types():
     # Extract all radio button values
     radio_values = []
     for control in column.controls:
-        if isinstance(control, ft.Container):
-            if isinstance(control.content, ft.Radio):
+        if isinstance(control, ft.Container) and isinstance(control.content, ft.Radio):
                 radio_values.append(control.content.value)
 
     # Check for expected project types

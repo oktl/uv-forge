@@ -75,12 +75,12 @@ class UIConfig:
     COLOR_INFO = ft.Colors.BLUE_600
 
     # Semantic UI Colors (theme-invariant)
-    COLOR_CHECKBOX_ACTIVE = ft.Colors.GREEN      # checkbox label when checked
-    COLOR_VALIDATION_OK = ft.Colors.GREEN        # text field valid icon
-    COLOR_VALIDATION_ERROR = ft.Colors.RED       # text field invalid icon
-    COLOR_FOLDER_ICON = ft.Colors.AMBER_400      # folder icon in tree
-    COLOR_FILE_ICON = ft.Colors.GREY_500         # file icon in tree
-    COLOR_FILE_TEXT = ft.Colors.GREY_400         # file name text in tree
+    COLOR_CHECKBOX_ACTIVE = ft.Colors.GREEN  # checkbox label when checked
+    COLOR_VALIDATION_OK = ft.Colors.GREEN  # text field valid icon
+    COLOR_VALIDATION_ERROR = ft.Colors.RED  # text field invalid icon
+    COLOR_FOLDER_ICON = ft.Colors.AMBER_400  # folder icon in tree
+    COLOR_FILE_ICON = ft.Colors.GREY_500  # file icon in tree
+    COLOR_FILE_TEXT = ft.Colors.GREY_400  # file name text in tree
 
     # Button Background Colors (full-saturation for visual weight)
     COLOR_BTN_BUILD = ft.Colors.GREEN

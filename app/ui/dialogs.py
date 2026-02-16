@@ -985,7 +985,7 @@ def create_add_packages_dialog(
 
 
 def create_build_summary_dialog(
-    config: "BuildSummaryConfig",
+    config: BuildSummaryConfig,
     on_build_callback,
     on_cancel_callback,
     is_dark_mode: bool,

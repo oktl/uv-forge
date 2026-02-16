@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
 """Pytest tests for models.py"""
 
-import pytest
 from pathlib import Path
 
-from app.core.models import FolderSpec, ProjectConfig, BuildResult
-
+from app.core.models import BuildResult, FolderSpec, ProjectConfig
 
 # FolderSpec Tests
 

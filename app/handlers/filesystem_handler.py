@@ -15,7 +15,7 @@ def create_folders(
     parent_dir: Path,
     folders: list[str | dict[str, Any]],
     parent_create_init: bool = True,
-    resolver: "BoilerplateResolver | None" = None,
+    resolver: BoilerplateResolver | None = None,
     skip_files: bool = False,
 ) -> None:
     """Recursively create directory structure from configuration.
@@ -81,7 +81,7 @@ def create_folders(
 def setup_app_structure(
     project_path: Path,
     folders: list[str | dict[str, Any]],
-    resolver: "BoilerplateResolver | None" = None,
+    resolver: BoilerplateResolver | None = None,
     skip_files: bool = False,
 ) -> None:
     """Create app directory and configured folder structure.
@@ -112,7 +112,9 @@ def setup_app_structure(
 
     # Create root-level folders at project root
     if root_folders:
-        create_folders(project_path, root_folders, resolver=resolver, skip_files=skip_files)
+        create_folders(
+            project_path, root_folders, resolver=resolver, skip_files=skip_files
+        )
 
     # Create app-level folders inside app/
     if app_folders:

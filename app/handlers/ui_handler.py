@@ -10,15 +10,14 @@ import flet as ft
 
 from app.core.state import AppState
 from app.core.template_loader import TemplateLoader
-from app.ui.components import Controls
-
+from app.handlers.build_handlers import BuildHandlersMixin
+from app.handlers.feature_handlers import FeatureHandlersMixin
+from app.handlers.folder_handlers import FolderHandlersMixin
 from app.handlers.handler_base import HandlerBase
 from app.handlers.input_handlers import InputHandlersMixin
 from app.handlers.option_handlers import OptionHandlersMixin
-from app.handlers.folder_handlers import FolderHandlersMixin
 from app.handlers.package_handlers import PackageHandlersMixin
-from app.handlers.build_handlers import BuildHandlersMixin
-from app.handlers.feature_handlers import FeatureHandlersMixin
+from app.ui.components import Controls
 
 
 def wrap_async(coro_func):
@@ -97,9 +96,7 @@ def attach_handlers(page: ft.Page, state: AppState) -> None:
     controls.include_starter_files_checkbox.on_change = wrap_async(
         handlers.on_boilerplate_toggle
     )
-    controls.ui_project_checkbox.on_change = wrap_async(
-        handlers.on_ui_project_toggle
-    )
+    controls.ui_project_checkbox.on_change = wrap_async(handlers.on_ui_project_toggle)
     controls.other_projects_checkbox.on_change = wrap_async(
         handlers.on_other_project_toggle
     )

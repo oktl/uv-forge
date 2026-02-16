@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
 """Pytest tests for event_handlers.py - UI event handlers and helper methods"""
 
-import pytest
+import tempfile
 from pathlib import Path
 from unittest.mock import Mock, patch
-import tempfile
 
-from app.handlers.ui_handler import Handlers
-from app.core.state import AppState
+import pytest
+
 from app.core.constants import DEFAULT_PYTHON_VERSION
+from app.core.state import AppState
+from app.handlers.ui_handler import Handlers
 from app.ui.dialog_data import (
-    UI_PROJECT_CHECKBOX_LABEL,
     OTHER_PROJECT_CHECKBOX_LABEL,
+    UI_PROJECT_CHECKBOX_LABEL,
 )
 
 
@@ -897,8 +898,6 @@ async def test_reset_with_both_checked(mock_handlers):
     state.other_project_enabled = True
     state.project_type = "django"
 
-    mock_event = Mock()
-
     with patch.object(handlers, '_reload_and_merge_templates') as mock_reload:
         await handlers._do_reset()
 
@@ -1394,8 +1393,6 @@ async def test_reset_clears_validation_icons(mock_handlers):
     controls.project_path_input.suffix = "something"
     controls.project_name_input.suffix = "something"
 
-    mock_event = Mock()
-
     with patch.object(handlers, '_reload_and_merge_templates'):
         await handlers._do_reset()
 
@@ -1607,8 +1604,6 @@ async def test_reset_clears_both_checkbox_labels(mock_handlers):
     state.project_type = "django"
     controls.other_projects_checkbox.value = True
     controls.other_projects_checkbox.label = "Project: Django"
-
-    mock_event = Mock()
 
     with patch.object(handlers, '_reload_and_merge_templates'):
         await handlers._do_reset()

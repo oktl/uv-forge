@@ -1,10 +1,8 @@
 """Tests for template_merger.py - folder normalization and merging utilities."""
 
-import pytest
 
 from app.core.models import FolderSpec
-from app.core.template_merger import normalize_folder, merge_folder_lists, _merge_files
-
+from app.core.template_merger import _merge_files, merge_folder_lists, normalize_folder
 
 # ========== TestNormalizeFolder ==========
 

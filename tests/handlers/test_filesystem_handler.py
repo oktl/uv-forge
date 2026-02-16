@@ -2,7 +2,6 @@
 
 import tempfile
 from pathlib import Path
-import pytest
 
 from app.handlers.filesystem_handler import (
     create_folders,

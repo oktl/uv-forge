@@ -4,7 +4,6 @@ Tests the new selected_item_path and selected_item_type fields
 added for folder/file selection functionality.
 """
 
-import pytest
 from app.core.state import AppState
 
 

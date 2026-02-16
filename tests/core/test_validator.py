@@ -2,14 +2,16 @@
 """Pytest tests for validator.py functions"""
 
 import os
-import pytest
 import tempfile
 from pathlib import Path
+
+import pytest
+
 from app.core.validator import (
-    validate_project_name,
+    _MAX_NAME_LENGTH,
     validate_folder_name,
     validate_path,
-    _MAX_NAME_LENGTH,
+    validate_project_name,
 )
 
 

@@ -2,8 +2,9 @@
 """Pytest tests for state.py - AppState dataclass"""
 
 import pytest
-from app.core.state import AppState
+
 from app.core.constants import DEFAULT_PROJECT_ROOT, DEFAULT_PYTHON_VERSION
+from app.core.state import AppState
 
 
 def test_appstate_initialization():

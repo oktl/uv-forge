@@ -132,7 +132,7 @@ def create_section_box(
     return container, title_text
 
 
-def create_controls(state: "AppState", colors: dict) -> Controls:
+def create_controls(state: AppState, colors: dict) -> Controls:
     """Create all UI controls for the application.
 
     Args:
@@ -380,7 +380,7 @@ def create_controls(state: "AppState", colors: dict) -> Controls:
     return controls
 
 
-def create_sections(controls: Controls, state: "AppState") -> None:
+def create_sections(controls: Controls, state: AppState) -> None:
     """Create section containers and organize controls into sections.
 
     Args:
@@ -591,7 +591,11 @@ def create_layout(controls: Controls) -> ft.Column:
             controls.section_containers[2],  # Add or Remove Folders
             ft.Container(
                 content=ft.Row(
-                    controls=[controls.progress_ring, controls.status_icon, controls.status_text],
+                    controls=[
+                        controls.progress_ring,
+                        controls.status_icon,
+                        controls.status_text,
+                    ],
                     alignment=ft.MainAxisAlignment.CENTER,
                     spacing=8,
                 )
@@ -606,7 +610,7 @@ def create_layout(controls: Controls) -> ft.Column:
     )
 
 
-def build_main_view(page: ft.Page, state: "AppState") -> ft.Control:
+def build_main_view(page: ft.Page, state: AppState) -> ft.Control:
     """Build and return the main application UI layout.
 
     Creates all UI controls, arranges them in a column layout, and stores

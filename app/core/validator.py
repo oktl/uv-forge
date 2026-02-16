@@ -4,9 +4,9 @@ This module provides validation logic for project names, folder names,
 and paths to ensure they meet filesystem and Python package requirements.
 """
 
+import keyword
 import os
 import re
-import keyword
 from pathlib import Path
 
 ValidationResult = tuple[bool, str]
@@ -36,7 +36,10 @@ def validate_project_name(name: str) -> ValidationResult:
         return False, "Project name cannot be empty."
 
     if len(name) > _MAX_NAME_LENGTH:
-        return False, f"Project name exceeds maximum length of {_MAX_NAME_LENGTH} characters."
+        return (
+            False,
+            f"Project name exceeds maximum length of {_MAX_NAME_LENGTH} characters.",
+        )
 
     # Checked separately from the start-character rule below
     # so the UI can show the specific error as the user types

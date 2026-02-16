@@ -133,4 +133,3 @@ DEFAULT_GIT_HUB_ROOT = Path.home() / "Projects" / "git-repos"
 
 # Default folder structure (used as final fallback)
 DEFAULT_FOLDERS = ["core", "ui", "utils", "assets"]
-

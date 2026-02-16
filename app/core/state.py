@@ -59,7 +59,9 @@ class AppState:
 
     # Package management
     packages: list[str] = field(default_factory=list)
-    auto_packages: list[str] = field(default_factory=list)  # map-derived; used to detect manual additions
+    auto_packages: list[str] = field(
+        default_factory=list
+    )  # map-derived; used to detect manual additions
     selected_package_idx: int | None = None
 
     # UI state

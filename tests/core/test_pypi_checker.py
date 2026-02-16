@@ -1,7 +1,7 @@
 """Tests for PyPI name availability checker."""
 
-import pytest
 import httpx
+import pytest
 
 from app.core.pypi_checker import check_pypi_availability, normalize_pypi_name
 

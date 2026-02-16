@@ -5,7 +5,6 @@ Uses a fallback chain: framework-specific → project-type-specific → common �
 """
 
 from pathlib import Path
-from typing import Optional
 
 from app.core.constants import BOILERPLATE_DIR
 
@@ -44,7 +43,6 @@ def normalize_framework_name(framework: str) -> str:
     return name
 
 
-
 class BoilerplateResolver:
     """Resolves filenames to boilerplate content using a fallback chain.
 
@@ -64,9 +62,9 @@ class BoilerplateResolver:
     def __init__(
         self,
         project_name: str,
-        framework: Optional[str] = None,
-        project_type: Optional[str] = None,
-        boilerplate_dir: Optional[Path] = None,
+        framework: str | None = None,
+        project_type: str | None = None,
+        boilerplate_dir: Path | None = None,
     ):
         if not project_name:
             raise ValueError("project_name cannot be empty")
@@ -82,7 +80,7 @@ class BoilerplateResolver:
             self.search_dirs.append(base / "project_types" / project_type)
         self.search_dirs.append(base / "common")
 
-    def resolve(self, filename: str) -> Optional[str]:
+    def resolve(self, filename: str) -> str | None:
         """Look up boilerplate content for a filename.
 
         Searches the fallback chain in order and returns the first match,

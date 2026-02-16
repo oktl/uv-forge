@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 
 @dataclass
@@ -26,11 +26,11 @@ class FolderSpec:
     name: str
     create_init: bool = True
     root_level: bool = False
-    subfolders: Optional[list[str | FolderSpec]] = None
-    files: Optional[list[str]] = None
+    subfolders: list[str | FolderSpec] | None = None
+    files: list[str] | None = None
 
     @classmethod
-    def _from_dict(cls, data: dict[str, Any]) -> "FolderSpec":
+    def _from_dict(cls, data: dict[str, Any]) -> FolderSpec:
         """Create a FolderSpec from a dictionary (internal use only).
 
         This method is provided for potential future use or testing scenarios where
@@ -128,7 +128,7 @@ class ProjectConfig:
     ui_project_enabled: bool = False
     framework: str = ""
     other_project_enabled: bool = False
-    project_type: Optional[str] = None
+    project_type: str | None = None
     include_starter_files: bool = True
     folders: list[str | dict[str, Any] | FolderSpec] = field(default_factory=list)
     packages: list[str] = field(default_factory=list)
@@ -173,7 +173,7 @@ class BuildResult:
 
     success: bool
     message: str
-    error: Optional[Exception] = None
+    error: Exception | None = None
 
 
 @dataclass
@@ -213,9 +213,9 @@ class BuildSummaryConfig:
     python_version: str
     git_enabled: bool
     ui_project_enabled: bool
-    framework: Optional[str]
+    framework: str | None
     other_project_enabled: bool
-    project_type: Optional[str]
+    project_type: str | None
     starter_files: bool
     folder_count: int
     file_count: int

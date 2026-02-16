@@ -1,7 +1,5 @@
 """Handlers for option checkboxes, framework/project type dialogs, and template loading."""
 
-from typing import Any
-
 import flet as ft
 
 from app.core.constants import (
@@ -11,12 +9,12 @@ from app.core.constants import (
     PROJECT_TYPE_PACKAGE_MAP,
 )
 from app.core.template_merger import merge_folder_lists, normalize_folder
-from app.ui.dialogs import (
-    create_framework_dialog,
-)
 from app.ui.dialog_data import (
     OTHER_PROJECT_CHECKBOX_LABEL,
     UI_PROJECT_CHECKBOX_LABEL,
+)
+from app.ui.dialogs import (
+    create_framework_dialog,
 )
 
 
@@ -82,9 +80,7 @@ class OptionHandlersMixin:
                 self._set_status("UI framework cleared.", "info", update=False)
             else:
                 self.state.framework = framework
-                self.controls.ui_project_checkbox.label = (
-                    f"UI Framework: {framework}"
-                )
+                self.controls.ui_project_checkbox.label = f"UI Framework: {framework}"
                 self._style_selected_checkbox(self.controls.ui_project_checkbox)
                 self._reload_and_merge_templates()
                 self._set_status(
@@ -225,20 +221,14 @@ class OptionHandlersMixin:
         structures are merged. Otherwise the single active template is used.
         Falls back to the default template when neither is selected.
         """
-        framework = (
-            self.state.framework if self.state.ui_project_enabled else None
-        )
+        framework = self.state.framework if self.state.ui_project_enabled else None
         project_type = (
-            self.state.project_type
-            if self.state.other_project_enabled
-            else None
+            self.state.project_type if self.state.other_project_enabled else None
         )
 
         if framework and project_type:
             fw_folders = self._load_template_folders(framework)
-            pt_folders = self._load_template_folders(
-                f"project_types/{project_type}"
-            )
+            pt_folders = self._load_template_folders(f"project_types/{project_type}")
             self.state.folders = merge_folder_lists(fw_folders, pt_folders)
 
             pt_name = project_type.replace("_", " ").title()

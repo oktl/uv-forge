@@ -10,14 +10,14 @@ from app.core.async_executor import AsyncExecutor
 from app.core.constants import DEFAULT_FOLDERS
 from app.core.models import BuildSummaryConfig, ProjectConfig
 from app.handlers.project_builder import build_project
+from app.ui.dialog_data import (
+    OTHER_PROJECT_CHECKBOX_LABEL,
+    UI_PROJECT_CHECKBOX_LABEL,
+)
 from app.ui.dialogs import (
     create_build_error_dialog,
     create_build_summary_dialog,
     create_confirm_dialog,
-)
-from app.ui.dialog_data import (
-    OTHER_PROJECT_CHECKBOX_LABEL,
-    UI_PROJECT_CHECKBOX_LABEL,
 )
 
 
@@ -84,7 +84,10 @@ class BuildHandlersMixin:
             self._show_snackbar("VS Code not found", is_error=True)
 
     async def _execute_build(
-        self, open_folder: bool = False, open_vscode: bool = False, open_terminal: bool = False
+        self,
+        open_folder: bool = False,
+        open_vscode: bool = False,
+        open_terminal: bool = False,
     ) -> None:
         """Execute the project build after confirmation."""
         self.controls.progress_ring.visible = True
@@ -174,9 +177,7 @@ class BuildHandlersMixin:
             python_version=self.state.python_version,
             git_enabled=self.state.git_enabled,
             ui_project_enabled=self.state.ui_project_enabled,
-            framework=self.state.framework
-            if self.state.ui_project_enabled
-            else None,
+            framework=self.state.framework if self.state.ui_project_enabled else None,
             other_project_enabled=self.state.other_project_enabled,
             project_type=self.state.project_type
             if self.state.other_project_enabled

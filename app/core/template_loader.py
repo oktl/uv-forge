@@ -9,14 +9,14 @@ Templates are organized in subdirectories:
 
 import json
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from app.core.boilerplate_resolver import normalize_framework_name
 from app.core.constants import (
+    DEFAULT_FOLDERS,
+    PROJECT_TYPE_TEMPLATES_DIR,
     TEMPLATES_DIR,
     UI_TEMPLATES_DIR,
-    PROJECT_TYPE_TEMPLATES_DIR,
-    DEFAULT_FOLDERS,
 )
 
 
@@ -36,10 +36,10 @@ class TemplateLoader:
     def __init__(self):
         """Initialize TemplateLoader and load default settings."""
         self.config_source: Path = TEMPLATES_DIR / "default.json"
-        self.loaded_template: Optional[str] = None
+        self.loaded_template: str | None = None
         self.settings: dict[str, Any] = self.load_config()
 
-    def _load_template(self, template_path: Path) -> Optional[dict[str, Any]]:
+    def _load_template(self, template_path: Path) -> dict[str, Any] | None:
         """Load and parse a template file.
 
         Args:
@@ -52,16 +52,16 @@ class TemplateLoader:
         if not template_path.exists():
             return None
         try:
-            with open(template_path, "r") as f:
+            with open(template_path) as f:
                 data = json.load(f)
                 return {"folders": data.get("folders", DEFAULT_FOLDERS.copy())}
-        except (json.JSONDecodeError, OSError):
+        except json.JSONDecodeError, OSError:
             return None
 
     def _update_config_state(
         self,
         template_path: Path,
-        loaded_template: Optional[str],
+        loaded_template: str | None,
         settings: dict[str, Any],
     ) -> None:
         """Update config state after loading a template.
@@ -75,7 +75,7 @@ class TemplateLoader:
         self.loaded_template = loaded_template
         self.settings = settings
 
-    def load_config(self, template: Optional[str] = None) -> dict[str, Any]:
+    def load_config(self, template: str | None = None) -> dict[str, Any]:
         """Load folder configuration from template files.
 
         Precedence:
@@ -121,7 +121,7 @@ class TemplateLoader:
         self._update_config_state(default_template, template, defaults)
         return defaults
 
-    def save_config(self, settings: Optional[dict[str, Any]] = None) -> None:
+    def save_config(self, settings: dict[str, Any] | None = None) -> None:
         """Save folder structure to the active template.
 
         Writes the current settings to the template file being used.

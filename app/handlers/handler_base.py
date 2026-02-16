@@ -19,7 +19,9 @@ class HandlerBase:
     def _style_selected_checkbox(checkbox: ft.Checkbox) -> None:
         """Set checkbox label green when checked, default when unchecked."""
         checkbox.label_style = (
-            ft.TextStyle(color=UIConfig.COLOR_CHECKBOX_ACTIVE) if checkbox.value else None
+            ft.TextStyle(color=UIConfig.COLOR_CHECKBOX_ACTIVE)
+            if checkbox.value
+            else None
         )
 
     @staticmethod
@@ -33,9 +35,13 @@ class HandlerBase:
         if is_valid is None:
             field.suffix = None
         elif is_valid:
-            field.suffix = ft.Icon(ft.Icons.CHECK_CIRCLE, color=UIConfig.COLOR_VALIDATION_OK)
+            field.suffix = ft.Icon(
+                ft.Icons.CHECK_CIRCLE, color=UIConfig.COLOR_VALIDATION_OK
+            )
         else:
-            field.suffix = ft.Icon(ft.Icons.CANCEL, color=UIConfig.COLOR_VALIDATION_ERROR)
+            field.suffix = ft.Icon(
+                ft.Icons.CANCEL, color=UIConfig.COLOR_VALIDATION_ERROR
+            )
 
     def _update_build_button_state(self) -> None:
         """Enable/disable build button and copy-path button based on validation state."""
@@ -115,9 +121,9 @@ class HandlerBase:
             update: Whether to call page.update() after setting.
         """
         type_styles = {
-            "info":    (UIConfig.COLOR_INFO,    ft.Icons.INFO_OUTLINE),
+            "info": (UIConfig.COLOR_INFO, ft.Icons.INFO_OUTLINE),
             "success": (UIConfig.COLOR_SUCCESS, ft.Icons.CHECK_CIRCLE),
-            "error":   (UIConfig.COLOR_ERROR,   ft.Icons.ERROR_OUTLINE),
+            "error": (UIConfig.COLOR_ERROR, ft.Icons.ERROR_OUTLINE),
         }
         color, icon = type_styles.get(status_type, type_styles["info"])
         self.controls.status_text.value = message

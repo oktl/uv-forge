@@ -4,9 +4,10 @@ import subprocess
 import tempfile
 from pathlib import Path
 from unittest.mock import patch
+
 import pytest
 
-from app.handlers.git_handler import handle_git_init, finalize_git_setup
+from app.handlers.git_handler import finalize_git_setup, handle_git_init
 
 
 @pytest.fixture
