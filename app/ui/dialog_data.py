@@ -123,7 +123,7 @@ PROJECT_TYPE_CATEGORIES = {
             (
                 "Web Scraping",
                 "scraping",
-                "Web scraping toolkit with BeautifulSoup, requests, and data extraction utilities",
+                "Web scraping toolkit with BeautifulSoup, httpx, and data extraction utilities",
             ),
             (
                 "Browser Automation",
