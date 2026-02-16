@@ -95,6 +95,7 @@ class MockControls:
         self.reset_button = MockControl()
         self.exit_button = MockControl()
         self.theme_toggle_button = Mock(icon=None)
+        self.about_button = MockControl()
         self.check_pypi_button = MockControl()
         self.pypi_status_text = MockText()
         self.section_titles = []
@@ -1750,3 +1751,66 @@ def test_collect_state_packages_builtin_framework(mock_handlers):
 
     packages = handlers._collect_state_packages()
     assert packages == []  # tkinter maps to None, not installed
+
+
+# ========== About Dialog Handler Tests ==========
+
+
+@pytest.mark.asyncio
+async def test_on_about_click_opens_dialog(mock_handlers):
+    """Test on_about_click loads ABOUT.md and opens a dialog."""
+    handlers, page, controls, state = mock_handlers
+
+    with patch("app.handlers.feature_handlers.ABOUT_FILE") as mock_file:
+        mock_file.read_text.return_value = "# About\nTest content"
+        await handlers.on_about_click(None)
+
+    assert len(page.overlay) == 1
+    dialog = page.overlay[0]
+    assert dialog.open is True
+    assert page.updated is True
+
+
+@pytest.mark.asyncio
+async def test_on_about_click_handles_missing_file(mock_handlers):
+    """Test on_about_click handles missing ABOUT.md gracefully."""
+    handlers, page, controls, state = mock_handlers
+
+    with patch("app.handlers.feature_handlers.ABOUT_FILE") as mock_file:
+        mock_file.read_text.side_effect = FileNotFoundError("not found")
+        await handlers.on_about_click(None)
+
+    # Dialog should still be opened with fallback content
+    assert len(page.overlay) == 1
+    assert page.overlay[0].open is True
+
+
+@pytest.mark.asyncio
+async def test_on_about_internal_link_help(mock_handlers):
+    """Test About dialog internal link navigates to Help dialog."""
+    handlers, page, controls, state = mock_handlers
+
+    with patch("app.handlers.feature_handlers.ABOUT_FILE") as mock_file:
+        mock_file.read_text.return_value = "# About\n[Help](app://help)"
+        await handlers.on_about_click(None)
+
+    about_dialog = page.overlay[0]
+
+    # Extract the on_tap_link handler from the Markdown widget
+    md_widget = about_dialog.content.content.controls[0]
+    assert md_widget.on_tap_link is not None
+
+
+@pytest.mark.asyncio
+async def test_on_about_internal_link_git_cheat_sheet(mock_handlers):
+    """Test About dialog internal link navigates to Git Cheat Sheet dialog."""
+    handlers, page, controls, state = mock_handlers
+
+    with patch("app.handlers.feature_handlers.ABOUT_FILE") as mock_file:
+        mock_file.read_text.return_value = (
+            "# About\n[Git Cheat Sheet](app://git-cheat-sheet)"
+        )
+        await handlers.on_about_click(None)
+
+    about_dialog = page.overlay[0]
+    assert about_dialog.open is True

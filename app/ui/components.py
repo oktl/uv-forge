@@ -90,6 +90,7 @@ class Controls:
         self.reset_button: ft.Button
         self.exit_button: ft.Button
         self.progress_ring: ft.ProgressRing
+        self.about_button: ft.IconButton
         self.help_button: ft.IconButton
         self.git_cheat_sheet_button: ft.IconButton
         self.theme_toggle_button: ft.IconButton
@@ -161,6 +162,12 @@ def create_controls(state: AppState, colors: dict) -> Controls:
         icon=ft.Icons.HELP_OUTLINE,
         icon_size=UIConfig.ICON_SIZE_DEFAULT,
         tooltip="Help & Documentation",
+    )
+
+    controls.about_button = ft.IconButton(
+        icon=ft.Icons.INFO_OUTLINE,
+        icon_size=UIConfig.ICON_SIZE_DEFAULT,
+        tooltip="About",
     )
 
     # Project path controls
@@ -554,8 +561,8 @@ def create_app_bars(page: ft.Page, controls: Controls, colors: dict) -> None:
         ),
         bgcolor=ft.Colors.TRANSPARENT,
         actions=[
-            controls.git_cheat_sheet_button,
             controls.help_button,
+            controls.about_button,
             controls.theme_toggle_button,
         ],
         toolbar_height=UIConfig.APPBAR_TOOLBAR_HEIGHT,

@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
-"""Pytest tests for dialogs.py - Project type dialog creation"""
+"""Pytest tests for dialogs.py - Project type dialog and about dialog creation"""
+
+from unittest.mock import AsyncMock, Mock
 
 import flet as ft
 import pytest
 
-from app.ui.dialogs import create_project_type_dialog
+from app.ui.dialogs import create_about_dialog, create_project_type_dialog
 
 
 def test_create_project_type_dialog_basic():
@@ -224,3 +226,75 @@ def test_create_project_type_dialog_actions():
     # Check button types - Select is FilledButton, Cancel is OutlinedButton
     assert isinstance(dialog.actions[0], ft.FilledButton)  # Select button
     assert isinstance(dialog.actions[1], ft.OutlinedButton)  # Cancel button
+
+
+# ========== About Dialog Tests ==========
+
+
+def test_create_about_dialog_basic():
+    """Test about dialog creates a valid AlertDialog."""
+    page = Mock()
+    page.launch_url = AsyncMock()
+
+    dialog = create_about_dialog(
+        content="# About\nTest content",
+        on_close=lambda _: None,
+        page=page,
+        is_dark_mode=True,
+    )
+
+    assert isinstance(dialog, ft.AlertDialog)
+    assert dialog.modal is True
+    assert dialog.actions is not None
+    assert len(dialog.actions) == 1  # Close button only
+
+
+def test_create_about_dialog_light_mode():
+    """Test about dialog works in light mode."""
+    page = Mock()
+    page.launch_url = AsyncMock()
+
+    dialog = create_about_dialog(
+        content="# About",
+        on_close=lambda _: None,
+        page=page,
+        is_dark_mode=False,
+    )
+
+    assert isinstance(dialog, ft.AlertDialog)
+
+
+def test_create_about_dialog_with_internal_link_callback():
+    """Test about dialog accepts on_internal_link parameter."""
+    page = Mock()
+    page.launch_url = AsyncMock()
+    captured = []
+
+    dialog = create_about_dialog(
+        content="# About\n[Help](app://help)",
+        on_close=lambda _: None,
+        page=page,
+        is_dark_mode=True,
+        on_internal_link=lambda path: captured.append(path),
+    )
+
+    assert isinstance(dialog, ft.AlertDialog)
+
+
+def test_create_about_dialog_has_markdown_content():
+    """Test about dialog wraps content in a Markdown widget."""
+    page = Mock()
+    page.launch_url = AsyncMock()
+
+    dialog = create_about_dialog(
+        content="# UV Project Creator\nVersion 0.1.0",
+        on_close=lambda _: None,
+        page=page,
+        is_dark_mode=True,
+    )
+
+    # Content is Container > Column > [Markdown]
+    column = dialog.content.content
+    assert isinstance(column, ft.Column)
+    assert len(column.controls) == 1
+    assert isinstance(column.controls[0], ft.Markdown)

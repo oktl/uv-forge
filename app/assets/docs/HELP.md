@@ -142,6 +142,7 @@ A **confirmation dialog** will appear showing a summary of your project settings
 - **Reset Button** (`⌘R`) - Restore all settings to defaults (preserves dark/light mode preference)
 - **Theme Toggle** - Click the sun/moon icon to switch between light and dark mode
 - **Help Button** - Click the "?" icon to view this help documentation
+- **About Button** - Click the "i" icon to view app info, tech stack, and features (with links back to Help and Git Cheat Sheet)
 - **Real-time Validation** - The app shows validation status with ✓ (valid) and ✗ (invalid) icons
 - **Warning Banner** - Any issues are displayed below the project name field
 - **Status Messages** - See what's happening in the status bar during build

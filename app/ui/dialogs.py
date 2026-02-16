@@ -5,6 +5,7 @@ that maintain consistent styling and behavior across the application.
 """
 
 import ast
+import collections.abc
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -342,6 +343,7 @@ def _create_markdown_dialog(
     page: ft.Page,
     is_dark_mode: bool,
     width: int = UIConfig.DIALOG_WIDTH,
+    on_internal_link: collections.abc.Callable[[str], None] | None = None,
 ) -> ft.AlertDialog:
     """Create a theme-aware dialog with scrollable markdown content.
 
@@ -352,6 +354,7 @@ def _create_markdown_dialog(
         page: The Flet page instance (needed to launch URLs)
         is_dark_mode: Whether dark mode is active
         width: Dialog content width in pixels
+        on_internal_link: Optional callback for app:// links
 
     Returns:
         Configured AlertDialog
@@ -359,7 +362,11 @@ def _create_markdown_dialog(
     colors = get_theme_colors(is_dark_mode)
 
     async def handle_link_click(e):
-        await page.launch_url(e.data)
+        url = e.data
+        if url.startswith("app://") and on_internal_link is not None:
+            on_internal_link(url[len("app://") :])
+        else:
+            await page.launch_url(url)
 
     return ft.AlertDialog(
         modal=True,
@@ -404,6 +411,24 @@ def create_git_cheat_sheet_dialog(
     """Create theme-aware dialog displaying the Git cheat sheet."""
     return _create_markdown_dialog(
         "Git Cheat Sheet", content, on_close, page, is_dark_mode, width=900
+    )
+
+
+def create_about_dialog(
+    content: str,
+    on_close,
+    page: ft.Page,
+    is_dark_mode: bool,
+    on_internal_link: collections.abc.Callable[[str], None] | None = None,
+) -> ft.AlertDialog:
+    """Create theme-aware About dialog with optional internal link navigation."""
+    return _create_markdown_dialog(
+        "About",
+        content,
+        on_close,
+        page,
+        is_dark_mode,
+        on_internal_link=on_internal_link,
     )
 
 

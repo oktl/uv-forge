@@ -6,6 +6,8 @@ including Python version options, UI frameworks, and default paths.
 
 from pathlib import Path
 
+APP_VERSION = "0.1.0"
+
 # Python versions supported by the application
 PYTHON_VERSIONS = ["3.14", "3.13", "3.12", "3.11", "3.10", "3.9"]
 DEFAULT_PYTHON_VERSION = "3.14"
@@ -126,6 +128,7 @@ BOILERPLATE_DIR = TEMPLATES_DIR / "boilerplate"
 DOCS_DIR = Path(__file__).parent.parent / "assets" / "docs"
 HELP_FILE = DOCS_DIR / "HELP.md"
 GIT_CHEAT_SHEET_FILE = DOCS_DIR / "Git-Cheat-Sheet.md"
+ABOUT_FILE = DOCS_DIR / "ABOUT.md"
 
 # Default paths
 DEFAULT_PROJECT_ROOT = str(Path.home() / "Projects")

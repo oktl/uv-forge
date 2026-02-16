@@ -123,6 +123,7 @@ def attach_handlers(page: ft.Page, state: AppState) -> None:
         handlers.on_git_cheat_sheet_click
     )
     controls.help_button.on_click = wrap_async(handlers.on_help_click)
+    controls.about_button.on_click = wrap_async(handlers.on_about_click)
     controls.theme_toggle_button.on_click = wrap_async(handlers.on_theme_toggle)
 
     # --- Keyboard Shortcuts ---

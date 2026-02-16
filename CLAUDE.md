@@ -23,7 +23,7 @@ Key capabilities:
 ```bash
 uv run create_project        # Via entry point
 python app/main.py            # Direct execution
-uv run pytest                 # Run 390 tests (coverage automatic)
+uv run pytest                 # Run 398 tests (coverage automatic)
 uv run ruff check app         # Lint app/ (runs automatically on commit)
 uv run ruff format app        # Auto-format app/
 ```
@@ -54,14 +54,14 @@ app/
 │   ├── folder_handlers.py    # FolderHandlersMixin — folder tree display and management
 │   ├── package_handlers.py   # PackageHandlersMixin — package list display and management
 │   ├── build_handlers.py     # BuildHandlersMixin — build, reset, exit, keyboard shortcuts
-│   ├── feature_handlers.py   # FeatureHandlersMixin — theme toggle, help, git cheat sheet
+│   ├── feature_handlers.py   # FeatureHandlersMixin — theme toggle, help, git cheat sheet, about
 │   ├── project_builder.py    # build_project() orchestration — UV init, git, folders, packages
 │   ├── filesystem_handler.py # setup_app_structure(), folder creation, cleanup_on_error()
 │   ├── uv_handler.py         # run_uv_init(), install_package(), setup_virtual_env()
 │   ├── git_handler.py        # handle_git_init(), finalize_git_setup() — two-phase git setup
 ├── ui/
 │   ├── components.py         # Controls class + build_main_view(page, state)
-│   ├── dialogs.py            # 8 dialog functions + 5 shared helpers; all theme-aware via is_dark_mode
+│   ├── dialogs.py            # 9 dialog functions + 5 shared helpers; all theme-aware via is_dark_mode
 │   ├── dialog_data.py        # Framework/project type categories, checkbox labels — dialog display metadata
 │   ├── theme_manager.py      # get_theme_colors() singleton
 │   └── ui_config.py          # UI constants (colors, sizes)
@@ -74,8 +74,8 @@ app/
 
 tests/
 ├── core/                     # 148 tests (state, models, validator, template_loader, template_merger, boilerplate_resolver)
-├── handlers/                 # 93 tests (ui_handler, filesystem, git, uv)
-├── ui/                       # 19 tests (dialogs)
+├── handlers/                 # 97 tests (ui_handler, filesystem, git, uv)
+├── ui/                       # 23 tests (dialogs)
 └── utils/                    # 13 tests (async_executor)
 ```
 
@@ -152,6 +152,7 @@ Files use `{{project_name}}` placeholders, substituted at build time with a norm
 - **`normalize_framework_name()`** in `boilerplate_resolver.py` is the shared function for framework name normalization — used by both `ConfigManager` and `BoilerplateResolver`
 - **`normalize_project_name()`** in `boilerplate_resolver.py` converts project names to title case with spaces for `{{project_name}}` substitution (e.g. `my_app` → `My App`)
 - **PyPI checker** (`pypi_checker.py`): Manual trigger via icon button, uses `httpx.AsyncClient` directly (no `AsyncExecutor` needed). PEP 503 name normalization ensures `my_app` and `my-app` are treated as the same package. Tri-state return: `True` (available) / `False` (taken) / `None` (error).
+- **About dialog** (`feature_handlers.py`): Loads `ABOUT.md` with app info, tech stack, features. Supports `app://` internal links — clicking `[Help](app://help)` or `[Git Cheat Sheet](app://git-cheat-sheet)` closes the About dialog and opens the target dialog directly. The `_create_markdown_dialog()` helper accepts an optional `on_internal_link` callback for this.
 - **Two-phase git setup** (if git enabled):
   - Phase 1 (`handle_git_init`): Creates local repo + bare hub at `~/Projects/git-repos/<name>.git`, connects via remote origin
   - Phase 2 (`finalize_git_setup`): Called after all files created; stages, commits, and pushes to hub automatically
@@ -173,7 +174,7 @@ Ruff is configured in `pyproject.toml` and enforced via a git pre-commit hook (`
 
 ## Development Guidelines
 
-- **Run `uv run pytest` before committing** — 390 tests, coverage automatic
+- **Run `uv run pytest` before committing** — 398 tests, coverage automatic
 - **Ruff runs automatically on commit** via pre-commit hook — fix any errors before committing
 - **Add tests** in `tests/core/`, `tests/handlers/`, or `tests/utils/` for new functionality
 - **Use `wrap_async()` for new async handlers** wrapping coroutines for Flet callbacks
@@ -197,3 +198,4 @@ Detailed historical docs live in `app/assets/docs/`:
 - `PYTEST_MIGRATION.md` — test migration details
 - `COVERAGE_GUIDE.md` — per-file coverage analysis
 - `HELP.md` — user-facing help text shown in app
+- `ABOUT.md` — about dialog content (app info, tech stack, features, internal links)
