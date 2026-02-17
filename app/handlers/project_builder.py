@@ -91,15 +91,15 @@ def _create_project_scaffold(
         on_progress: Optional callback invoked with a status string before each step.
     """
 
-    def _p(msg: str) -> None:
+    def _progress(msg: str) -> None:
         if on_progress:
             on_progress(msg)
 
-    _p("Initializing UV project...")
+    _progress("Initializing UV project...")
     run_uv_init(project_path, config.python_version)
 
     if config.git_enabled:
-        _p("Setting up Git repository...")
+        _progress("Setting up Git repository...")
     handle_git_init(project_path, config.git_enabled)
 
     resolver = (
@@ -112,7 +112,7 @@ def _create_project_scaffold(
         else None
     )
 
-    _p("Creating folder structure...")
+    _progress("Creating folder structure...")
     setup_app_structure(
         project_path,
         config.folders,
@@ -140,17 +140,17 @@ def _install_dependencies(
         on_progress: Optional callback invoked with a status string before each step.
     """
 
-    def _p(msg: str) -> None:
+    def _progress(msg: str) -> None:
         if on_progress:
             on_progress(msg)
 
-    _p("Creating virtual environment...")
+    _progress("Creating virtual environment...")
     setup_virtual_env(project_path, config.python_version)
 
     packages = _collect_packages_to_install(config)
     if packages:
         n = len(packages)
-        _p(f"Installing {n} package{'s' if n != 1 else ''}...")
+        _progress(f"Installing {n} package{'s' if n != 1 else ''}...")
     install_packages(project_path, packages)
 
 
