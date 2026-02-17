@@ -238,11 +238,11 @@ def _build_project_tree_lines(config: BuildSummaryConfig) -> list[str]:
         total = len(file_children) + len(subfolders)
         idx = 0
 
-        for f in file_children:
+        for file in file_children:
             idx += 1
             is_last = idx == total
             conn = "└── " if is_last else "├── "
-            lines.append(f"{child_prefix}{conn}{f}")
+            lines.append(f"{child_prefix}{conn}{file}")
 
         for sf in subfolders:
             idx += 1
@@ -387,11 +387,11 @@ def _build_project_tree_controls(config: BuildSummaryConfig) -> list[ft.Control]
         total = len(file_children) + len(subfolders)
         idx = 0
 
-        for f in file_children:
+        for file in file_children:
             idx += 1
             is_last = idx == total
             conn = "└── " if is_last else "├── "
-            controls.append(_tree_row(child_prefix, conn, f, False))
+            controls.append(_tree_row(child_prefix, conn, file, False))
 
         for sf in subfolders:
             idx += 1
@@ -1244,8 +1244,10 @@ def create_add_packages_dialog(
     def on_add_click(e):
         raw = packages_field.value or ""
         # Split on newlines and commas, strip whitespace, drop empty tokens
-        tokens = [t.strip() for part in raw.splitlines() for t in part.split(",")]
-        packages = [t for t in tokens if t]
+        tokens = [
+            token.strip() for part in raw.splitlines() for token in part.split(",")
+        ]
+        packages = [token for token in tokens if token]
         if not packages:
             warning_text.value = "Enter at least one package name."
             warning_text.visible = True
@@ -1344,7 +1346,7 @@ def create_build_summary_dialog(
     rows.append(tree_tile)
 
     if config.packages:
-        n = len(config.packages)
+        count = len(config.packages)
         rows.append(
             ft.Row(
                 [
@@ -1352,7 +1354,7 @@ def create_build_summary_dialog(
                     ft.Column(
                         [
                             ft.Text(
-                                f"{n} package{'s' if n != 1 else ''}",
+                                f"{count} package{'s' if count != 1 else ''}",
                                 size=13,
                                 color=colors.get("section_title"),
                             ),

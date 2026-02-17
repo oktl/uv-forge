@@ -74,10 +74,10 @@ def _merge_files(primary_files: list[str], secondary_files: list[str]) -> list[s
     """
     seen = set(primary_files)
     result = list(primary_files)
-    for f in secondary_files:
-        if f not in seen:
-            seen.add(f)
-            result.append(f)
+    for filename in secondary_files:
+        if filename not in seen:
+            seen.add(filename)
+            result.append(filename)
     return result
 
 
@@ -124,8 +124,8 @@ def merge_folder_lists(
     Returns:
         Merged list of normalized folder dicts.
     """
-    norm_primary = [normalize_folder(f) for f in primary]
-    norm_secondary = [normalize_folder(f) for f in secondary]
+    norm_primary = [normalize_folder(folder) for folder in primary]
+    norm_secondary = [normalize_folder(folder) for folder in secondary]
 
     # Index secondary by name for lookup
     secondary_by_name: dict[str, dict[str, Any]] = {}

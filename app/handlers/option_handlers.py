@@ -207,7 +207,7 @@ class OptionHandlersMixin:
         """
         settings = self.template_loader.load_config(template_name)
         raw_folders = settings.get("folders", DEFAULT_FOLDERS.copy())
-        return [normalize_folder(f) for f in raw_folders]
+        return [normalize_folder(folder) for folder in raw_folders]
 
     def _load_project_type_template(self, project_type: str | None) -> None:
         """Load folder template for the specified project type."""
@@ -258,9 +258,11 @@ class OptionHandlersMixin:
         # Rebuild package list: keep user-added packages, replace auto ones
         new_auto = self._collect_state_packages()
         prev_auto = set(self.state.auto_packages)
-        manual = [p for p in self.state.packages if p not in prev_auto]
+        manual = [pkg for pkg in self.state.packages if pkg not in prev_auto]
         new_auto_set = set(new_auto)
-        self.state.packages = new_auto + [p for p in manual if p not in new_auto_set]
+        self.state.packages = new_auto + [
+            pkg for pkg in manual if pkg not in new_auto_set
+        ]
         self.state.auto_packages = new_auto
 
         self._update_folder_display()

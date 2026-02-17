@@ -149,8 +149,8 @@ def _install_dependencies(
 
     packages = _collect_packages_to_install(config)
     if packages:
-        n = len(packages)
-        _progress(f"Installing {n} package{'s' if n != 1 else ''}...")
+        count = len(packages)
+        _progress(f"Installing {count} package{'s' if count != 1 else ''}...")
     install_packages(project_path, packages)
 
 

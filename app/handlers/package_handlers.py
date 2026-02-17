@@ -91,7 +91,7 @@ class PackageHandlersMixin:
         existing = set(self.state.packages)
 
         def on_packages_entered(new_packages: list[str]) -> None:
-            added = [p for p in new_packages if p not in existing]
+            added = [pkg for pkg in new_packages if pkg not in existing]
             self.state.packages.extend(added)
             existing.update(added)
             dialog.open = False

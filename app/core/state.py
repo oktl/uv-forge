@@ -79,6 +79,6 @@ class AppState:
         """
         preserved_dark_mode = self.is_dark_mode
         fresh = AppState()
-        for f in fields(self):
-            setattr(self, f.name, getattr(fresh, f.name))
+        for attr in fields(self):
+            setattr(self, attr.name, getattr(fresh, attr.name))
         self.is_dark_mode = preserved_dark_mode
