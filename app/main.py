@@ -1,4 +1,4 @@
-"""Application entry point for the UV Project Creator.
+"""Application entry point for UV Forge.
 
 This module initializes the Flet application, configures the main page,
 and wires together the application state, UI components, and event handlers.
@@ -33,10 +33,10 @@ async def main(page: ft.Page) -> None:
     try:
         # Set up logging first thing.
         setup_logging()
-        logger.info("Starting Create Project application")
+        logger.info("Starting UV Forge application")
 
         # Configure page-level settings including window size, colors, and title.
-        page.title = "UV Project Creator"
+        page.title = "UV Forge"
         page.window.width = 750
         page.window.height = 1360
         page.padding = 30

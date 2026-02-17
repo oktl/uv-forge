@@ -59,4 +59,4 @@ For more information, visit the official Git documentation at [Git Docs](https:/
 ## See Also
 
 - [Help & Documentation](app://help) — Usage guide and keyboard shortcuts
-- [About UV Project Creator](app://about) — App info, tech stack, and features
+- [About UV Forge](app://about) — App info, tech stack, and features

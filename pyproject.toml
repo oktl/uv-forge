@@ -1,7 +1,7 @@
 [project]
-name = "create-project"
+name = "uv-forge"
 version = "0.1.0"
-description = "Create configured Python projects from project templates"
+description = "A desktop app for forging Python projects with UV — templates, frameworks, and smart scaffolding"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
@@ -22,7 +22,7 @@ dev = [
 ]
 
 [project.scripts]
-create_project = "app.main:run"
+uv_forge = "app.main:run"
 
 [tool.pytest.ini_options]
 python_files = "test_*.py"

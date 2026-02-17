@@ -1,4 +1,4 @@
-# UV Project Creator Help
+# UV Forge Help
 
 This application helps you create new Python projects using UV with automatic folder structure generation, template management, and package installation.
 
@@ -184,5 +184,5 @@ You can select **both** a UI framework and a project type! The templates will be
 
 ## See Also
 
-- [About UV Project Creator](app://about) — App info, tech stack, and features
+- [About UV Forge](app://about) — App info, tech stack, and features
 - [Git Cheat Sheet](app://git-cheat-sheet) — Quick reference for common Git commands

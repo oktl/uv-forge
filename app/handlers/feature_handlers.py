@@ -44,7 +44,7 @@ class FeatureHandlersMixin:
         try:
             help_text = HELP_FILE.read_text(encoding="utf-8")
         except (FileNotFoundError, OSError) as e:
-            help_text = """# UV Project Creator Help
+            help_text = """# UV Forge Help
 
 **Error**: Could not load help file.
 
@@ -125,7 +125,7 @@ For more information, visit: https://docs.astral.sh/uv/
         try:
             content = ABOUT_FILE.read_text(encoding="utf-8")
         except (FileNotFoundError, OSError) as e:
-            content = "# UV Project Creator\n\nError: Could not load about file."
+            content = "# UV Forge\n\nError: Could not load about file."
             self._set_status(
                 f"Warning: About file not found ({e})", "error", update=False
             )

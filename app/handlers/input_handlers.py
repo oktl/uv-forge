@@ -105,7 +105,7 @@ class InputHandlersMixin:
             self._update_build_button_state()
             self._set_warning("Enter a project name.", update=False)
             self._update_path_preview()
-            self.page.title = "UV Project Creator"
+            self.page.title = "UV Forge"
             self.page.update()
             return
 
@@ -131,11 +131,7 @@ class InputHandlersMixin:
         self.controls.check_pypi_button.disabled = not self.state.name_valid
         self._update_build_button_state()
         self._update_path_preview()
-        self.page.title = (
-            f"UV Project Creator — {name}"
-            if self.state.name_valid
-            else "UV Project Creator"
-        )
+        self.page.title = f"UV Forge — {name}" if self.state.name_valid else "UV Forge"
         self.page.update()
 
     async def on_check_pypi(self, _: ft.ControlEvent) -> None:

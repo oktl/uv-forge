@@ -234,7 +234,7 @@ class BuildHandlersMixin:
         self.controls.check_pypi_button.disabled = True
         self.controls.path_preview_text.value = "\u00a0"
         self.controls.progress_ring.visible = False
-        self.page.title = "UV Project Creator"
+        self.page.title = "UV Forge"
 
         self._set_validation_icon(self.controls.project_path_input, True)
         self._set_validation_icon(self.controls.project_name_input, None)

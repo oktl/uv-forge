@@ -1,4 +1,4 @@
-"""Event handlers for the UV Project Creator.
+"""Event handlers for UV Forge.
 
 This module composes handler mixins into a single Handlers class and
 provides the attach_handlers() function that wires all UI controls.

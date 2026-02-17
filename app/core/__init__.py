@@ -1,4 +1,4 @@
-"""Core business logic for the UV Project Creator."""
+"""Core business logic for UV Forge."""
 
 from app.core.state import AppState
 

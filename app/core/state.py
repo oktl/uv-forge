@@ -1,4 +1,4 @@
-"""Application state management for the UV Project Creator.
+"""Application state management for UV Forge.
 
 This module defines the AppState dataclass that holds all mutable application
 state, including project configuration, UI state, and validation status.

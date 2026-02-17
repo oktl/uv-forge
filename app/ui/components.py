@@ -375,7 +375,7 @@ def create_controls(state: AppState, colors: dict) -> Controls:
 
     # Title and container lists
     controls.main_title = ft.Text(
-        "UV Project Creator",
+        "UV Forge",
         size=UIConfig.MAIN_TITLE_SIZE,
         weight=ft.FontWeight.BOLD,
         color=colors["main_title"],

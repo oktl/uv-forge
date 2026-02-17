@@ -1,4 +1,4 @@
-# CLAUDE.md - UV Project Creator
+# CLAUDE.md - UV Forge
 
 **Version:** 0.1.0 | **Python:** 3.14+ | **UI:** Flet 0.80.5+ | **Package Manager:** UV
 
@@ -21,7 +21,7 @@ Key capabilities:
 ## Running
 
 ```bash
-uv run create_project        # Via entry point
+uv run uv_forge              # Via entry point
 python app/main.py            # Direct execution
 uv run pytest                 # Run 439 tests (coverage automatic)
 uv run ruff check app         # Lint app/ (runs automatically on commit)
