@@ -1279,7 +1279,12 @@ def create_add_packages_dialog(
             padding=UIConfig.DIALOG_CONTENT_PADDING,
         ),
         actions=_create_dialog_actions(
-            "Add", on_add_click, on_close_callback, ft.Icons.ADD, is_dark_mode
+            "Add",
+            on_add_click,
+            on_close_callback,
+            ft.Icons.ADD,
+            is_dark_mode,
+            primary_autofocus=False,
         ),
         actions_alignment=ft.MainAxisAlignment.END,
     )
