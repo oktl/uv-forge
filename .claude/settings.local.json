@@ -12,9 +12,7 @@
       "Bash(uv run:*)",
       "Bash(python3:*)",
       "Bash(uv sync:*)",
-      "Bash(git push:*)",
-      "Bash(git -C /Users/tim/Projects/for-launch/create-project add app/core/ui_state_sync.py app/handlers/button_state.py app/config/config.py CLAUDE.md)",
-      "Bash(git -C /Users/tim/Projects/for-launch/create-project commit -m \"$\\(cat <<''EOF''\nRemove stale leftover files from previous project\n\nDeleted ui_state_sync.py \\(legacy YouTube Transcript Downloader code\\),\nbutton_state.py \\(empty placeholder\\), and config/config.py \\(empty file\\) —\nnone were imported anywhere in the codebase. Updated CLAUDE.md Known\nIssues to reflect the cleanup.\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")"
+      "Bash(git push:*)"
     ]
   },
   "prefersReducedMotion": false
