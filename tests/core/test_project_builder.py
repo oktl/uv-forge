@@ -2,8 +2,15 @@
 
 import tempfile
 from pathlib import Path
+from subprocess import CalledProcessError
+from unittest.mock import MagicMock, patch
 
-from app.handlers.project_builder import remove_partial_project
+from app.core.models import ProjectConfig
+from app.handlers.project_builder import (
+    _collect_packages_to_install,
+    build_project,
+    remove_partial_project,
+)
 
 
 class TestRemovePartialProject:
@@ -70,3 +77,198 @@ class TestRemovePartialProject:
             remove_partial_project(project_path)
 
             assert not project_path.exists()
+
+
+def _make_config(tmpdir, **kwargs) -> ProjectConfig:
+    """Helper to build a minimal ProjectConfig rooted in a temp directory."""
+    defaults = {
+        "project_name": "my_project",
+        "project_path": Path(tmpdir),
+        "python_version": "3.14",
+        "git_enabled": False,
+        "ui_project_enabled": False,
+        "framework": "",
+        "other_project_enabled": False,
+        "project_type": None,
+        "packages": [],
+    }
+    defaults.update(kwargs)
+    return ProjectConfig(**defaults)
+
+
+class TestCollectPackagesToInstall:
+    """Tests for _collect_packages_to_install package resolution logic."""
+
+    def test_explicit_packages_returned_directly(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            config = _make_config(tmpdir, packages=["httpx", "rich"])
+            assert _collect_packages_to_install(config) == ["httpx", "rich"]
+
+    def test_explicit_packages_skip_framework_lookup(self):
+        """Explicit list wins even when framework is set."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            config = _make_config(
+                tmpdir,
+                packages=["mylib"],
+                ui_project_enabled=True,
+                framework="flet",
+            )
+            assert _collect_packages_to_install(config) == ["mylib"]
+
+    def test_framework_package_added_when_ui_enabled(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            config = _make_config(
+                tmpdir, ui_project_enabled=True, framework="flet"
+            )
+            assert "flet" in _collect_packages_to_install(config)
+
+    def test_builtin_framework_returns_no_package(self):
+        """tkinter is built-in; FRAMEWORK_PACKAGE_MAP maps it to None."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            config = _make_config(
+                tmpdir,
+                ui_project_enabled=True,
+                framework="tkinter (built-in)",
+            )
+            assert _collect_packages_to_install(config) == []
+
+    def test_project_type_packages_added_when_other_enabled(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            config = _make_config(
+                tmpdir,
+                other_project_enabled=True,
+                project_type="fastapi",
+            )
+            pkgs = _collect_packages_to_install(config)
+            assert "fastapi" in pkgs
+            assert "uvicorn" in pkgs
+
+    def test_both_flags_combine_packages(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            config = _make_config(
+                tmpdir,
+                ui_project_enabled=True,
+                framework="flet",
+                other_project_enabled=True,
+                project_type="cli_click",
+            )
+            pkgs = _collect_packages_to_install(config)
+            assert "flet" in pkgs
+            assert "click" in pkgs
+
+    def test_no_flags_returns_empty(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            config = _make_config(tmpdir)
+            assert _collect_packages_to_install(config) == []
+
+    def test_unknown_project_type_returns_empty(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            config = _make_config(
+                tmpdir,
+                other_project_enabled=True,
+                project_type="nonexistent_type",
+            )
+            assert _collect_packages_to_install(config) == []
+
+
+class TestBuildProjectErrors:
+    """Tests for build_project error handling and validation."""
+
+    def test_invalid_project_name_returns_failure(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            config = _make_config(tmpdir, project_name="")
+            result = build_project(config)
+            assert not result.success
+            assert result.message
+
+    def test_invalid_name_with_spaces_returns_failure(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            config = _make_config(tmpdir, project_name="my project")
+            result = build_project(config)
+            assert not result.success
+
+    def test_called_process_error_returns_failure_and_cleans_up(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            config = _make_config(tmpdir, project_name="my_proj")
+            cmd_error = CalledProcessError(1, ["uv", "init"], stderr="some error")
+
+            with patch(
+                "app.handlers.project_builder._create_project_scaffold",
+                side_effect=cmd_error,
+            ):
+                result = build_project(config)
+
+            assert not result.success
+            assert "Command failed" in result.message
+            # Project directory should be cleaned up
+            assert not (Path(tmpdir) / "my_proj").exists()
+
+    def test_os_error_returns_failure_and_cleans_up(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            config = _make_config(tmpdir, project_name="my_proj")
+
+            with patch(
+                "app.handlers.project_builder._create_project_scaffold",
+                side_effect=OSError("disk full"),
+            ):
+                result = build_project(config)
+
+            assert not result.success
+            assert "Could not create project files" in result.message
+
+    def test_generic_exception_returns_failure(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            config = _make_config(tmpdir, project_name="my_proj")
+
+            with patch(
+                "app.handlers.project_builder._create_project_scaffold",
+                side_effect=RuntimeError("unexpected"),
+            ):
+                result = build_project(config)
+
+            assert not result.success
+
+    def test_missing_base_directory_creates_it(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            deep_path = Path(tmpdir) / "a" / "b" / "c"
+            config = _make_config(deep_path, project_name="my_proj")
+
+            with patch(
+                "app.handlers.project_builder._create_project_scaffold"
+            ) as mock_scaffold, patch(
+                "app.handlers.project_builder._install_dependencies"
+            ), patch(
+                "app.handlers.project_builder.finalize_git_setup"
+            ):
+                mock_scaffold.return_value = None
+                result = build_project(config)
+
+            assert deep_path.exists()
+
+    def test_base_dir_creation_failure_returns_error(self):
+        """OSError while creating missing base dir returns clean error."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            config = _make_config(
+                Path(tmpdir) / "missing_base", project_name="my_proj"
+            )
+            with patch("pathlib.Path.mkdir", side_effect=OSError("permission denied")):
+                result = build_project(config)
+
+            assert not result.success
+            assert "Could not create base directory" in result.message
+
+    def test_success_returns_success_result(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            config = _make_config(tmpdir, project_name="my_proj")
+
+            with patch(
+                "app.handlers.project_builder._create_project_scaffold"
+            ), patch(
+                "app.handlers.project_builder._install_dependencies"
+            ), patch(
+                "app.handlers.project_builder.finalize_git_setup"
+            ):
+                result = build_project(config)
+
+            assert result.success
+            assert "my_proj" in result.message

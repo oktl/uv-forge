@@ -23,7 +23,7 @@ Key capabilities:
 ```bash
 uv run uv_forge              # Via entry point
 python app/main.py            # Direct execution
-uv run pytest                 # Run 439 tests (coverage automatic)
+uv run pytest                 # Run 493 tests (coverage automatic)
 uv run ruff check app         # Lint app/ (runs automatically on commit)
 uv run ruff format app        # Auto-format app/
 ```

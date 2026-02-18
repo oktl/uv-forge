@@ -3,6 +3,7 @@
 import json
 import tempfile
 from pathlib import Path
+from unittest.mock import patch
 
 from app.core.template_loader import TemplateLoader
 
@@ -131,3 +132,122 @@ class TestGetConfigDisplayName:
 
         assert " template" in display_name
         assert display_name.endswith(" template")
+
+
+class TestLoadConfigProjectTypePath:
+    """Tests for load_config with project_type style paths (lines 101-102)."""
+
+    def test_project_type_path_extracts_filename(self):
+        """load_config with 'project_types/django' should load the django template."""
+        manager = TemplateLoader()
+        config = manager.load_config("project_types/django")
+
+        assert isinstance(config, dict)
+        assert "folders" in config
+        # Loaded template name is stored
+        assert manager.loaded_template == "project_types/django"
+
+    def test_project_type_path_with_nested_slash(self):
+        """Only the last segment after / is used as the filename."""
+        manager = TemplateLoader()
+        # Use a real project type that exists
+        config = manager.load_config("project_types/fastapi")
+        assert "folders" in config
+
+    def test_framework_path_without_slash_normalizes(self):
+        """Framework name without slash should load from ui_frameworks/ directory."""
+        manager = TemplateLoader()
+        config = manager.load_config("flet")
+        assert "folders" in config
+        assert manager.loaded_template == "flet"
+
+    def test_nonexistent_project_type_falls_back(self):
+        """Unknown project type falls through to default template."""
+        manager = TemplateLoader()
+        config = manager.load_config("project_types/nonexistent_xyz")
+        assert "folders" in config
+
+    def test_load_config_updates_config_source(self):
+        """After successful load, config_source is updated (line 110-111)."""
+        manager = TemplateLoader()
+        original_source = manager.config_source
+        manager.load_config("flet")
+        # config_source should reflect the flet template path now
+        assert "flet" in str(manager.config_source).lower()
+
+    def test_fallback_to_default_folders_when_no_template(self):
+        """When both specific and default templates fail, hardcoded defaults used (lines 121-122)."""
+        manager = TemplateLoader()
+        # Patch _load_template to always return None
+        with patch.object(manager, "_load_template", return_value=None):
+            config = manager.load_config("some_framework")
+
+        assert "folders" in config
+        # Should have fallen back to DEFAULT_FOLDERS
+        from app.core.constants import DEFAULT_FOLDERS
+        assert config["folders"] == DEFAULT_FOLDERS.copy()
+
+
+class TestSaveConfig:
+    """Tests for save_config (lines 132-136)."""
+
+    def test_save_config_writes_json(self):
+        """save_config should write valid JSON with folder structure."""
+        manager = TemplateLoader()
+
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            temp_path = Path(f.name)
+
+        try:
+            manager.config_source = temp_path
+            settings = {"folders": ["src", "tests", "docs"]}
+            manager.settings = settings
+
+            manager.save_config()
+
+            with open(temp_path) as f:
+                saved = json.load(f)
+
+            assert "folders" in saved
+            assert saved["folders"] == ["src", "tests", "docs"]
+        finally:
+            temp_path.unlink()
+
+    def test_save_config_with_explicit_settings(self):
+        """save_config accepts explicit settings to override self.settings."""
+        manager = TemplateLoader()
+
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            temp_path = Path(f.name)
+
+        try:
+            manager.config_source = temp_path
+            explicit = {"folders": ["custom"]}
+
+            manager.save_config(explicit)
+
+            with open(temp_path) as f:
+                saved = json.load(f)
+
+            assert saved["folders"] == ["custom"]
+        finally:
+            temp_path.unlink()
+
+    def test_save_config_uses_self_settings_when_none_passed(self):
+        """When no settings arg, self.settings is used."""
+        manager = TemplateLoader()
+        manager.settings = {"folders": ["app", "lib"]}
+
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            temp_path = Path(f.name)
+
+        try:
+            manager.config_source = temp_path
+            manager.save_config()
+
+            with open(temp_path) as f:
+                saved = json.load(f)
+
+            assert saved["folders"] == ["app", "lib"]
+        finally:
+            temp_path.unlink()
