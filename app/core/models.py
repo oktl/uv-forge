@@ -4,8 +4,6 @@ This module defines the core data structures used throughout the application,
 including project configuration, folder specifications, and build results.
 """
 
-from __future__ import annotations
-
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -29,49 +27,12 @@ class FolderSpec:
     subfolders: list[str | FolderSpec] | None = None
     files: list[str] | None = None
 
-    @classmethod
-    def _from_dict(cls, data: dict[str, Any]) -> FolderSpec:
-        """Create a FolderSpec from a dictionary (internal use only).
-
-        This method is provided for potential future use or testing scenarios where
-        folder specs need to be reconstructed from raw dictionaries. It is not
-        currently used in the application's runtime code path, which works directly
-        with mixed dict/string folder structures.
-
-        Args:
-            data: Dictionary with folder specification data.
-
-        Returns:
-            FolderSpec instance.
-
-        Raises:
-            ValueError: If 'name' field is missing from data.
-        """
-        if "name" not in data:
-            raise ValueError("FolderSpec requires 'name' field in dictionary")
-
-        subfolders = data.get("subfolders")
-        if subfolders:
-            # Recursively convert subfolders
-            subfolders = [
-                cls._from_dict(sf) if isinstance(sf, dict) else sf for sf in subfolders
-            ]
-
-        return cls(
-            name=data.get("name", ""),
-            create_init=data.get("create_init", True),
-            root_level=data.get("root_level", False),
-            subfolders=subfolders,
-            files=data.get("files"),
-        )
-
     def to_dict(self) -> dict[str, Any]:
         """Convert FolderSpec to a dictionary.
 
-        Only includes fields with non-default values to minimize JSON output:
-        - create_init (default True): only included if False
-        - root_level (default False): only included if True
-        - subfolders, files: only included if present
+        Only includes fields with non-default values to minimize JSON output.
+        Note: Not a lossless round-trip — default values (create_init=True,
+        root_level=False) are omitted from the output.
 
         Returns:
             Dictionary representation of the folder specification.
@@ -222,3 +183,38 @@ class BuildSummaryConfig:
     file_count: int
     packages: list[str] = field(default_factory=list)
     folders: list[str | dict] = field(default_factory=list)
+
+    @classmethod
+    def from_project_config(
+        cls,
+        config: ProjectConfig,
+        folder_count: int,
+        file_count: int,
+        folders: list[str | dict],
+    ) -> BuildSummaryConfig:
+        """Create a BuildSummaryConfig from a ProjectConfig.
+
+        Args:
+            config: The project configuration to summarize.
+            folder_count: Number of folders to be created.
+            file_count: Number of files to be created.
+            folders: Normalized folder structure for tree preview.
+
+        Returns:
+            BuildSummaryConfig instance.
+        """
+        return cls(
+            project_name=config.project_name,
+            project_path=str(config.project_path),
+            python_version=config.python_version,
+            git_enabled=config.git_enabled,
+            ui_project_enabled=config.ui_project_enabled,
+            framework=config.effective_framework,
+            other_project_enabled=config.other_project_enabled,
+            project_type=config.effective_project_type,
+            starter_files=config.include_starter_files,
+            folder_count=folder_count,
+            file_count=file_count,
+            packages=config.packages,
+            folders=folders,
+        )

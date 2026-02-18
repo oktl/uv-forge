@@ -37,7 +37,7 @@ class AppState:
     """
 
     # Path and project settings
-    project_path: str = DEFAULT_PROJECT_ROOT
+    project_path: str = str(DEFAULT_PROJECT_ROOT)
     project_name: str = ""
 
     # Options

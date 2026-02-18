@@ -3,7 +3,7 @@
 
 from pathlib import Path
 
-from app.core.models import BuildResult, FolderSpec, ProjectConfig
+from app.core.models import BuildResult, BuildSummaryConfig, FolderSpec, ProjectConfig
 
 # FolderSpec Tests
 
@@ -31,39 +31,6 @@ def test_folder_spec_all_parameters():
     assert len(folder.files) == 2
 
 
-def test_folder_spec_from_dict():
-    """Test FolderSpec._from_dict()"""
-    data = {
-        "name": "models",
-        "create_init": True,
-        "root_level": False,
-        "files": ["__init__.py", "user.py"]
-    }
-    folder = FolderSpec._from_dict(data)
-    assert folder.name == "models"
-    assert folder.create_init == True
-    assert len(folder.files) == 2
-
-
-def test_folder_spec_from_dict_nested_subfolders():
-    """Test FolderSpec._from_dict() with nested subfolders"""
-    data = {
-        "name": "app",
-        "create_init": True,
-        "subfolders": [
-            {"name": "core", "create_init": True},
-            {"name": "utils", "create_init": False}
-        ]
-    }
-    folder = FolderSpec._from_dict(data)
-    assert folder.name == "app"
-    assert len(folder.subfolders) == 2
-    assert isinstance(folder.subfolders[0], FolderSpec)
-    assert folder.subfolders[0].name == "core"
-    assert folder.subfolders[1].name == "utils"
-    assert folder.subfolders[1].create_init == False
-
-
 def test_folder_spec_to_dict():
     """Test FolderSpec.to_dict()"""
     folder = FolderSpec(
@@ -78,6 +45,17 @@ def test_folder_spec_to_dict():
     assert result["create_init"] == False
     assert result["root_level"] == True
     assert len(result["files"]) == 1
+
+
+def test_folder_spec_to_dict_omits_defaults():
+    """Test that to_dict() omits fields with default values"""
+    folder = FolderSpec(name="minimal")
+    result = folder.to_dict()
+    assert result == {"name": "minimal"}
+    assert "create_init" not in result  # True is default, omitted
+    assert "root_level" not in result   # False is default, omitted
+    assert "subfolders" not in result
+    assert "files" not in result
 
 
 def test_folder_spec_to_dict_nested():
@@ -122,6 +100,54 @@ def test_project_config_full_path():
     full_path = config.full_path
     expected = Path("/home/user/projects/test_app")
     assert full_path == expected
+
+
+def test_project_config_effective_framework_when_enabled():
+    """Test effective_framework returns framework when UI is enabled"""
+    config = ProjectConfig(
+        project_name="test",
+        project_path=Path("/tmp"),
+        python_version="3.14",
+        ui_project_enabled=True,
+        framework="flet",
+    )
+    assert config.effective_framework == "flet"
+
+
+def test_project_config_effective_framework_when_disabled():
+    """Test effective_framework returns None when UI is disabled"""
+    config = ProjectConfig(
+        project_name="test",
+        project_path=Path("/tmp"),
+        python_version="3.14",
+        ui_project_enabled=False,
+        framework="flet",
+    )
+    assert config.effective_framework is None
+
+
+def test_project_config_effective_project_type_when_enabled():
+    """Test effective_project_type returns type when enabled"""
+    config = ProjectConfig(
+        project_name="test",
+        project_path=Path("/tmp"),
+        python_version="3.14",
+        other_project_enabled=True,
+        project_type="django",
+    )
+    assert config.effective_project_type == "django"
+
+
+def test_project_config_effective_project_type_when_disabled():
+    """Test effective_project_type returns None when disabled"""
+    config = ProjectConfig(
+        project_name="test",
+        project_path=Path("/tmp"),
+        python_version="3.14",
+        other_project_enabled=False,
+        project_type="django",
+    )
+    assert config.effective_project_type is None
 
 
 def test_project_config_mixed_folder_types():
@@ -170,3 +196,60 @@ def test_build_result_failure_without_exception():
     result = BuildResult(success=False, message="Validation failed")
     assert result.success == False
     assert result.error is None
+
+
+# BuildSummaryConfig Tests
+
+def test_build_summary_config_creation():
+    """Test BuildSummaryConfig basic creation"""
+    config = BuildSummaryConfig(
+        project_name="my_app",
+        project_path="/home/user/projects",
+        python_version="3.14",
+        git_enabled=True,
+        ui_project_enabled=True,
+        framework="flet",
+        other_project_enabled=False,
+        project_type=None,
+        starter_files=True,
+        folder_count=5,
+        file_count=10,
+    )
+    assert config.project_name == "my_app"
+    assert config.framework == "flet"
+    assert config.folder_count == 5
+    assert config.packages == []
+    assert config.folders == []
+
+
+def test_build_summary_config_from_project_config():
+    """Test BuildSummaryConfig.from_project_config factory method"""
+    project_config = ProjectConfig(
+        project_name="my_app",
+        project_path=Path("/home/user/projects"),
+        python_version="3.14",
+        git_enabled=True,
+        ui_project_enabled=True,
+        framework="flet",
+        other_project_enabled=False,
+        project_type="django",
+        include_starter_files=True,
+        packages=["flet", "httpx"],
+    )
+    summary = BuildSummaryConfig.from_project_config(
+        config=project_config,
+        folder_count=5,
+        file_count=10,
+        folders=["core", "utils"],
+    )
+    assert summary.project_name == "my_app"
+    assert summary.project_path == "/home/user/projects"
+    assert summary.python_version == "3.14"
+    assert summary.git_enabled is True
+    assert summary.framework == "flet"  # effective_framework since ui enabled
+    assert summary.project_type is None  # effective_project_type since other disabled
+    assert summary.starter_files is True
+    assert summary.folder_count == 5
+    assert summary.file_count == 10
+    assert summary.packages == ["flet", "httpx"]
+    assert summary.folders == ["core", "utils"]

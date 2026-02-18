@@ -11,7 +11,7 @@ def test_appstate_initialization():
     """Test AppState initializes with correct defaults"""
     state = AppState()
 
-    assert state.project_path == DEFAULT_PROJECT_ROOT
+    assert state.project_path == str(DEFAULT_PROJECT_ROOT)
     assert state.project_name == ""
     assert state.python_version == DEFAULT_PYTHON_VERSION
     assert state.git_enabled == True
@@ -82,7 +82,7 @@ def test_appstate_reset():
     state.reset()
 
     # Test reset values (all should be back to defaults except is_dark_mode)
-    assert state.project_path == DEFAULT_PROJECT_ROOT
+    assert state.project_path == str(DEFAULT_PROJECT_ROOT)
     assert state.project_name == ""
     assert state.python_version == DEFAULT_PYTHON_VERSION
     assert state.git_enabled == True
