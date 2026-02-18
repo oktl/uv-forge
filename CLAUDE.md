@@ -21,7 +21,7 @@ Key capabilities:
 ## Running
 
 ```bash
-uv run uv_forge              # Via entry point
+uv run uv-forge              # Via entry point
 python app/main.py            # Direct execution
 uv run pytest                 # Run 493 tests (coverage automatic)
 uv run ruff check app         # Lint app/ (runs automatically on commit)
