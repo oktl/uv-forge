@@ -58,5 +58,10 @@ async def main(page: ft.Page) -> None:
         raise
 
 
-if __name__ == "__main__":
+def run() -> None:
+    """Entry point for the uv-forge console script."""
     ft.run(main, assets_dir="assets")
+
+
+if __name__ == "__main__":
+    run()
