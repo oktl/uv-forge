@@ -4,6 +4,7 @@ This module defines the AppState dataclass that holds all mutable application
 state, including project configuration, UI state, and validation status.
 """
 
+from collections.abc import Callable
 from dataclasses import dataclass, field, fields
 from typing import Any, Literal
 
@@ -66,7 +67,7 @@ class AppState:
 
     # UI state
     is_dark_mode: bool = True
-    active_dialog: Any | None = None  # Currently open dismissible dialog
+    active_dialog: Callable[[], None] | None = None  # Currently open dismissible dialog
 
     # Validation state
     path_valid: bool = True  # Default path is valid

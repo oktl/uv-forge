@@ -51,11 +51,12 @@ class TemplateLoader:
         """
         if not template_path.exists():
             return None
+        _template_errors = (json.JSONDecodeError, OSError)
         try:
             with open(template_path) as f:
                 data = json.load(f)
                 return {"folders": data.get("folders", DEFAULT_FOLDERS.copy())}
-        except json.JSONDecodeError, OSError:
+        except _template_errors:
             return None
 
     def _update_config_state(

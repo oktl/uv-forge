@@ -14,7 +14,7 @@ ValidationResult = tuple[bool, str]
 # Compiled regex patterns for name validation
 _PROJECT_NAME_CHARS = re.compile(r"^[a-zA-Z0-9_-]+$")
 _PROJECT_NAME_START = re.compile(r"^[a-zA-Z_]")
-_FOLDER_NAME_CHARS = re.compile(r"^[a-zA-Z0-9_.-]+$")
+_FOLDER_NAME_CHARS = re.compile(r"^[-a-zA-Z0-9_.]+$")
 
 _RESERVED_NAMES = frozenset({".", ".."})
 _MAX_NAME_LENGTH = 255
@@ -105,6 +105,9 @@ def validate_path(path: Path) -> ValidationResult:
     Returns:
         Tuple of (is_valid, error_message). If valid, error_message is empty string.
     """
+    if not path.is_absolute():
+        return False, "Path must be absolute."
+
     try:
         if not path.exists():
             # Check that the nearest existing ancestor is a writable directory

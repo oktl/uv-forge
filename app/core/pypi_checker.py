@@ -38,5 +38,5 @@ async def check_pypi_availability(name: str, timeout: float = 5.0) -> bool | Non
         if response.status_code == 200:
             return False
         return None
-    except httpx.HTTPError, httpx.TimeoutException:
+    except httpx.HTTPError:
         return None
