@@ -726,9 +726,10 @@ def create_edit_file_dialog(
     colors = get_theme_colors(is_dark_mode)
 
     # Extract filename from path for display - add safety check
+    _path_errors = (ValueError, TypeError)
     try:
         filename = Path(file_path).name
-    except ValueError, TypeError:
+    except _path_errors:
         filename = str(file_path)
 
     # Create editable text field
@@ -1102,9 +1103,10 @@ def create_add_item_dialog(
         if parent_value == "root":
             parent_path = None
         else:
+            _parse_errors = (ValueError, SyntaxError)
             try:
                 parent_path = ast.literal_eval(parent_value)
-            except ValueError, SyntaxError:
+            except _parse_errors:
                 parent_path = None
 
         on_add_callback(name, item_type, parent_path)
