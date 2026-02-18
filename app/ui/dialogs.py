@@ -660,7 +660,18 @@ def create_help_dialog(
     is_dark_mode: bool,
     on_internal_link: collections.abc.Callable[[str], None] | None = None,
 ) -> ft.AlertDialog:
-    """Create theme-aware help dialog with scrollable content."""
+    """Create theme-aware help dialog with scrollable content.
+
+    Args:
+        content: Markdown help text to display.
+        on_close: Close button callback.
+        page: The Flet page instance (needed to launch URLs).
+        is_dark_mode: Whether dark mode is active.
+        on_internal_link: Optional callback for app:// links.
+
+    Returns:
+        Configured AlertDialog with scrollable markdown content.
+    """
     return _create_markdown_dialog(
         "Help & Documentation",
         content,
@@ -678,7 +689,18 @@ def create_git_cheat_sheet_dialog(
     is_dark_mode: bool,
     on_internal_link: collections.abc.Callable[[str], None] | None = None,
 ) -> ft.AlertDialog:
-    """Create theme-aware dialog displaying the Git cheat sheet."""
+    """Create theme-aware dialog displaying the Git cheat sheet.
+
+    Args:
+        content: Markdown cheat sheet text to display.
+        on_close: Close button callback.
+        page: The Flet page instance (needed to launch URLs).
+        is_dark_mode: Whether dark mode is active.
+        on_internal_link: Optional callback for app:// links.
+
+    Returns:
+        Configured AlertDialog with scrollable markdown content.
+    """
     return _create_markdown_dialog(
         "Git Cheat Sheet",
         content,
@@ -697,7 +719,18 @@ def create_about_dialog(
     is_dark_mode: bool,
     on_internal_link: collections.abc.Callable[[str], None] | None = None,
 ) -> ft.AlertDialog:
-    """Create theme-aware About dialog with optional internal link navigation."""
+    """Create theme-aware About dialog with optional internal link navigation.
+
+    Args:
+        content: Markdown about text to display.
+        on_close: Close button callback.
+        page: The Flet page instance (needed to launch URLs).
+        is_dark_mode: Whether dark mode is active.
+        on_internal_link: Optional callback for app:// links.
+
+    Returns:
+        Configured AlertDialog with scrollable markdown content.
+    """
     return _create_markdown_dialog(
         "About",
         content,
@@ -949,7 +982,17 @@ def create_project_type_dialog(
     current_selection: str | None,
     is_dark_mode: bool,
 ) -> ft.AlertDialog:
-    """Create dialog for selecting project type with rich tooltips and styling."""
+    """Create dialog for selecting project type with rich tooltips and styling.
+
+    Args:
+        on_select_callback: Callback receiving the selected project type string, or None if cleared.
+        on_close_callback: Callback when Cancel is clicked.
+        current_selection: Currently selected project type, or None.
+        is_dark_mode: Whether dark mode is active.
+
+    Returns:
+        Configured AlertDialog with categorized radio selection.
+    """
     from app.core.constants import PROJECT_TYPE_PACKAGE_MAP
     from app.ui.dialog_data import PROJECT_TYPE_CATEGORIES
 
@@ -971,7 +1014,17 @@ def create_framework_dialog(
     current_selection: str | None,
     is_dark_mode: bool,
 ) -> ft.AlertDialog:
-    """Create dialog for selecting UI framework with rich tooltips."""
+    """Create dialog for selecting UI framework with rich tooltips.
+
+    Args:
+        on_select_callback: Callback receiving the selected framework string, or None if cleared.
+        on_close_callback: Callback when Cancel is clicked.
+        current_selection: Currently selected framework, or None.
+        is_dark_mode: Whether dark mode is active.
+
+    Returns:
+        Configured AlertDialog with categorized radio selection.
+    """
     from app.core.constants import FRAMEWORK_PACKAGE_MAP
     from app.ui.dialog_data import UI_FRAMEWORK_CATEGORIES
 

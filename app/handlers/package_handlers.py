@@ -17,6 +17,13 @@ class PackageHandlersMixin:
 
         Auto-derived packages (from framework/project type maps) show a muted
         'auto' badge on the right to distinguish them from manually added ones.
+
+        Args:
+            pkg: Package name to display.
+            idx: Index of the package in the list (used for selection tracking).
+
+        Returns:
+            Configured Container with click handler and selection highlighting.
         """
         is_selected = self.state.selected_package_idx == idx
         is_auto = pkg in self.state.auto_packages

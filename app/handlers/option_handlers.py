@@ -210,13 +210,21 @@ class OptionHandlersMixin:
         return [normalize_folder(folder) for folder in raw_folders]
 
     def _load_project_type_template(self, project_type: str | None) -> None:
-        """Load folder template for the specified project type."""
+        """Load folder template for the specified project type.
+
+        Args:
+            project_type: Project type key (e.g., "django"), or None for default.
+        """
         template_name = f"project_types/{project_type}" if project_type else None
         self.state.folders = self._load_template_folders(template_name)
         self._update_folder_display()
 
     def _load_framework_template(self, framework: str | None) -> None:
-        """Load folder template for the specified framework."""
+        """Load folder template for the specified framework.
+
+        Args:
+            framework: UI framework name (e.g., "flet"), or None for default.
+        """
         self.state.folders = self._load_template_folders(framework)
         self._update_folder_display()
 
@@ -269,7 +277,11 @@ class OptionHandlersMixin:
         self._update_package_display()
 
     def _collect_state_packages(self) -> list[str]:
-        """Build the package list from current framework/project type selections."""
+        """Build the package list from current framework/project type selections.
+
+        Returns:
+            List of package name strings derived from the active selections.
+        """
         packages: list[str] = []
         if self.state.ui_project_enabled and self.state.framework:
             fw_pkg = FRAMEWORK_PACKAGE_MAP.get(self.state.framework)

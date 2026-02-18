@@ -9,7 +9,13 @@ def normalize_pypi_name(name: str) -> str:
     """Normalize a name per PEP 503 (PyPI simple repository spec).
 
     PyPI treats hyphens, underscores, and dots as equivalent, and
-    names are case-insensitive. E.g. "My_Cool.App" -> "my-cool-app".
+    names are case-insensitive.
+
+    Args:
+        name: The package name to normalize.
+
+    Returns:
+        Lowercased name with all separators replaced by hyphens.
     """
     return re.sub(r"[-_.]+", "-", name).lower()
 

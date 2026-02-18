@@ -106,6 +106,11 @@ def create_section_box(
 ) -> tuple[ft.Container, ft.Text]:
     """Create a bordered section with a title and content.
 
+    Args:
+        title: Section heading text.
+        content: List of Flet controls to display inside the section.
+        is_dark: Whether dark mode is active (default False).
+
     Returns:
         Tuple of (container, title_text) for theme update access.
     """

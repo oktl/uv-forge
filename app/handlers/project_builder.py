@@ -169,6 +169,7 @@ def build_project(
 
     Args:
         config: ProjectConfig containing all project settings.
+        on_progress: Optional callback invoked with a status string before each step.
 
     Returns:
         BuildResult indicating success or failure with message.

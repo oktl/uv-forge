@@ -30,7 +30,11 @@ class BuildHandlersMixin:
 
     @staticmethod
     def _open_in_file_manager(project_path: Path) -> None:
-        """Open the project directory in the OS file manager."""
+        """Open the project directory in the OS file manager.
+
+        Args:
+            project_path: Path to the project directory to open.
+        """
         if sys.platform == "darwin":
             subprocess.Popen(["open", str(project_path)])
         elif sys.platform == "win32":
@@ -40,7 +44,11 @@ class BuildHandlersMixin:
 
     @staticmethod
     def _open_in_terminal(project_path: Path) -> None:
-        """Open a terminal window at the project root."""
+        """Open a terminal window at the project root.
+
+        Args:
+            project_path: Path to the project directory to open in a terminal.
+        """
         if sys.platform == "darwin":
             subprocess.Popen(["open", "-a", "Terminal", str(project_path)])
         elif sys.platform == "win32":
@@ -63,7 +71,11 @@ class BuildHandlersMixin:
                     continue
 
     def _open_in_vscode(self, project_path: Path) -> None:
-        """Open the project directory in VS Code."""
+        """Open the project directory in VS Code.
+
+        Args:
+            project_path: Path to the project directory to open in VS Code.
+        """
         try:
             if sys.platform == "darwin":
                 subprocess.Popen(
@@ -80,7 +92,13 @@ class BuildHandlersMixin:
         open_vscode: bool = False,
         open_terminal: bool = False,
     ) -> None:
-        """Execute the project build after confirmation."""
+        """Execute the project build after confirmation.
+
+        Args:
+            open_folder: Whether to open the project in the OS file manager after build.
+            open_vscode: Whether to open the project in VS Code after build.
+            open_terminal: Whether to open a terminal at the project root after build.
+        """
         self.controls.progress_ring.visible = True
         self.controls.build_project_button.disabled = True
         self._set_status("Building project...", "info", update=True)

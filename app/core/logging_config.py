@@ -1,3 +1,9 @@
+"""Logging configuration for UV Forge.
+
+This module configures loguru with console and rotating file handlers,
+including a separate error log for long-term retention.
+"""
+
 import sys
 
 from loguru import logger

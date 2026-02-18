@@ -38,6 +38,13 @@ class Handlers(
     """
 
     def __init__(self, page: ft.Page, controls: Controls, state: AppState) -> None:
+        """Initialize handler with page, controls, and state references.
+
+        Args:
+            page: The Flet page containing the UI controls.
+            controls: Controls instance with references to interactive UI elements.
+            state: The application state instance.
+        """
         self.page = page
         self.controls = controls
         self.state = state

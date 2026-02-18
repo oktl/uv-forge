@@ -26,20 +26,12 @@ class AsyncExecutor:
         otherwise block the async event loop (e.g., API calls, file I/O).
 
         Args:
-            func: The synchronous function to run
-            *args: Positional arguments to pass to the function
-            **kwargs: Keyword arguments to pass to the function
+            func: The synchronous function to run.
+            *args: Positional arguments to pass to the function.
+            **kwargs: Keyword arguments to pass to the function.
 
         Returns:
-            The return value from the function
-
-        Example:
-            result = await AsyncExecutor.run(
-                some_blocking_function,
-                arg1,
-                arg2,
-                key=value
-            )
+            The return value from the function.
         """
         loop = asyncio.get_running_loop()
         return await loop.run_in_executor(None, lambda: func(*args, **kwargs))

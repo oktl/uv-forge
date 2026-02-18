@@ -41,6 +41,16 @@ def get_bare_repo_path(project_path: Path) -> Path:
 def _run_git(
     cmd: list[str], cwd: Path, *, check: bool = True
 ) -> subprocess.CompletedProcess:
+    """Run a git command as a subprocess.
+
+    Args:
+        cmd: Command and arguments to execute.
+        cwd: Working directory for the command.
+        check: Whether to raise CalledProcessError on non-zero exit (default True).
+
+    Returns:
+        CompletedProcess instance with stdout and stderr captured.
+    """
     return subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, check=check)
 
 
