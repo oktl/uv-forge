@@ -23,7 +23,7 @@ Key capabilities:
 ```bash
 uv run uv-forge              # Via entry point
 python app/main.py            # Direct execution
-uv run pytest                 # Run 493 tests (coverage automatic)
+uv run pytest                 # Run 509 tests (coverage automatic)
 uv run ruff check app         # Lint app/ (runs automatically on commit)
 uv run ruff format app        # Auto-format app/
 ```
@@ -174,7 +174,7 @@ Ruff is configured in `pyproject.toml` and enforced via a git pre-commit hook (`
 
 ## Development Guidelines
 
-- **Run `uv run pytest` before committing** — 439 tests, coverage automatic
+- **Run `uv run pytest` before committing** — 509 tests, coverage automatic
 - **Ruff runs automatically on commit** via pre-commit hook — fix any errors before committing
 - **Add tests** in `tests/core/`, `tests/handlers/`, or `tests/utils/` for new functionality
 - **Use `wrap_async()` for new async handlers** wrapping coroutines for Flet callbacks
