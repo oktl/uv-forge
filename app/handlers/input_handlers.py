@@ -20,6 +20,7 @@ class InputHandlersMixin:
     async def on_copy_path(self, _: ft.ControlEvent) -> None:
         """Copy the full project path (base + name) to the system clipboard."""
         full_path = str(Path(self.state.project_path) / self.state.project_name)
+        _clipboard_errors = (FileNotFoundError, subprocess.CalledProcessError)
         try:
             if sys.platform == "darwin":
                 subprocess.run(["pbcopy"], input=full_path.encode(), check=True)
@@ -32,7 +33,7 @@ class InputHandlersMixin:
                     check=True,
                 )
             self._set_status(f"Copied: {full_path}", "info", update=True)
-        except FileNotFoundError, subprocess.CalledProcessError:
+        except _clipboard_errors:
             self._set_status("Could not copy to clipboard.", "error", update=True)
 
     async def on_browse_click(self, _: ft.ControlEvent) -> None:

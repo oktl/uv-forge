@@ -1,11 +1,22 @@
 """Shared UI helper methods used across all handler mixins."""
 
+import asyncio
 from pathlib import Path
+from typing import Literal
 
 import flet as ft
 
 from app.core.validator import validate_path, validate_project_name
 from app.ui.ui_config import UIConfig
+
+
+def wrap_async(coro_func):
+    """Wrap an async coroutine for Flet's sync callback system."""
+
+    def wrapper(e):
+        asyncio.create_task(coro_func(e))
+
+    return wrapper
 
 
 class HandlerBase:
@@ -111,7 +122,10 @@ class HandlerBase:
             self.page.update()
 
     def _set_status(
-        self, message: str, status_type: str = "info", update: bool = False
+        self,
+        message: str,
+        status_type: Literal["info", "success", "error"] = "info",
+        update: bool = False,
     ) -> None:
         """Update status text message, color, and icon.
 

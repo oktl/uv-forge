@@ -129,6 +129,8 @@ class FolderHandlersMixin:
 
         for folder in folders:
             folder_count += 1
+            if folder.get("create_init", True):
+                file_count += 1  # __init__.py
             file_count += len(folder.get("files", []) or [])
             subfolders = folder.get("subfolders", []) or []
             if subfolders:

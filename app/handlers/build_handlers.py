@@ -9,6 +9,7 @@ import flet as ft
 from app.core.async_executor import AsyncExecutor
 from app.core.constants import DEFAULT_FOLDERS
 from app.core.models import BuildSummaryConfig, ProjectConfig
+from app.handlers.handler_base import wrap_async
 from app.handlers.project_builder import build_project
 from app.ui.dialog_data import (
     OTHER_PROJECT_CHECKBOX_LABEL,
@@ -19,16 +20,6 @@ from app.ui.dialogs import (
     create_build_summary_dialog,
     create_confirm_dialog,
 )
-
-
-def wrap_async(coro_func):
-    """Wrap an async coroutine for Flet's sync callback system."""
-    import asyncio
-
-    def wrapper(e):
-        asyncio.create_task(coro_func(e))
-
-    return wrapper
 
 
 class BuildHandlersMixin:
@@ -263,7 +254,7 @@ class BuildHandlersMixin:
             title="Reset All Settings?",
             message="This will clear all selections, packages, and folder changes.",
             confirm_label="Reset",
-            on_confirm=do_reset,
+            on_confirm=wrap_async(do_reset),
             on_cancel=cancel,
             is_dark_mode=self.state.is_dark_mode,
             confirm_icon=ft.Icons.REFRESH,
@@ -317,7 +308,7 @@ class BuildHandlersMixin:
             title="Exit Application?",
             message="Any unsaved configuration will be lost.",
             confirm_label="Exit",
-            on_confirm=do_exit,
+            on_confirm=wrap_async(do_exit),
             on_cancel=cancel,
             is_dark_mode=self.state.is_dark_mode,
             confirm_icon=ft.Icons.EXIT_TO_APP,

@@ -4,8 +4,6 @@ This module composes handler mixins into a single Handlers class and
 provides the attach_handlers() function that wires all UI controls.
 """
 
-import asyncio
-
 import flet as ft
 
 from app.core.state import AppState
@@ -13,20 +11,11 @@ from app.core.template_loader import TemplateLoader
 from app.handlers.build_handlers import BuildHandlersMixin
 from app.handlers.feature_handlers import FeatureHandlersMixin
 from app.handlers.folder_handlers import FolderHandlersMixin
-from app.handlers.handler_base import HandlerBase
+from app.handlers.handler_base import HandlerBase, wrap_async
 from app.handlers.input_handlers import InputHandlersMixin
 from app.handlers.option_handlers import OptionHandlersMixin
 from app.handlers.package_handlers import PackageHandlersMixin
 from app.ui.components import Controls
-
-
-def wrap_async(coro_func):
-    """Wrap an async coroutine for Flet's sync callback system."""
-
-    def wrapper(e):
-        asyncio.create_task(coro_func(e))
-
-    return wrapper
 
 
 def _get_controls(page: ft.Page) -> Controls:

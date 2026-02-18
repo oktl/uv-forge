@@ -949,7 +949,7 @@ def test_count_folders_and_files_flat_dicts(mock_handlers):
     ]
     fc, fic = Handlers._count_folders_and_files(folders)
     assert fc == 3
-    assert fic == 0
+    assert fic == 3  # 3x __init__.py (create_init defaults to True)
 
 
 def test_count_folders_and_files_with_files(mock_handlers):
@@ -960,7 +960,7 @@ def test_count_folders_and_files_with_files(mock_handlers):
     ]
     fc, fic = Handlers._count_folders_and_files(folders)
     assert fc == 2
-    assert fic == 3
+    assert fic == 5  # 2x __init__.py + state.py, models.py, components.py
 
 
 def test_count_folders_and_files_nested(mock_handlers):
@@ -977,7 +977,7 @@ def test_count_folders_and_files_nested(mock_handlers):
     ]
     fc, fic = Handlers._count_folders_and_files(folders)
     assert fc == 3  # app, core, ui
-    assert fic == 4  # main.py, state.py, components.py, theme.py
+    assert fic == 7  # 3x __init__.py + main.py, state.py, components.py, theme.py
 
 
 def test_count_folders_and_files_nested_dicts(mock_handlers):
@@ -990,7 +990,7 @@ def test_count_folders_and_files_nested_dicts(mock_handlers):
     ]
     fc, fic = Handlers._count_folders_and_files(folders)
     assert fc == 3  # core, ui, widgets
-    assert fic == 3  # state.py, models.py, button.py
+    assert fic == 6  # 3x __init__.py + state.py, models.py, button.py
 
 
 def test_update_folder_display_updates_label(mock_handlers):
@@ -1003,7 +1003,7 @@ def test_update_folder_display_updates_label(mock_handlers):
     handlers._update_folder_display()
 
     assert "1 folders" in controls.app_subfolders_label.value
-    assert "1 files" in controls.app_subfolders_label.value
+    assert "2 files" in controls.app_subfolders_label.value  # state.py + __init__.py
 
 
 # ========== Feature 5: Validation Icon Tests ==========
