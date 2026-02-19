@@ -93,6 +93,7 @@ class Controls:
         self.about_button: ft.IconButton
         self.help_button: ft.IconButton
         self.git_cheat_sheet_button: ft.IconButton
+        self.settings_button: ft.IconButton
         self.theme_toggle_button: ft.IconButton
         self.main_title: ft.Text
         self.check_pypi_button: ft.IconButton
@@ -173,6 +174,12 @@ def create_controls(state: AppState, colors: dict) -> Controls:
         icon=ft.Icons.INFO_OUTLINE,
         icon_size=UIConfig.ICON_SIZE_DEFAULT,
         tooltip="About",
+    )
+
+    controls.settings_button = ft.IconButton(
+        icon=ft.Icons.SETTINGS,
+        icon_size=UIConfig.ICON_SIZE_DEFAULT,
+        tooltip="Settings",
     )
 
     # Project path controls
@@ -566,6 +573,7 @@ def create_app_bars(page: ft.Page, controls: Controls, colors: dict) -> None:
         ),
         bgcolor=ft.Colors.TRANSPARENT,
         actions=[
+            controls.settings_button,
             controls.help_button,
             controls.about_button,
             controls.theme_toggle_button,

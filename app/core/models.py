@@ -93,6 +93,7 @@ class ProjectConfig:
     include_starter_files: bool = True
     folders: list[str | dict[str, Any] | FolderSpec] = field(default_factory=list)
     packages: list[str] = field(default_factory=list)
+    github_root: Path | None = None
 
     @property
     def full_path(self) -> Path:

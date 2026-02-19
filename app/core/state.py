@@ -8,7 +8,7 @@ from collections.abc import Callable
 from dataclasses import dataclass, field, fields
 from typing import Any, Literal
 
-from app.core.constants import DEFAULT_PROJECT_ROOT, DEFAULT_PYTHON_VERSION
+from app.core.settings_manager import AppSettings
 
 
 @dataclass
@@ -16,6 +16,7 @@ class AppState:
     """Container for application state data.
 
     Attributes:
+        settings: Persisted user settings (IDE preference, default paths, etc.).
         project_path: Base directory where project will be created.
         project_name: Name of the project to create.
         python_version: Python version for the project.
@@ -37,12 +38,15 @@ class AppState:
         name_valid: Whether the current project name passes validation.
     """
 
-    # Path and project settings
-    project_path: str = str(DEFAULT_PROJECT_ROOT)
+    # User settings (persisted to disk, not reset)
+    settings: AppSettings = field(default_factory=AppSettings)
+
+    # Path and project settings — defaults pulled from settings in __post_init__
+    project_path: str = ""
     project_name: str = ""
 
     # Options
-    python_version: str = DEFAULT_PYTHON_VERSION
+    python_version: str = ""
     git_enabled: bool = True
     include_starter_files: bool = True
     ui_project_enabled: bool = False
@@ -73,13 +77,22 @@ class AppState:
     path_valid: bool = True  # Default path is valid
     name_valid: bool = False  # Empty name is invalid
 
+    def __post_init__(self) -> None:
+        """Apply settings-based defaults when fields are left at sentinel values."""
+        if not self.project_path:
+            self.project_path = self.settings.default_project_path
+        if not self.python_version:
+            self.python_version = self.settings.default_python_version
+        self.git_enabled = self.settings.git_enabled_default
+
     def reset(self) -> None:
         """Reset state to initial values.
 
-        Preserves is_dark_mode since theme preference should persist.
+        Preserves is_dark_mode and settings since those persist across resets.
         """
         preserved_dark_mode = self.is_dark_mode
-        fresh = AppState()
+        preserved_settings = self.settings
+        fresh = AppState(settings=preserved_settings)
         for attr in fields(self):
             setattr(self, attr.name, getattr(fresh, attr.name))
         self.is_dark_mode = preserved_dark_mode

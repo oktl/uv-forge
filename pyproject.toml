@@ -12,6 +12,7 @@ dependencies = [
     "flet>=0.80.5",
     "httpx>=0.28.1",
     "loguru>=0.7.3",
+    "platformdirs>=4.9.2",
 ]
 
 [tool.hatch.build.targets.wheel]

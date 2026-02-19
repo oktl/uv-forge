@@ -26,16 +26,19 @@ from loguru import logger
 from app.core.constants import DEFAULT_GIT_HUB_ROOT
 
 
-def get_bare_repo_path(project_path: Path) -> Path:
+def get_bare_repo_path(project_path: Path, github_root: Path | None = None) -> Path:
     """Derive the bare hub repository path for a project.
 
     Args:
         project_path: Absolute path to the project directory.
+        github_root: Optional override for the hub directory. Falls back to
+            DEFAULT_GIT_HUB_ROOT when not provided.
 
     Returns:
-        Path to the corresponding bare repo at ~/Projects/git-repos/<name>.git.
+        Path to the corresponding bare repo at <github_root>/<name>.git.
     """
-    return DEFAULT_GIT_HUB_ROOT / f"{project_path.name}.git"
+    root = github_root if github_root is not None else DEFAULT_GIT_HUB_ROOT
+    return root / f"{project_path.name}.git"
 
 
 def _run_git(
@@ -54,13 +57,15 @@ def _run_git(
     return subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, check=check)
 
 
-def handle_git_init(project_path: Path, use_git: bool) -> None:
+def handle_git_init(
+    project_path: Path, use_git: bool, github_root: Path | None = None
+) -> None:
     """Phase 1: Create local and bare repositories and connect them.
 
     If use_git is True:
         - Initializes a local git repo in project_path (skipped if .git already
             exists, e.g. created by uv init).
-        - Creates a bare repository at ~/Projects/git-repos/<name>.git, which
+        - Creates a bare repository at <github_root>/<name>.git, which
             acts as the local hub (skipped if it already exists).
         - Adds the bare repo as the 'origin' remote; if origin already exists,
             updates its URL instead.
@@ -71,6 +76,7 @@ def handle_git_init(project_path: Path, use_git: bool) -> None:
     Args:
         project_path: Absolute path to the project directory.
         use_git: Whether to set up git for this project.
+        github_root: Optional override for the hub directory.
 
     Raises:
         subprocess.CalledProcessError: If any git command fails.
@@ -93,7 +99,7 @@ def handle_git_init(project_path: Path, use_git: bool) -> None:
         logger.debug("Local .git already exists, skipping git init")
 
     # Initialize bare hub repo
-    bare_repo_path = get_bare_repo_path(project_path)
+    bare_repo_path = get_bare_repo_path(project_path, github_root=github_root)
     logger.debug("Bare repo path: {}", bare_repo_path)
     bare_repo_path.mkdir(parents=True, exist_ok=True)
     if not (bare_repo_path / "HEAD").exists():

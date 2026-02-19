@@ -100,7 +100,7 @@ def _create_project_scaffold(
 
     if config.git_enabled:
         _progress("Setting up Git repository...")
-    handle_git_init(project_path, config.git_enabled)
+    handle_git_init(project_path, config.git_enabled, github_root=config.github_root)
 
     resolver = (
         BoilerplateResolver(
@@ -179,7 +179,11 @@ def build_project(
         return BuildResult(success=False, message=error_msg)
 
     project_path = config.full_path
-    bare_repo_path = get_bare_repo_path(project_path) if config.git_enabled else None
+    bare_repo_path = (
+        get_bare_repo_path(project_path, github_root=config.github_root)
+        if config.git_enabled
+        else None
+    )
 
     # Ensure the base directory exists
     if not config.project_path.exists():

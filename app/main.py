@@ -16,6 +16,7 @@ import flet as ft
 from loguru import logger
 
 from app.core.logging_config import setup_logging
+from app.core.settings_manager import load_settings
 from app.core.state import AppState
 from app.handlers.ui_handler import attach_handlers
 from app.ui.components import build_main_view
@@ -41,7 +42,8 @@ async def main(page: ft.Page) -> None:
         page.window.height = 1360
         page.padding = 30
 
-        state = AppState()
+        settings = load_settings()
+        state = AppState(settings=settings)
         page.theme_mode = (
             ft.ThemeMode.DARK if state.is_dark_mode else ft.ThemeMode.LIGHT
         )

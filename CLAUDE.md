@@ -23,7 +23,7 @@ Key capabilities:
 ```bash
 uv run uv-forge              # Via entry point
 python app/main.py            # Direct execution
-uv run pytest                 # Run 509 tests (coverage automatic)
+uv run pytest                 # Run 523 tests (coverage automatic)
 uv run ruff check app         # Lint app/ (runs automatically on commit)
 uv run ruff format app        # Auto-format app/
 ```
@@ -45,6 +45,7 @@ app/
 │   ├── template_merger.py    # normalize_folder(), merge_folder_lists(), _merge_files()
 │   ├── pypi_checker.py       # normalize_pypi_name(), check_pypi_availability() — async httpx
 │   ├── async_executor.py    # AsyncExecutor.run() — ThreadPoolExecutor wrapper
+│   ├── settings_manager.py  # AppSettings, load/save to platformdirs JSON
 │   └── logging_config.py    # Loguru setup: console + file handlers with rotation
 ├── handlers/
 │   ├── ui_handler.py         # Handlers class (mixin composition) + attach_handlers() wiring
@@ -54,14 +55,14 @@ app/
 │   ├── folder_handlers.py    # FolderHandlersMixin — folder tree display and management
 │   ├── package_handlers.py   # PackageHandlersMixin — package list display and management
 │   ├── build_handlers.py     # BuildHandlersMixin — build, reset, exit, keyboard shortcuts
-│   ├── feature_handlers.py   # FeatureHandlersMixin — theme toggle, help, git cheat sheet, about
+│   ├── feature_handlers.py   # FeatureHandlersMixin — theme toggle, help, git cheat sheet, about, settings
 │   ├── project_builder.py    # build_project() orchestration — UV init, git, folders, packages
 │   ├── filesystem_handler.py # setup_app_structure(), folder creation, cleanup_on_error()
 │   ├── uv_handler.py         # run_uv_init(), install_package(), setup_virtual_env()
 │   ├── git_handler.py        # handle_git_init(), finalize_git_setup() — two-phase git setup
 ├── ui/
 │   ├── components.py         # Controls class + build_main_view(page, state)
-│   ├── dialogs.py            # 9 dialog functions + 5 shared helpers; all theme-aware via is_dark_mode
+│   ├── dialogs.py            # 10 dialog functions + 5 shared helpers; all theme-aware via is_dark_mode
 │   ├── dialog_data.py        # Framework/project type categories, checkbox labels — dialog display metadata
 │   ├── theme_manager.py      # get_theme_colors() singleton
 │   └── ui_config.py          # UI constants (colors, sizes)
@@ -153,8 +154,9 @@ Files use `{{project_name}}` placeholders, substituted at build time with a norm
 - **`normalize_project_name()`** in `boilerplate_resolver.py` converts project names to title case with spaces for `{{project_name}}` substitution (e.g. `my_app` → `My App`)
 - **PyPI checker** (`pypi_checker.py`): Manual trigger via icon button, uses `httpx.AsyncClient` directly (no `AsyncExecutor` needed). PEP 503 name normalization ensures `my_app` and `my-app` are treated as the same package. Tri-state return: `True` (available) / `False` (taken) / `None` (error).
 - **About dialog** (`feature_handlers.py`): Loads `ABOUT.md` with app info, tech stack, features. Supports `app://` internal links — clicking `[Help](app://help)` or `[Git Cheat Sheet](app://git-cheat-sheet)` closes the About dialog and opens the target dialog directly. The `_create_markdown_dialog()` helper accepts an optional `on_internal_link` callback for this.
+- **Settings system** (`settings_manager.py`): `AppSettings` dataclass loaded from `platformdirs.user_data_dir("UV Forge")/settings.json`. Persists default project path, GitHub root, Python version, preferred IDE, and git default. Threaded into `AppState` at startup; settings dialog allows live editing.
 - **Two-phase git setup** (if git enabled):
-  - Phase 1 (`handle_git_init`): Creates local repo + bare hub at `~/Projects/git-repos/<name>.git`, connects via remote origin
+  - Phase 1 (`handle_git_init`): Creates local repo + bare hub at configurable hub path (from `settings.default_github_root`), connects via remote origin
   - Phase 2 (`finalize_git_setup`): Called after all files created; stages, commits, and pushes to hub automatically
 
 ---
@@ -174,7 +176,7 @@ Ruff is configured in `pyproject.toml` and enforced via a git pre-commit hook (`
 
 ## Development Guidelines
 
-- **Run `uv run pytest` before committing** — 509 tests, coverage automatic
+- **Run `uv run pytest` before committing** — 523 tests, coverage automatic
 - **Ruff runs automatically on commit** via pre-commit hook — fix any errors before committing
 - **Add tests** in `tests/core/`, `tests/handlers/`, or `tests/utils/` for new functionality
 - **Use `wrap_async()` for new async handlers** wrapping coroutines for Flet callbacks
@@ -185,7 +187,7 @@ Ruff is configured in `pyproject.toml` and enforced via a git pre-commit hook (`
 
 ## Dependencies
 
-**Runtime:** Python 3.14+, UV (external), Flet 0.80.5+, httpx 0.28+, Git (optional)
+**Runtime:** Python 3.14+, UV (external), Flet 0.80.5+, httpx 0.28+, platformdirs 4.0+, Git (optional)
 
 **Dev:** pytest >=8.0, pytest-asyncio >=0.23, pytest-cov >=7.0, ruff >=0.15
 

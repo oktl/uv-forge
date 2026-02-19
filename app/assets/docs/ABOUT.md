@@ -12,6 +12,7 @@ A desktop application for creating Python projects with UV — the fast Python p
 - **Flet** 0.80.5+ (UI framework)
 - **UV** (package & project manager)
 - **httpx** (async HTTP for PyPI checks)
+- **platformdirs** (cross-platform settings storage)
 - **Git** (optional, for repository initialization)
 
 ---
@@ -23,7 +24,8 @@ A desktop application for creating Python projects with UV — the fast Python p
 - **Template Merging** — Select both a UI framework and project type to automatically merge their folder structures
 - **Smart Scaffolding** — Starter files populated with boilerplate content instead of empty files
 - **PyPI Name Checker** — Verify package name availability before building
-- **Git Integration** — Two-phase setup with local repo and bare hub at `~/Projects/git-repos/`
+- **User Settings** — Configurable defaults for project path, Python version, IDE preference, and git; persisted to disk
+- **Git Integration** — Two-phase setup with local repo and bare hub (path configurable via Settings)
 - **Async Operations** — UV and git commands run off the UI thread for a responsive experience
 - **Theme Support** — Toggle between dark and light mode
 - **Error Handling** — Rollback and cleanup on build failure

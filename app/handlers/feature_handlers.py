@@ -1,14 +1,16 @@
-"""Handlers for theme toggle, help dialog, git cheat sheet, and about dialog."""
+"""Handlers for theme toggle, help dialog, git cheat sheet, about dialog, and settings."""
 
 import asyncio
 
 import flet as ft
 
 from app.core.constants import ABOUT_FILE, GIT_CHEAT_SHEET_FILE, HELP_FILE
+from app.core.settings_manager import save_settings
 from app.ui.dialogs import (
     create_about_dialog,
     create_git_cheat_sheet_dialog,
     create_help_dialog,
+    create_settings_dialog,
 )
 from app.ui.theme_manager import get_theme_colors
 
@@ -152,5 +154,36 @@ For more information, visit: https://docs.astral.sh/uv/
 
         self.page.overlay.append(about_dialog)
         about_dialog.open = True
+        self.state.active_dialog = close_dialog
+        self.page.update()
+
+    async def on_settings_click(self, _: ft.ControlEvent) -> None:
+        """Handle Settings button click.
+
+        Opens a dialog for editing user preferences (default paths, IDE,
+        Python version, git default). Saves changes to disk and updates
+        the live settings on the AppState.
+        """
+
+        def close_dialog(_=None):
+            settings_dialog.open = False
+            self.state.active_dialog = None
+            self.page.update()
+
+        def on_save(updated_settings):
+            save_settings(updated_settings)
+            self.state.settings = updated_settings
+            close_dialog()
+            self._show_snackbar("Settings saved")
+
+        settings_dialog = create_settings_dialog(
+            settings=self.state.settings,
+            on_save_callback=on_save,
+            on_close_callback=close_dialog,
+            is_dark_mode=self.state.is_dark_mode,
+        )
+
+        self.page.overlay.append(settings_dialog)
+        settings_dialog.open = True
         self.state.active_dialog = close_dialog
         self.page.update()

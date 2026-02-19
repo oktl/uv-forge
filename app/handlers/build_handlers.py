@@ -7,7 +7,11 @@ from pathlib import Path
 import flet as ft
 
 from app.core.async_executor import AsyncExecutor
-from app.core.constants import DEFAULT_FOLDERS
+from app.core.constants import (
+    DEFAULT_FOLDERS,
+    IDE_MACOS_APP_NAMES,
+    SUPPORTED_IDES,
+)
 from app.core.models import BuildSummaryConfig, ProjectConfig
 from app.handlers.handler_base import wrap_async
 from app.handlers.project_builder import build_project
@@ -70,33 +74,46 @@ class BuildHandlersMixin:
                 except FileNotFoundError:
                     continue
 
-    def _open_in_vscode(self, project_path: Path) -> None:
-        """Open the project directory in VS Code.
+    def _open_in_ide(self, project_path: Path) -> None:
+        """Open the project directory in the user's preferred IDE.
+
+        Uses the IDE configured in settings. Falls back to the CLI command
+        from SUPPORTED_IDES, with macOS ``open -a`` handling for known apps.
 
         Args:
-            project_path: Path to the project directory to open in VS Code.
+            project_path: Path to the project directory to open.
         """
+        ide_name = self.state.settings.preferred_ide
+        command = SUPPORTED_IDES.get(ide_name)
+
+        # "Other / Custom" — use the custom path from settings
+        if command is None:
+            command = self.state.settings.custom_ide_path
+            if not command:
+                self._show_snackbar("No custom IDE path configured", is_error=True)
+                return
+
         try:
-            if sys.platform == "darwin":
+            if sys.platform == "darwin" and ide_name in IDE_MACOS_APP_NAMES:
                 subprocess.Popen(
-                    ["open", "-a", "Visual Studio Code", str(project_path)]
+                    ["open", "-a", IDE_MACOS_APP_NAMES[ide_name], str(project_path)]
                 )
             else:
-                subprocess.Popen(["code", str(project_path)])
+                subprocess.Popen([command, str(project_path)])
         except FileNotFoundError:
-            self._show_snackbar("VS Code not found", is_error=True)
+            self._show_snackbar(f"{ide_name} not found", is_error=True)
 
     async def _execute_build(
         self,
         open_folder: bool = False,
-        open_vscode: bool = False,
+        open_ide: bool = False,
         open_terminal: bool = False,
     ) -> None:
         """Execute the project build after confirmation.
 
         Args:
             open_folder: Whether to open the project in the OS file manager after build.
-            open_vscode: Whether to open the project in VS Code after build.
+            open_ide: Whether to open the project in the preferred IDE after build.
             open_terminal: Whether to open a terminal at the project root after build.
         """
         self.controls.progress_ring.visible = True
@@ -117,6 +134,7 @@ class BuildHandlersMixin:
             if self.state.folders
             else DEFAULT_FOLDERS.copy(),
             packages=list(self.state.packages),
+            github_root=Path(self.state.settings.default_github_root),
         )
 
         def _on_build_progress(msg: str) -> None:
@@ -133,8 +151,8 @@ class BuildHandlersMixin:
             project_path = config.project_path / config.project_name
             if open_folder:
                 self._open_in_file_manager(project_path)
-            if open_vscode:
-                self._open_in_vscode(project_path)
+            if open_ide:
+                self._open_in_ide(project_path)
             if open_terminal:
                 self._open_in_terminal(project_path)
         else:
@@ -168,14 +186,14 @@ class BuildHandlersMixin:
 
         async def on_confirm(_):
             open_folder = dialog.open_folder_checkbox.value
-            open_vscode = dialog.open_vscode_checkbox.value
+            open_ide = dialog.open_ide_checkbox.value
             open_terminal = dialog.open_terminal_checkbox.value
             dialog.open = False
             self.state.active_dialog = None
             self.page.update()
             await self._execute_build(
                 open_folder=open_folder,
-                open_vscode=open_vscode,
+                open_ide=open_ide,
                 open_terminal=open_terminal,
             )
 
@@ -207,6 +225,7 @@ class BuildHandlersMixin:
             on_build_callback=wrap_async(on_confirm),
             on_cancel_callback=on_cancel,
             is_dark_mode=self.state.is_dark_mode,
+            ide_name=self.state.settings.preferred_ide,
         )
 
         self.page.overlay.append(dialog)
@@ -221,7 +240,7 @@ class BuildHandlersMixin:
         self.controls.project_path_input.value = self.state.project_path
         self.controls.project_name_input.value = ""
         self.controls.python_version_dropdown.value = self.state.python_version
-        self.controls.create_git_checkbox.value = True
+        self.controls.create_git_checkbox.value = self.state.git_enabled
         self.controls.include_starter_files_checkbox.value = True
         self.controls.ui_project_checkbox.value = False
         self.controls.ui_project_checkbox.label = UI_PROJECT_CHECKBOX_LABEL

@@ -19,7 +19,7 @@ A live path preview appears below the name field showing the full resolved proje
 - **Orange** — could not reach PyPI (check your internet connection)
 
 ### 2. **Set Project Path**
-Browse or enter the directory where you want to create your project. This is where your project folder will be created. The default path is pre-filled and rarely needs changing.
+Browse or enter the directory where you want to create your project. This is where your project folder will be created. The default path is pre-filled from your settings and rarely needs changing.
 
 ### 3. **Python Version**
 Select the Python version for your project:
@@ -32,7 +32,7 @@ Check this option to initialize a Git repository in your project with automatic 
 
 **Phase 1 (During Project Creation):**
 - Creates a local Git repository in your project directory
-- Creates a bare "hub" repository at `~/Projects/git-repos/<project_name>.git`
+- Creates a bare "hub" repository at your configured GitHub root path (default: `~/Projects/git-repos/<project_name>.git`, configurable via Settings)
 - Connects the local repo to the hub as the `origin` remote
 
 **Phase 2 (After Build Completion):**
@@ -125,8 +125,21 @@ Click "Build Project" to create your project with all configured settings. The b
 
 A **confirmation dialog** will appear showing a summary of your project settings, including a collapsible **Structure** preview showing the complete project tree with all folders and files that will be created. Click the Structure tile to expand the tree. Before confirming, you can choose post-build actions:
 - **Open project folder after build** — Opens the created project in Finder/Explorer (checked by default)
-- **Open in VS Code** — Opens the project in VS Code immediately after creation (checked by default; requires VS Code to be installed)
+- **Open in preferred IDE** — Opens the project in your preferred IDE immediately after creation (checked by default; IDE is configurable in Settings)
 - **Open terminal at project root** — Opens a terminal window in the project directory
+
+## Settings
+
+Click the **gear icon** (⚙) in the app bar to open the Settings dialog. Settings are saved automatically and persist across sessions.
+
+**Configurable options:**
+- **Default Project Path** — Where new projects are created (e.g., `~/Projects`)
+- **GitHub Root** — Location for bare hub repositories (e.g., `~/Projects/git-repos`)
+- **Python Version** — Default Python version for new projects
+- **Preferred IDE** — IDE used for "Open in IDE" after build (VS Code, PyCharm, Zed, Cursor, etc.)
+- **Git Default** — Whether the Git checkbox is checked by default for new projects
+
+Settings are stored in `~/Library/Application Support/UV Forge/settings.json` on macOS (platform-appropriate location on other OSes via `platformdirs`).
 
 ## Keyboard Shortcuts
 

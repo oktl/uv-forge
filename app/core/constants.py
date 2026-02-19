@@ -134,5 +134,22 @@ ABOUT_FILE = DOCS_DIR / "ABOUT.md"
 DEFAULT_PROJECT_ROOT = Path.home() / "Projects"
 DEFAULT_GIT_HUB_ROOT = Path.home() / "Projects" / "git-repos"
 
+# Supported IDEs — display name → CLI command (None = user provides path)
+SUPPORTED_IDES: dict[str, str | None] = {
+    "VS Code": "code",
+    "PyCharm": "pycharm",
+    "Zed": "zed",
+    "Cursor": "cursor",
+    "Other / Custom": None,
+}
+
+# macOS app names for IDEs that need `open -a` on darwin
+IDE_MACOS_APP_NAMES: dict[str, str] = {
+    "VS Code": "Visual Studio Code",
+    "Cursor": "Cursor",
+    "Zed": "Zed",
+    "PyCharm": "PyCharm",
+}
+
 # Default folder structure (used as final fallback)
 DEFAULT_FOLDERS = ["core", "ui", "utils", "assets"]
