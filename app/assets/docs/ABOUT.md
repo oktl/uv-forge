@@ -27,6 +27,7 @@ A desktop application for creating Python projects with UV — the fast Python p
 - **User Settings** — Configurable defaults for project path, Python version, IDE preference, and git; persisted to disk
 - **Git Integration** — Two-phase setup with local repo and bare hub (path configurable via Settings)
 - **Async Operations** — UV and git commands run off the UI thread for a responsive experience
+- **Log Viewer** — Colour-coded log display with clickable source locations that open in your IDE
 - **Theme Support** — Toggle between dark and light mode
 - **Error Handling** — Rollback and cleanup on build failure
 

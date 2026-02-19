@@ -141,6 +141,16 @@ Click the **gear icon** (⚙) in the app bar to open the Settings dialog. Settin
 
 Settings are stored in `~/Library/Application Support/UV Forge/settings.json` on macOS (platform-appropriate location on other OSes via `platformdirs`).
 
+## Log Viewer
+
+Click the **article icon** (📄) in the app bar to open the Log Viewer dialog. It displays today's application log with colour-coded entries:
+
+- **Coloured by level** — DEBUG (grey), INFO (grey), SUCCESS (green), WARNING (amber), ERROR (red), CRITICAL (bold red)
+- **Clickable locations** — Hover over a location segment (e.g., `app.core.state:load:42`) to see an underline; click to open the source file at that line in your preferred IDE
+- **Copy to Clipboard** — Copy the full log text for sharing or debugging
+
+Log files are stored in the `logs/` directory and rotate daily. The viewer always shows the current day's log.
+
 ## Keyboard Shortcuts
 
 | Shortcut | Action |
