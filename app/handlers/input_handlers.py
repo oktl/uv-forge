@@ -41,9 +41,9 @@ class InputHandlersMixin:
 
         Opens a directory picker dialog and updates the project path.
         """
-        result = await ft.FilePicker().get_directory_path(
-            dialog_title="Select Project Location"
-        )
+        from app.ui.file_picker import select_folder
+
+        result = await select_folder("Select Project Location")
 
         if result:
             self.state.project_path = result

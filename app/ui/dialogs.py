@@ -1352,6 +1352,7 @@ def create_build_summary_dialog(
     on_build_callback,
     on_cancel_callback,
     is_dark_mode: bool,
+    ide_name: str = "VS Code",
 ) -> ft.AlertDialog:
     """Create a confirmation dialog showing project summary before build.
 
@@ -1360,6 +1361,7 @@ def create_build_summary_dialog(
         on_build_callback: Callback when Build is clicked
         on_cancel_callback: Callback when Cancel is clicked
         is_dark_mode: Whether dark mode is active
+        ide_name: Display name of the preferred IDE for the open-in checkbox.
 
     Returns:
         Configured AlertDialog with project summary
@@ -1451,7 +1453,7 @@ def create_build_summary_dialog(
     )
 
     open_vscode_checkbox = ft.Checkbox(
-        label="Open in VS Code",
+        label=f"Open in {ide_name}",
         value=True,
         label_style=green,
         on_change=on_checkbox_change,
@@ -1525,6 +1527,205 @@ def create_build_summary_dialog(
     )
 
     dialog.open_folder_checkbox = open_folder_checkbox
+    dialog.open_ide_checkbox = open_vscode_checkbox
+    # Keep legacy alias for backward compatibility in tests
     dialog.open_vscode_checkbox = open_vscode_checkbox
     dialog.open_terminal_checkbox = open_terminal_checkbox
+    return dialog
+
+
+def create_settings_dialog(
+    settings,
+    on_save_callback: collections.abc.Callable,
+    on_close_callback: collections.abc.Callable,
+    is_dark_mode: bool,
+) -> ft.AlertDialog:
+    """Create a dialog for editing user preferences.
+
+    Args:
+        settings: Current AppSettings instance to populate fields from.
+        on_save_callback: Callback receiving the updated AppSettings on save.
+        on_close_callback: Callback when Cancel is clicked or dialog dismissed.
+        is_dark_mode: Whether dark mode is active.
+
+    Returns:
+        Configured AlertDialog for editing settings.
+    """
+    from app.core.constants import PYTHON_VERSIONS, SUPPORTED_IDES
+
+    colors = get_theme_colors(is_dark_mode)
+
+    label_style = ft.TextStyle(size=13, color=colors["section_title"])
+
+    # --- Default project path ---
+    project_path_field = ft.TextField(
+        label="Default Project Path",
+        value=settings.default_project_path,
+        expand=True,
+        label_style=label_style,
+    )
+
+    async def browse_project_path(_):
+        from app.ui.file_picker import select_folder
+
+        result = await select_folder("Select Default Project Path")
+        if result:
+            project_path_field.value = result
+            project_path_field.update()
+
+    project_path_row = ft.Row(
+        [
+            project_path_field,
+            ft.IconButton(
+                icon=ft.Icons.FOLDER_OPEN,
+                icon_size=UIConfig.ICON_SIZE_DEFAULT,
+                tooltip="Browse",
+                on_click=browse_project_path,
+            ),
+        ],
+        spacing=4,
+    )
+
+    # --- Default GitHub root ---
+    github_root_field = ft.TextField(
+        label="Default GitHub Root",
+        value=settings.default_github_root,
+        expand=True,
+        label_style=label_style,
+    )
+
+    async def browse_github_root(_):
+        from app.ui.file_picker import select_folder
+
+        result = await select_folder("Select Default GitHub Root")
+        if result:
+            github_root_field.value = result
+            github_root_field.update()
+
+    github_root_row = ft.Row(
+        [
+            github_root_field,
+            ft.IconButton(
+                icon=ft.Icons.FOLDER_OPEN,
+                icon_size=UIConfig.ICON_SIZE_DEFAULT,
+                tooltip="Browse",
+                on_click=browse_github_root,
+            ),
+        ],
+        spacing=4,
+    )
+
+    # --- Default Python version ---
+    python_version_dropdown = ft.Dropdown(
+        label="Default Python Version",
+        value=settings.default_python_version,
+        options=[ft.dropdown.Option(v) for v in PYTHON_VERSIONS],
+        width=200,
+        label_style=label_style,
+    )
+
+    # --- Preferred IDE ---
+    ide_names = list(SUPPORTED_IDES.keys())
+    ide_dropdown = ft.Dropdown(
+        label="Preferred IDE",
+        value=settings.preferred_ide
+        if settings.preferred_ide in ide_names
+        else ide_names[0],
+        options=[ft.dropdown.Option(name) for name in ide_names],
+        width=250,
+        label_style=label_style,
+    )
+
+    custom_ide_field = ft.TextField(
+        label="Custom IDE Executable Path",
+        value=settings.custom_ide_path,
+        visible=settings.preferred_ide == "Other / Custom",
+        expand=True,
+        label_style=label_style,
+        hint_text="/usr/local/bin/my-editor",
+    )
+
+    def on_ide_change(e):
+        custom_ide_field.visible = ide_dropdown.value == "Other / Custom"
+        custom_ide_field.update()
+
+    ide_dropdown.on_change = on_ide_change
+
+    # --- Git init default ---
+    git_checkbox = ft.Checkbox(
+        label="Enable Git init by default",
+        value=settings.git_enabled_default,
+    )
+
+    # --- Save handler ---
+    def on_save_click(_):
+        from app.core.settings_manager import AppSettings
+
+        updated = AppSettings(
+            default_project_path=project_path_field.value
+            or settings.default_project_path,
+            default_github_root=github_root_field.value or settings.default_github_root,
+            default_python_version=python_version_dropdown.value
+            or settings.default_python_version,
+            preferred_ide=ide_dropdown.value or settings.preferred_ide,
+            custom_ide_path=custom_ide_field.value or "",
+            git_enabled_default=git_checkbox.value,
+        )
+        on_save_callback(updated)
+
+    dialog = ft.AlertDialog(
+        modal=True,
+        title=_create_dialog_title("Settings", colors, icon=ft.Icons.SETTINGS),
+        content=ft.Container(
+            content=ft.Column(
+                [
+                    ft.Text(
+                        "Configure default values for new projects.",
+                        size=13,
+                        color=colors.get("section_title"),
+                    ),
+                    ft.Container(height=8),
+                    ft.Text(
+                        "Paths",
+                        weight=ft.FontWeight.W_600,
+                        size=14,
+                        color=colors["main_title"],
+                    ),
+                    project_path_row,
+                    github_root_row,
+                    ft.Divider(height=16, color=colors.get("section_border")),
+                    ft.Text(
+                        "Defaults",
+                        weight=ft.FontWeight.W_600,
+                        size=14,
+                        color=colors["main_title"],
+                    ),
+                    ft.Row([python_version_dropdown], spacing=16),
+                    git_checkbox,
+                    ft.Divider(height=16, color=colors.get("section_border")),
+                    ft.Text(
+                        "IDE",
+                        weight=ft.FontWeight.W_600,
+                        size=14,
+                        color=colors["main_title"],
+                    ),
+                    ide_dropdown,
+                    custom_ide_field,
+                ],
+                tight=True,
+                spacing=10,
+            ),
+            width=500,
+            padding=UIConfig.DIALOG_CONTENT_PADDING,
+        ),
+        actions=_create_dialog_actions(
+            "Save",
+            on_save_click,
+            on_close_callback,
+            ft.Icons.SAVE,
+            is_dark_mode,
+        ),
+        actions_alignment=ft.MainAxisAlignment.END,
+    )
+
     return dialog
