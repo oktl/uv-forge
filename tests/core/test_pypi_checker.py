@@ -3,7 +3,12 @@
 import httpx
 import pytest
 
-from app.core.pypi_checker import check_pypi_availability, normalize_pypi_name
+from app.core.pypi_checker import (
+    check_pypi_availability,
+    extract_package_name,
+    normalize_pypi_name,
+    validate_package_format,
+)
 
 
 class TestNormalizePypiName:
@@ -112,3 +117,60 @@ class TestCheckPypiAvailability:
         monkeypatch.setattr(httpx.AsyncClient, "get", mock_get)
         await check_pypi_availability("My_Cool_App")
         assert "my-cool-app" in captured_urls[0]
+
+
+class TestExtractPackageName:
+    """Tests for extracting bare package name from versioned specs."""
+
+    def test_bare_name(self):
+        assert extract_package_name("requests") == "requests"
+
+    def test_with_version_gte(self):
+        assert extract_package_name("httpx>=0.25") == "httpx"
+
+    def test_with_extras(self):
+        assert extract_package_name("django[postgres]") == "django"
+
+    def test_with_version_ne(self):
+        assert extract_package_name("my-package!=1.0") == "my-package"
+
+    def test_with_version_eq(self):
+        assert extract_package_name("pytest==8.0") == "pytest"
+
+    def test_with_version_tilde(self):
+        assert extract_package_name("flask~=2.0") == "flask"
+
+    def test_single_char(self):
+        assert extract_package_name("x") == "x"
+
+    def test_dotted_name(self):
+        assert extract_package_name("zope.interface>=5.0") == "zope.interface"
+
+
+class TestValidatePackageFormat:
+    """Tests for client-side package spec format validation."""
+
+    def test_valid_simple(self):
+        assert validate_package_format("valid-pkg") is None
+
+    def test_valid_with_version(self):
+        assert validate_package_format("httpx>=0.25") is None
+
+    def test_valid_with_extras(self):
+        assert validate_package_format("django[postgres]") is None
+
+    def test_invalid_spaces(self):
+        result = validate_package_format("has space")
+        assert result is not None
+        assert "spaces" in result
+
+    def test_invalid_at_sign(self):
+        result = validate_package_format("@invalid")
+        assert result is not None
+        assert "Invalid" in result
+
+    def test_valid_single_char(self):
+        assert validate_package_format("x") is None
+
+    def test_valid_underscored(self):
+        assert validate_package_format("my_package") is None

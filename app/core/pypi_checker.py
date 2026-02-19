@@ -20,6 +20,35 @@ def normalize_pypi_name(name: str) -> str:
     return re.sub(r"[-_.]+", "-", name).lower()
 
 
+def extract_package_name(package_spec: str) -> str:
+    """Extract the bare package name from a versioned spec string.
+
+    Strips version specifiers (>=, ==, !=, ~=, <, >) and extras ([postgres])
+    so the name can be looked up on PyPI.
+
+    Args:
+        package_spec: Package spec as entered by user, e.g. 'httpx>=0.25'
+            or 'django[postgres]'.
+
+    Returns:
+        Bare package name suitable for a PyPI lookup.
+    """
+    match = re.match(r"^[A-Za-z0-9]([A-Za-z0-9._-]*[A-Za-z0-9])?", package_spec)
+    return match.group(0) if match else package_spec
+
+
+def validate_package_format(package_spec: str) -> str | None:
+    """Validate package spec format. Returns error message or None if valid."""
+    if " " in package_spec.strip():
+        return f"Invalid: '{package_spec}' contains spaces"
+    if not re.match(
+        r"^[A-Za-z0-9][A-Za-z0-9._-]*[A-Za-z0-9]?(\[.*\])?(([><=!~]=?|===?).*)?$",
+        package_spec,
+    ):
+        return f"Invalid format: '{package_spec}'"
+    return None
+
+
 async def check_pypi_availability(name: str, timeout: float = 5.0) -> bool | None:
     """Check if a package name is available on PyPI.
 

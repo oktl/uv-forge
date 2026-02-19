@@ -12,6 +12,7 @@ from app.ui.dialogs import (
     _parse_log_line,
     _parse_log_location,
     create_about_dialog,
+    create_add_packages_dialog,
     create_log_viewer_dialog,
     create_project_type_dialog,
 )
@@ -633,3 +634,57 @@ def test_parse_log_line_without_callback_is_plain_text():
 
     loc_control = row.controls[4]
     assert isinstance(loc_control, ft.Text)
+
+
+# ========== Add Packages Dialog Tests ==========
+
+
+def test_create_add_packages_dialog_basic():
+    """Test add packages dialog creates a valid AlertDialog."""
+    dialog = create_add_packages_dialog(
+        on_add_callback=lambda pkgs: None,
+        on_close_callback=lambda _: None,
+        is_dark_mode=True,
+    )
+
+    assert isinstance(dialog, ft.AlertDialog)
+    assert dialog.modal is True
+    assert dialog.actions is not None
+    assert len(dialog.actions) == 2  # Add and Cancel
+
+
+def test_create_add_packages_dialog_has_verify_button():
+    """Test add packages dialog includes the Verify on PyPI button."""
+    dialog = create_add_packages_dialog(
+        on_add_callback=lambda pkgs: None,
+        on_close_callback=lambda _: None,
+        is_dark_mode=True,
+    )
+
+    assert hasattr(dialog, "verify_button")
+    assert isinstance(dialog.verify_button, ft.Button)
+    assert "Verify" in dialog.verify_button.content
+
+
+def test_create_add_packages_dialog_has_results_column():
+    """Test add packages dialog includes a results column (initially hidden)."""
+    dialog = create_add_packages_dialog(
+        on_add_callback=lambda pkgs: None,
+        on_close_callback=lambda _: None,
+        is_dark_mode=True,
+    )
+
+    assert hasattr(dialog, "results_column")
+    assert isinstance(dialog.results_column, ft.Column)
+    assert dialog.results_column.visible is False
+
+
+def test_create_add_packages_dialog_light_mode():
+    """Test add packages dialog works in light mode."""
+    dialog = create_add_packages_dialog(
+        on_add_callback=lambda pkgs: None,
+        on_close_callback=lambda _: None,
+        is_dark_mode=False,
+    )
+
+    assert isinstance(dialog, ft.AlertDialog)

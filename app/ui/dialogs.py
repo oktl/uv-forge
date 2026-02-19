@@ -1268,6 +1268,10 @@ def create_add_packages_dialog(
 ) -> ft.AlertDialog:
     """Create dialog for adding one or more packages to the install list.
 
+    Includes an opt-in "Verify on PyPI" button that checks each package
+    against the PyPI registry asynchronously. Results are informational
+    only — the Add button works regardless of check results.
+
     Args:
         on_add_callback: Callback function(packages: list[str]) called with parsed names.
         on_close_callback: Callback function when Cancel is clicked.
@@ -1276,6 +1280,14 @@ def create_add_packages_dialog(
     Returns:
         Configured AlertDialog for adding packages.
     """
+    import asyncio
+
+    from app.core.pypi_checker import (
+        check_pypi_availability,
+        extract_package_name,
+        validate_package_format,
+    )
+
     colors = get_theme_colors(is_dark_mode)
 
     warning_text = ft.Text(
@@ -1296,18 +1308,134 @@ def create_add_packages_dialog(
         autofocus=True,
     )
 
-    def on_add_click(e):
+    # Results area for PyPI verification — hidden until first verify click
+    results_column = ft.Column(
+        scroll=ft.ScrollMode.AUTO, height=120, visible=False, spacing=4
+    )
+
+    def _parse_packages() -> list[str]:
+        """Parse package specs from the text field."""
         raw = packages_field.value or ""
-        # Split on newlines and commas, strip whitespace, drop empty tokens
         tokens = [
             token.strip() for part in raw.splitlines() for token in part.split(",")
         ]
-        packages = [token for token in tokens if token]
+        return [token for token in tokens if token]
+
+    def _make_result_row(icon: str, icon_color: str, pkg: str, message: str) -> ft.Row:
+        return ft.Row(
+            [
+                ft.Icon(icon, color=icon_color, size=16),
+                ft.Text(pkg, size=12, weight=ft.FontWeight.W_500),
+                ft.Text(f"— {message}", size=12, color=ft.Colors.GREY_500),
+            ],
+            spacing=6,
+            tight=True,
+        )
+
+    def _make_checking_row(pkg: str) -> ft.Row:
+        return ft.Row(
+            [
+                ft.ProgressRing(width=14, height=14, stroke_width=2),
+                ft.Text(pkg, size=12, weight=ft.FontWeight.W_500),
+                ft.Text("— Checking...", size=12, color=ft.Colors.GREY_500),
+            ],
+            spacing=6,
+            tight=True,
+        )
+
+    async def _verify_packages(e):
+        """Check each package against PyPI."""
+        packages = _parse_packages()
+        if not packages:
+            warning_text.value = "Enter at least one package name to verify."
+            warning_text.visible = True
+            e.page.update()
+            return
+
+        warning_text.visible = False
+        results_column.controls.clear()
+        results_column.visible = True
+
+        # First pass: client-side format validation + show checking spinners
+        valid_packages: list[tuple[int, str]] = []  # (index, spec)
+        for pkg in packages:
+            fmt_error = validate_package_format(pkg)
+            if fmt_error:
+                results_column.controls.append(
+                    _make_result_row(
+                        ft.Icons.CANCEL, UIConfig.COLOR_ERROR, pkg, fmt_error
+                    )
+                )
+            else:
+                idx = len(results_column.controls)
+                results_column.controls.append(_make_checking_row(pkg))
+                valid_packages.append((idx, pkg))
+
+        e.page.update()
+
+        # Second pass: async PyPI lookups
+        for idx, pkg in valid_packages:
+            bare_name = extract_package_name(pkg)
+            result = await check_pypi_availability(bare_name)
+
+            if result is False:
+                # Package exists on PyPI — that's good for an install
+                row = _make_result_row(
+                    ft.Icons.CHECK_CIRCLE,
+                    UIConfig.COLOR_SUCCESS,
+                    pkg,
+                    "Found on PyPI",
+                )
+            elif result is True:
+                # Package NOT on PyPI — warn user
+                row = _make_result_row(
+                    ft.Icons.ERROR_OUTLINE,
+                    UIConfig.COLOR_WARNING,
+                    pkg,
+                    "Not found on PyPI",
+                )
+            else:
+                # Network error
+                row = _make_result_row(
+                    ft.Icons.WIFI_OFF,
+                    UIConfig.COLOR_WARNING,
+                    pkg,
+                    "Could not check",
+                )
+
+            results_column.controls[idx] = row
+            e.page.update()
+
+    def _wrap_verify(e):
+        asyncio.create_task(_verify_packages(e))
+
+    verify_button = ft.Button(
+        "Verify on PyPI",
+        icon=ft.Icons.TRAVEL_EXPLORE,
+        on_click=_wrap_verify,
+    )
+
+    def on_add_click(e):
+        packages = _parse_packages()
         if not packages:
             warning_text.value = "Enter at least one package name."
             warning_text.visible = True
             e.page.update()
             return
+
+        # Client-side format validation before adding
+        errors = []
+        for pkg in packages:
+            fmt_error = validate_package_format(pkg)
+            if fmt_error:
+                errors.append(fmt_error)
+
+        if errors:
+            warning_text.value = "\n".join(errors)
+            warning_text.visible = True
+            e.page.update()
+            return
+
         warning_text.visible = False
         on_add_callback(packages)
 
@@ -1320,15 +1448,20 @@ def create_add_packages_dialog(
             content=ft.Column(
                 [
                     ft.Text(
-                        "Enter package names to add to the install list.\nEnsure each package is spelled correctly — uv will fail at build time if a package cannot be found.\nVersion specifiers (>=, ==, <) and extras ([postgres], [dev]) are supported.",
+                        "Enter package names to add to the install list.\n"
+                        "Version specifiers (>=, ==, <) and extras "
+                        "([postgres], [dev]) are supported.",
                         size=13,
                         color=colors.get("section_title"),
                     ),
                     ft.Container(height=8),
                     packages_field,
+                    ft.Row([verify_button], spacing=8),
                     warning_text,
+                    results_column,
                 ],
                 tight=True,
+                spacing=8,
             ),
             width=450,
             padding=UIConfig.DIALOG_CONTENT_PADDING,
@@ -1343,6 +1476,10 @@ def create_add_packages_dialog(
         ),
         actions_alignment=ft.MainAxisAlignment.END,
     )
+
+    # Expose for testing
+    dialog.verify_button = verify_button
+    dialog.results_column = results_column
 
     return dialog
 
