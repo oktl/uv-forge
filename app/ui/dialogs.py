@@ -1534,6 +1534,168 @@ def create_build_summary_dialog(
     return dialog
 
 
+def _parse_log_location(location: str) -> tuple[str, int] | None:
+    """Extract module path and line number from a log location segment.
+
+    Args:
+        location: Location string like ``app.core.state:load:42``.
+
+    Returns:
+        Tuple of (dotted module path, line number) or None if unparseable.
+    """
+    parts = location.strip().split(":")
+    if len(parts) >= 3:
+        try:
+            return parts[0], int(parts[-1])
+        except ValueError:
+            return None
+    return None
+
+
+def _parse_log_line(
+    line: str,
+    is_dark_mode: bool,
+    on_location_click: collections.abc.Callable[[str, int], None] | None = None,
+) -> ft.Row:
+    """Parse a single log line into a colored Flet Row.
+
+    Expected format: ``{time} | {level} | {name}:{function}:{line} - {message}``
+
+    Args:
+        line: Raw log line string.
+        is_dark_mode: Whether dark mode is active.
+        on_location_click: Optional callback ``(module_path, line_number)`` invoked
+            when the location segment is clicked.
+
+    Returns:
+        A Row with coloured Text segments for each part of the log line.
+    """
+    level_colors = {
+        "DEBUG": ft.Colors.GREY_600,
+        "INFO": ft.Colors.GREY_400 if is_dark_mode else ft.Colors.GREY_700,
+        "SUCCESS": ft.Colors.GREEN_400,
+        "WARNING": ft.Colors.AMBER_400,
+        "ERROR": ft.Colors.RED_400,
+        "CRITICAL": ft.Colors.RED_300,
+    }
+
+    text_kwargs = {"font_family": "monospace", "size": 11, "no_wrap": True}
+
+    parts = line.split(" | ", 2)
+    if len(parts) != 3:
+        return ft.Row(
+            [ft.Text(line, color=ft.Colors.GREY_600, **text_kwargs)],
+            spacing=0,
+            tight=True,
+        )
+
+    timestamp, level_raw, rest = parts
+    level = level_raw.strip()
+    color = level_colors.get(level, ft.Colors.GREY_600)
+    weight = ft.FontWeight.BOLD if level == "CRITICAL" else None
+
+    loc_msg = rest.split(" - ", 1)
+    location = loc_msg[0] if len(loc_msg) == 2 else rest
+    message = loc_msg[1] if len(loc_msg) == 2 else ""
+
+    # Build the location control — clickable if a callback is provided
+    loc_parsed = _parse_log_location(location) if on_location_click else None
+    if loc_parsed and on_location_click:
+        module_path, line_no = loc_parsed
+
+        loc_text = ft.Text(location, color=ft.Colors.CYAN_400, **text_kwargs)
+
+        def _on_hover(e, txt=loc_text):
+            txt.text_decorations = (
+                ft.TextDecoration.UNDERLINE
+                if e.data == "true"
+                else ft.TextDecoration.NONE
+            )
+            txt.update()
+
+        def _on_click(_e, mp=module_path, ln=line_no):
+            on_location_click(mp, ln)
+
+        location_control = ft.GestureDetector(
+            content=loc_text,
+            on_hover=_on_hover,
+            on_tap=_on_click,
+            mouse_cursor=ft.MouseCursor.CLICK,
+        )
+    else:
+        location_control = ft.Text(location, color=ft.Colors.CYAN_400, **text_kwargs)
+
+    controls = [
+        ft.Text(timestamp, color=ft.Colors.GREY_600, **text_kwargs),
+        ft.Text(" | ", color=ft.Colors.GREY_700, **text_kwargs),
+        ft.Text(level_raw, color=color, weight=weight, **text_kwargs),
+        ft.Text(" | ", color=ft.Colors.GREY_700, **text_kwargs),
+        location_control,
+    ]
+    if message:
+        controls.append(ft.Text(" - ", color=ft.Colors.GREY_700, **text_kwargs))
+        controls.append(ft.Text(message, color=color, weight=weight, **text_kwargs))
+
+    return ft.Row(controls, spacing=0, tight=True)
+
+
+def create_log_viewer_dialog(
+    log_content: str,
+    on_close_callback,
+    is_dark_mode: bool,
+    on_location_click: collections.abc.Callable[[str, int], None] | None = None,
+) -> ft.AlertDialog:
+    """Create a dialog displaying application log content with coloured lines.
+
+    Args:
+        log_content: Raw log file text.
+        on_close_callback: Callback when the Close button is clicked.
+        is_dark_mode: Whether dark mode is active.
+        on_location_click: Optional callback ``(module_path, line_number)`` invoked
+            when a clickable location segment is tapped.  When provided, location
+            segments are rendered as hover-underline links.
+
+    Returns:
+        Configured AlertDialog with parsed, coloured log rows.
+    """
+    colors = get_theme_colors(is_dark_mode)
+
+    parsed_rows = [
+        _parse_log_line(line, is_dark_mode, on_location_click=on_location_click)
+        for line in log_content.splitlines()
+        if line.strip()
+    ]
+
+    if not parsed_rows:
+        parsed_rows = [ft.Text("(empty log)", italic=True, color=ft.Colors.GREY_500)]
+
+    log_text_ref = log_content
+
+    def on_copy_click(e):
+        e.page.set_clipboard(log_text_ref)
+        copy_btn.text = "Copied!"
+        e.page.update()
+
+    copy_btn = ft.TextButton("Copy to Clipboard", on_click=on_copy_click)
+
+    return ft.AlertDialog(
+        modal=True,
+        title=_create_dialog_title("Log Viewer", colors, icon=ft.Icons.ARTICLE),
+        content=ft.Container(
+            content=ft.Column(
+                controls=parsed_rows,
+                scroll=ft.ScrollMode.AUTO,
+                auto_scroll=True,
+            ),
+            width=UIConfig.DIALOG_WIDTH,
+            height=UIConfig.DIALOG_HEIGHT - 100,
+            padding=UIConfig.DIALOG_CONTENT_PADDING,
+        ),
+        actions=[copy_btn, ft.TextButton("Close", on_click=on_close_callback)],
+        actions_alignment=ft.MainAxisAlignment.END,
+    )
+
+
 def create_settings_dialog(
     settings,
     on_save_callback: collections.abc.Callable,

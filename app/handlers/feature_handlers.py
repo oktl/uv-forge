@@ -1,15 +1,25 @@
-"""Handlers for theme toggle, help dialog, git cheat sheet, about dialog, and settings."""
+"""Handlers for theme toggle, help dialog, git cheat sheet, about dialog, settings, and log viewer."""
 
 import asyncio
+import subprocess
+from datetime import date
+from pathlib import Path
 
 import flet as ft
 
-from app.core.constants import ABOUT_FILE, GIT_CHEAT_SHEET_FILE, HELP_FILE
+from app.core.constants import (
+    ABOUT_FILE,
+    GIT_CHEAT_SHEET_FILE,
+    HELP_FILE,
+    PROJECT_DIR,
+    SUPPORTED_IDES,
+)
 from app.core.settings_manager import save_settings
 from app.ui.dialogs import (
     create_about_dialog,
     create_git_cheat_sheet_dialog,
     create_help_dialog,
+    create_log_viewer_dialog,
     create_settings_dialog,
 )
 from app.ui.theme_manager import get_theme_colors
@@ -154,6 +164,94 @@ For more information, visit: https://docs.astral.sh/uv/
 
         self.page.overlay.append(about_dialog)
         about_dialog.open = True
+        self.state.active_dialog = close_dialog
+        self.page.update()
+
+    # URL schemes for IDEs that support file:line navigation.
+    # More reliable than CLI commands which may not be on PATH.
+    _IDE_URL_SCHEMES: dict[str, str] = {
+        "VS Code": "vscode://file{path}:{line}",
+        "Cursor": "cursor://file{path}:{line}",
+        "Zed": "zed://file{path}:{line}",
+    }
+
+    def _open_file_in_ide(self, module_path: str, line_no: int) -> None:
+        """Open a source file in the user's preferred IDE at a specific line.
+
+        Resolves a dotted module path (e.g. ``app.core.state``) to a file
+        under ``PROJECT_DIR`` and launches the IDE.  Uses URL schemes on
+        macOS for reliability (CLI tools may not be on PATH); falls back
+        to CLI commands on other platforms.
+
+        Args:
+            module_path: Dotted Python module path.
+            line_no: Line number to jump to.
+        """
+        if module_path == "__main__":
+            module_path = "app.main"
+        rel = Path(module_path.replace(".", "/") + ".py")
+        file_path = PROJECT_DIR / rel
+        if not file_path.is_file():
+            return
+
+        ide_name = self.state.settings.preferred_ide
+
+        # Try URL scheme first (works on macOS without CLI in PATH)
+        url_template = self._IDE_URL_SCHEMES.get(ide_name)
+        if url_template:
+            url = url_template.format(path=file_path, line=line_no)
+            try:
+                subprocess.Popen(["open", url])
+                return
+            except FileNotFoundError:
+                pass
+
+        # Fallback to CLI command
+        command = SUPPORTED_IDES.get(ide_name)
+        if command is None:
+            command = self.state.settings.custom_ide_path
+            if not command:
+                return
+
+        try:
+            if ide_name == "PyCharm":
+                subprocess.Popen([command, "--line", str(line_no), str(file_path)])
+            else:
+                subprocess.Popen([command, "--goto", f"{file_path}:{line_no}"])
+        except FileNotFoundError:
+            pass
+
+    async def on_log_viewer_click(self, _: ft.ControlEvent) -> None:
+        """Handle Log Viewer button click.
+
+        Reads today's log file and displays it in a dialog with coloured,
+        parsed log lines.  Location segments are clickable and open the
+        source file in the user's preferred IDE.
+        """
+        log_file = PROJECT_DIR / "logs" / f"app_{date.today()}.log"
+        try:
+            log_content = log_file.read_text(encoding="utf-8")
+        except FileNotFoundError:
+            self._show_snackbar("No log file found for today", is_error=True)
+            return
+        except OSError as e:
+            self._show_snackbar(f"Could not read log file: {e}", is_error=True)
+            return
+
+        def close_dialog(_=None):
+            log_dialog.open = False
+            self.state.active_dialog = None
+            self.page.update()
+
+        log_dialog = create_log_viewer_dialog(
+            log_content,
+            close_dialog,
+            self.state.is_dark_mode,
+            on_location_click=self._open_file_in_ide,
+        )
+
+        self.page.overlay.append(log_dialog)
+        log_dialog.open = True
         self.state.active_dialog = close_dialog
         self.page.update()
 

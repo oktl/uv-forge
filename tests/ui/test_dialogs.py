@@ -9,7 +9,10 @@ import pytest
 from app.core.models import BuildSummaryConfig
 from app.ui.dialogs import (
     _build_project_tree_lines,
+    _parse_log_line,
+    _parse_log_location,
     create_about_dialog,
+    create_log_viewer_dialog,
     create_project_type_dialog,
 )
 
@@ -516,3 +519,117 @@ def test_tree_box_drawing_characters():
     lines = _build_project_tree_lines(config)
     all_text = "\n".join(lines)
     assert "├── " in all_text or "└── " in all_text
+
+
+# ========== Log Viewer Dialog Tests ==========
+
+
+def test_create_log_viewer_dialog():
+    """Test log viewer dialog creation with sample log content."""
+    sample = (
+        "2026-02-19 10:00:00 | INFO     | app.main:start:10 - App started\n"
+        "2026-02-19 10:00:01 | ERROR    | app.build:run:42 - Build failed\n"
+    )
+    dialog = create_log_viewer_dialog(
+        log_content=sample,
+        on_close_callback=lambda _: None,
+        is_dark_mode=True,
+    )
+
+    assert isinstance(dialog, ft.AlertDialog)
+    assert dialog.modal is True
+    assert dialog.content is not None
+    assert len(dialog.actions) == 2  # Copy + Close
+
+
+def test_create_log_viewer_dialog_empty():
+    """Test log viewer dialog with empty content shows placeholder."""
+    dialog = create_log_viewer_dialog(
+        log_content="",
+        on_close_callback=lambda _: None,
+        is_dark_mode=True,
+    )
+    column = dialog.content.content
+    assert len(column.controls) == 1
+    assert isinstance(column.controls[0], ft.Text)
+
+
+def test_parse_log_line_standard():
+    """Test standard log lines are parsed into coloured rows."""
+    line = "2026-02-19 10:00:00 | INFO     | app.main:start:10 - App started"
+    row = _parse_log_line(line, is_dark_mode=True)
+
+    assert isinstance(row, ft.Row)
+    # Should have timestamp, sep, level, sep, location, sep, message = 7 parts
+    assert len(row.controls) == 7
+
+
+def test_parse_log_line_continuation():
+    """Test non-standard lines (tracebacks) render as plain text."""
+    line = "  File \"/app/main.py\", line 10, in start"
+    row = _parse_log_line(line, is_dark_mode=True)
+
+    assert isinstance(row, ft.Row)
+    assert len(row.controls) == 1  # Single plain Text
+    assert row.controls[0].color == ft.Colors.GREY_600
+
+
+def test_parse_log_line_critical_is_bold():
+    """Test CRITICAL lines use bold weight."""
+    line = "2026-02-19 10:00:00 | CRITICAL | app.main:crash:1 - Fatal error"
+    row = _parse_log_line(line, is_dark_mode=True)
+
+    # Find the level text (index 2) and message text (index 6)
+    level_text = row.controls[2]
+    message_text = row.controls[6]
+    assert level_text.weight == ft.FontWeight.BOLD
+    assert message_text.weight == ft.FontWeight.BOLD
+
+
+def test_parse_log_line_light_mode_info_color():
+    """Test INFO uses different color in light mode."""
+    line = "2026-02-19 10:00:00 | INFO     | app.main:start:10 - Started"
+    row_dark = _parse_log_line(line, is_dark_mode=True)
+    row_light = _parse_log_line(line, is_dark_mode=False)
+
+    # Level text color should differ between modes
+    assert row_dark.controls[2].color == ft.Colors.GREY_400
+    assert row_light.controls[2].color == ft.Colors.GREY_700
+
+
+def test_parse_log_location_valid():
+    """Test parsing a standard log location segment."""
+    result = _parse_log_location("app.core.state:load:42")
+    assert result == ("app.core.state", 42)
+
+
+def test_parse_log_location_invalid():
+    """Test parsing returns None for non-standard segments."""
+    assert _parse_log_location("no_colons_here") is None
+    assert _parse_log_location("only:one") is None
+    assert _parse_log_location("mod:func:notanum") is None
+
+
+def test_parse_log_line_with_location_callback():
+    """Test location becomes a GestureDetector when callback is provided."""
+    captured = []
+
+    def on_click(module, line_no):
+        captured.append((module, line_no))
+
+    line = "2026-02-19 10:00:00 | INFO     | app.main:start:10 - Started"
+    row = _parse_log_line(line, is_dark_mode=True, on_location_click=on_click)
+
+    # Location control (index 4) should be a GestureDetector
+    loc_control = row.controls[4]
+    assert isinstance(loc_control, ft.GestureDetector)
+    assert loc_control.mouse_cursor == ft.MouseCursor.CLICK
+
+
+def test_parse_log_line_without_callback_is_plain_text():
+    """Test location is plain Text when no callback is provided."""
+    line = "2026-02-19 10:00:00 | INFO     | app.main:start:10 - Started"
+    row = _parse_log_line(line, is_dark_mode=True, on_location_click=None)
+
+    loc_control = row.controls[4]
+    assert isinstance(loc_control, ft.Text)
