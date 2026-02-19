@@ -14,11 +14,13 @@ from app.core.constants import (
     PROJECT_DIR,
     SUPPORTED_IDES,
 )
+from app.core.history_manager import clear_history, load_history
 from app.core.settings_manager import save_settings
 from app.ui.dialogs import (
     create_about_dialog,
     create_git_cheat_sheet_dialog,
     create_help_dialog,
+    create_history_dialog,
     create_log_viewer_dialog,
     create_settings_dialog,
 )
@@ -252,6 +254,41 @@ For more information, visit: https://docs.astral.sh/uv/
 
         self.page.overlay.append(log_dialog)
         log_dialog.open = True
+        self.state.active_dialog = close_dialog
+        self.page.update()
+
+    async def on_history_click(self, _: ft.ControlEvent) -> None:
+        """Handle Recent Projects button click.
+
+        Opens a dialog showing recent project builds. Selecting an entry
+        and clicking Restore populates the UI with that project's config.
+        """
+        entries = load_history()
+
+        def close_dialog(_=None):
+            history_dialog.open = False
+            self.state.active_dialog = None
+            self.page.update()
+
+        def on_restore(entry):
+            close_dialog()
+            self._restore_from_history(entry)
+
+        def on_clear(_=None):
+            clear_history()
+            close_dialog()
+            self._show_snackbar("History cleared")
+
+        history_dialog = create_history_dialog(
+            entries=entries,
+            on_restore_callback=on_restore,
+            on_close_callback=close_dialog,
+            on_clear_callback=on_clear,
+            is_dark_mode=self.state.is_dark_mode,
+        )
+
+        self.page.overlay.append(history_dialog)
+        history_dialog.open = True
         self.state.active_dialog = close_dialog
         self.page.update()
 

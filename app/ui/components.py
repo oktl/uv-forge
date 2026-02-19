@@ -94,6 +94,7 @@ class Controls:
         self.help_button: ft.IconButton
         self.git_cheat_sheet_button: ft.IconButton
         self.settings_button: ft.IconButton
+        self.history_button: ft.IconButton
         self.log_viewer_button: ft.IconButton
         self.theme_toggle_button: ft.IconButton
         self.main_title: ft.Text
@@ -181,6 +182,12 @@ def create_controls(state: AppState, colors: dict) -> Controls:
         icon=ft.Icons.SETTINGS,
         icon_size=UIConfig.ICON_SIZE_DEFAULT,
         tooltip="Settings",
+    )
+
+    controls.history_button = ft.IconButton(
+        icon=ft.Icons.HISTORY,
+        icon_size=UIConfig.ICON_SIZE_DEFAULT,
+        tooltip="Recent Projects",
     )
 
     controls.log_viewer_button = ft.IconButton(
@@ -580,6 +587,7 @@ def create_app_bars(page: ft.Page, controls: Controls, colors: dict) -> None:
         ),
         bgcolor=ft.Colors.TRANSPARENT,
         actions=[
+            controls.history_button,
             controls.log_viewer_button,
             controls.settings_button,
             controls.help_button,

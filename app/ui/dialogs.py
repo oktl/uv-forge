@@ -2043,3 +2043,228 @@ def create_settings_dialog(
     )
 
     return dialog
+
+
+def create_history_dialog(
+    entries: list,
+    on_restore_callback: collections.abc.Callable,
+    on_close_callback: collections.abc.Callable,
+    on_clear_callback: collections.abc.Callable,
+    is_dark_mode: bool,
+) -> ft.AlertDialog:
+    """Create a dialog showing recent project history.
+
+    Args:
+        entries: List of ProjectHistoryEntry objects, newest first.
+        on_restore_callback: Callback receiving the selected entry on restore.
+        on_close_callback: Callback when Cancel is clicked or dialog dismissed.
+        on_clear_callback: Callback to clear all history entries.
+        is_dark_mode: Whether dark mode is active.
+
+    Returns:
+        Configured AlertDialog for browsing and restoring recent projects.
+    """
+    colors = get_theme_colors(is_dark_mode)
+    selected_index: dict[str, int | None] = {"value": None}
+
+    row_containers: list[ft.Container] = []
+
+    def _highlight(idx: int) -> None:
+        for i, container in enumerate(row_containers):
+            if i == idx:
+                container.bgcolor = (
+                    ft.Colors.BLUE_900 if is_dark_mode else ft.Colors.BLUE_100
+                )
+                container.border = ft.Border.all(1, ft.Colors.BLUE_400)
+            else:
+                container.bgcolor = None
+                container.border = ft.Border.all(
+                    1, ft.Colors.GREY_700 if is_dark_mode else ft.Colors.GREY_300
+                )
+
+    def _on_row_click(idx: int):
+        def handler(_):
+            selected_index["value"] = idx
+            _highlight(idx)
+            restore_btn.disabled = False
+            for c in row_containers:
+                c.update()
+            restore_btn.update()
+
+        return handler
+
+    def _on_restore(_):
+        idx = selected_index["value"]
+        if idx is not None and idx < len(entries):
+            on_restore_callback(entries[idx])
+
+    restore_btn = ft.FilledButton(
+        "Restore",
+        icon=ft.Icons.RESTORE,
+        disabled=True,
+        on_click=_on_restore,
+        style=ft.ButtonStyle(
+            bgcolor={
+                ft.ControlState.DEFAULT: ft.Colors.BLUE_600,
+                ft.ControlState.FOCUSED: ft.Colors.BLUE_400,
+                ft.ControlState.HOVERED: ft.Colors.BLUE_500,
+                ft.ControlState.PRESSED: ft.Colors.BLUE_700,
+                ft.ControlState.DISABLED: ft.Colors.GREY_700,
+            },
+            side={
+                ft.ControlState.DEFAULT: ft.BorderSide(0, ft.Colors.TRANSPARENT),
+                ft.ControlState.FOCUSED: ft.BorderSide(2, ft.Colors.WHITE),
+            },
+        ),
+    )
+
+    if not entries:
+        content = ft.Container(
+            content=ft.Column(
+                [
+                    ft.Icon(
+                        ft.Icons.HISTORY,
+                        size=48,
+                        color=ft.Colors.GREY_500,
+                    ),
+                    ft.Text(
+                        "No recent projects",
+                        size=16,
+                        color=ft.Colors.GREY_500,
+                        text_align=ft.TextAlign.CENTER,
+                    ),
+                    ft.Text(
+                        "Projects will appear here after a successful build.",
+                        size=13,
+                        color=ft.Colors.GREY_600,
+                        text_align=ft.TextAlign.CENTER,
+                    ),
+                ],
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                spacing=8,
+            ),
+            width=500,
+            padding=UIConfig.DIALOG_CONTENT_PADDING,
+        )
+    else:
+        for i, entry in enumerate(entries):
+            # Build badge text
+            badges = []
+            if entry.ui_project_enabled and entry.framework:
+                badges.append(entry.framework)
+            if entry.other_project_enabled and entry.project_type:
+                badges.append(entry.project_type)
+
+            badge_row = []
+            for badge_text in badges:
+                badge_row.append(
+                    ft.Container(
+                        content=ft.Text(badge_text, size=11, color=ft.Colors.WHITE),
+                        bgcolor=ft.Colors.BLUE_700,
+                        border_radius=4,
+                        padding=ft.Padding.symmetric(horizontal=6, vertical=2),
+                    )
+                )
+            if entry.packages:
+                badge_row.append(
+                    ft.Text(
+                        f"{len(entry.packages)} pkg{'s' if len(entry.packages) != 1 else ''}",
+                        size=11,
+                        color=ft.Colors.GREY_500,
+                        italic=True,
+                    )
+                )
+
+            # Parse built_at for display
+            try:
+                dt = __import__("datetime").datetime.fromisoformat(entry.built_at)
+                time_str = dt.strftime("%b %d, %H:%M")
+            except ValueError, AttributeError:
+                time_str = entry.built_at[:16] if entry.built_at else ""
+
+            row = ft.Container(
+                content=ft.Column(
+                    [
+                        ft.Row(
+                            [
+                                ft.Text(
+                                    entry.project_name,
+                                    weight=ft.FontWeight.W_600,
+                                    size=14,
+                                    color=colors["main_title"],
+                                    expand=True,
+                                ),
+                                ft.Text(
+                                    time_str,
+                                    size=11,
+                                    color=ft.Colors.GREY_500,
+                                ),
+                            ],
+                        ),
+                        ft.Text(
+                            entry.project_path,
+                            size=12,
+                            color=ft.Colors.GREY_500,
+                        ),
+                        ft.Row(badge_row, spacing=6) if badge_row else ft.Container(),
+                    ],
+                    spacing=2,
+                    tight=True,
+                ),
+                border=ft.Border.all(
+                    1, ft.Colors.GREY_700 if is_dark_mode else ft.Colors.GREY_300
+                ),
+                border_radius=6,
+                padding=10,
+                on_click=_on_row_click(i),
+                ink=True,
+            )
+            row_containers.append(row)
+
+        content = ft.Container(
+            content=ft.Column(
+                row_containers,
+                spacing=6,
+                scroll=ft.ScrollMode.AUTO,
+            ),
+            width=500,
+            height=min(len(entries) * 90, 400),
+            padding=UIConfig.DIALOG_CONTENT_PADDING,
+        )
+
+    cancel_bg_focused = ft.Colors.GREY_700 if is_dark_mode else ft.Colors.GREY_300
+    cancel_btn = ft.OutlinedButton(
+        "Cancel",
+        on_click=on_close_callback,
+        style=ft.ButtonStyle(
+            bgcolor={
+                ft.ControlState.DEFAULT: ft.Colors.TRANSPARENT,
+                ft.ControlState.FOCUSED: cancel_bg_focused,
+                ft.ControlState.HOVERED: cancel_bg_focused,
+            },
+            side={
+                ft.ControlState.DEFAULT: ft.BorderSide(1, ft.Colors.GREY_500),
+                ft.ControlState.FOCUSED: ft.BorderSide(2, ft.Colors.WHITE),
+            },
+        ),
+    )
+
+    actions = [restore_btn, cancel_btn] if entries else [cancel_btn]
+    if entries:
+        clear_btn = ft.TextButton(
+            "Clear History",
+            icon=ft.Icons.DELETE_OUTLINE,
+            on_click=on_clear_callback,
+            style=ft.ButtonStyle(color=ft.Colors.RED_400),
+        )
+        actions.insert(0, clear_btn)
+
+    dialog = ft.AlertDialog(
+        modal=True,
+        title=_create_dialog_title("Recent Projects", colors, icon=ft.Icons.HISTORY),
+        content=content,
+        actions=actions,
+        actions_alignment=ft.MainAxisAlignment.END,
+    )
+
+    return dialog

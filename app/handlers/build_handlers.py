@@ -12,7 +12,9 @@ from app.core.constants import (
     IDE_MACOS_APP_NAMES,
     SUPPORTED_IDES,
 )
+from app.core.history_manager import add_to_history, make_history_entry
 from app.core.models import BuildSummaryConfig, ProjectConfig
+from app.core.validator import validate_project_name
 from app.handlers.handler_base import wrap_async
 from app.handlers.project_builder import build_project
 from app.ui.dialog_data import (
@@ -148,6 +150,23 @@ class BuildHandlersMixin:
         if result.success:
             self._set_status(result.message, "success", update=False)
             self._show_snackbar(result.message, is_error=False)
+
+            # Save to recent projects history
+            entry = make_history_entry(
+                project_name=config.project_name,
+                project_path=str(config.project_path),
+                python_version=config.python_version,
+                git_enabled=config.git_enabled,
+                include_starter_files=config.include_starter_files,
+                ui_project_enabled=config.ui_project_enabled,
+                framework=config.framework or None,
+                other_project_enabled=config.other_project_enabled,
+                project_type=config.project_type,
+                folders=config.folders,
+                packages=config.packages,
+            )
+            add_to_history(entry)
+
             project_path = config.project_path / config.project_name
             if open_folder:
                 self._open_in_file_manager(project_path)
@@ -172,6 +191,92 @@ class BuildHandlersMixin:
             error_dialog.open = True
             self.state.active_dialog = close_error_dialog
 
+        self.page.update()
+
+    def _restore_from_history(self, entry) -> None:
+        """Populate state and UI controls from a history entry.
+
+        Sets all state fields from the entry, updates folder/package
+        displays directly (without reloading templates), and validates.
+
+        Args:
+            entry: A ProjectHistoryEntry with the saved configuration.
+        """
+        # Populate state
+        self.state.project_name = entry.project_name
+        self.state.project_path = entry.project_path
+        self.state.python_version = entry.python_version
+        self.state.git_enabled = entry.git_enabled
+        self.state.include_starter_files = entry.include_starter_files
+        self.state.ui_project_enabled = entry.ui_project_enabled
+        self.state.framework = entry.framework
+        self.state.other_project_enabled = entry.other_project_enabled
+        self.state.project_type = entry.project_type
+        self.state.folders = list(entry.folders)
+        self.state.packages = list(entry.packages)
+
+        # Update UI controls
+        self.controls.project_name_input.value = entry.project_name
+        self.controls.project_path_input.value = entry.project_path
+        self.controls.python_version_dropdown.value = entry.python_version
+        self.controls.create_git_checkbox.value = entry.git_enabled
+        self.controls.include_starter_files_checkbox.value = entry.include_starter_files
+        self.controls.ui_project_checkbox.value = entry.ui_project_enabled
+        self.controls.other_projects_checkbox.value = entry.other_project_enabled
+
+        # Update checkbox labels
+        if entry.ui_project_enabled and entry.framework:
+            self.controls.ui_project_checkbox.label = f"UI Framework: {entry.framework}"
+        else:
+            self.controls.ui_project_checkbox.label = UI_PROJECT_CHECKBOX_LABEL
+
+        if entry.other_project_enabled and entry.project_type:
+            self.controls.other_projects_checkbox.label = (
+                f"Project Type: {entry.project_type}"
+            )
+        else:
+            self.controls.other_projects_checkbox.label = OTHER_PROJECT_CHECKBOX_LABEL
+
+        # Style checkboxes
+        for cb in (
+            self.controls.create_git_checkbox,
+            self.controls.include_starter_files_checkbox,
+            self.controls.ui_project_checkbox,
+            self.controls.other_projects_checkbox,
+        ):
+            self._style_selected_checkbox(cb)
+
+        # Validate path and name
+        self.state.path_valid = Path(entry.project_path).is_dir()
+        self._set_validation_icon(
+            self.controls.project_path_input, self.state.path_valid
+        )
+
+        is_valid, _ = validate_project_name(entry.project_name)
+        self.state.name_valid = is_valid
+        if is_valid:
+            full_path = Path(entry.project_path) / entry.project_name
+            if full_path.exists():
+                self.state.name_valid = False
+        self._set_validation_icon(
+            self.controls.project_name_input,
+            self.state.name_valid if entry.project_name else None,
+        )
+
+        # Update displays
+        self._update_folder_display()
+        self._update_package_display()
+        self._update_build_button_state()
+        self._update_path_preview()
+
+        self.controls.pypi_status_text.value = ""
+        self.controls.check_pypi_button.disabled = not self.state.name_valid
+        self.controls.warning_banner.value = ""
+        self.page.title = (
+            f"UV Forge — {entry.project_name}" if self.state.name_valid else "UV Forge"
+        )
+
+        self._show_snackbar(f"Restored: {entry.project_name}")
         self.page.update()
 
     async def on_build_project(self, _: ft.ControlEvent) -> None:

@@ -23,7 +23,7 @@ Key capabilities:
 ```bash
 uv run uv-forge              # Via entry point
 python app/main.py            # Direct execution
-uv run pytest                 # Run 537 tests (coverage automatic)
+uv run pytest                 # Run 572 tests (coverage automatic)
 uv run ruff check app         # Lint app/ (runs automatically on commit)
 uv run ruff format app        # Auto-format app/
 ```
@@ -43,9 +43,10 @@ app/
 │   ├── template_loader.py    # TemplateLoader: loads JSON templates, fallback chain
 │   ├── boilerplate_resolver.py # BoilerplateResolver: populates files with starter content
 │   ├── template_merger.py    # normalize_folder(), merge_folder_lists(), _merge_files()
-│   ├── pypi_checker.py       # normalize_pypi_name(), check_pypi_availability() — async httpx
+│   ├── pypi_checker.py       # normalize_pypi_name(), check_pypi_availability(), validate_package_format() — async httpx
 │   ├── async_executor.py    # AsyncExecutor.run() — ThreadPoolExecutor wrapper
 │   ├── settings_manager.py  # AppSettings, load/save to platformdirs JSON
+│   ├── history_manager.py   # ProjectHistoryEntry, load/save/add_to_history — recent projects JSON
 │   └── logging_config.py    # Loguru setup: console + file handlers with rotation
 ├── handlers/
 │   ├── ui_handler.py         # Handlers class (mixin composition) + attach_handlers() wiring
@@ -54,15 +55,15 @@ app/
 │   ├── option_handlers.py    # OptionHandlersMixin — checkboxes, dialogs, template loading/merging
 │   ├── folder_handlers.py    # FolderHandlersMixin — folder tree display and management
 │   ├── package_handlers.py   # PackageHandlersMixin — package list display and management
-│   ├── build_handlers.py     # BuildHandlersMixin — build, reset, exit, keyboard shortcuts
-│   ├── feature_handlers.py   # FeatureHandlersMixin — theme toggle, help, git cheat sheet, about, settings, log viewer
+│   ├── build_handlers.py     # BuildHandlersMixin — build, reset, exit, keyboard shortcuts, history restore
+│   ├── feature_handlers.py   # FeatureHandlersMixin — theme toggle, help, git cheat sheet, about, settings, log viewer, history
 │   ├── project_builder.py    # build_project() orchestration — UV init, git, folders, packages
 │   ├── filesystem_handler.py # setup_app_structure(), folder creation, cleanup_on_error()
 │   ├── uv_handler.py         # run_uv_init(), install_package(), setup_virtual_env()
 │   ├── git_handler.py        # handle_git_init(), finalize_git_setup() — two-phase git setup
 ├── ui/
 │   ├── components.py         # Controls class + build_main_view(page, state)
-│   ├── dialogs.py            # 11 dialog functions + 5 shared helpers; all theme-aware via is_dark_mode
+│   ├── dialogs.py            # 12 dialog functions + 5 shared helpers; all theme-aware via is_dark_mode
 │   ├── dialog_data.py        # Framework/project type categories, checkbox labels — dialog display metadata
 │   ├── theme_manager.py      # get_theme_colors() singleton
 │   └── ui_config.py          # UI constants (colors, sizes)
@@ -152,10 +153,11 @@ Files use `{{project_name}}` placeholders, substituted at build time with a norm
 - **`_reload_and_merge_templates()`** is the single entry point for all template loading — framework change, project type change, reset, toggle off
 - **`normalize_framework_name()`** in `boilerplate_resolver.py` is the shared function for framework name normalization — used by both `ConfigManager` and `BoilerplateResolver`
 - **`normalize_project_name()`** in `boilerplate_resolver.py` converts project names to title case with spaces for `{{project_name}}` substitution (e.g. `my_app` → `My App`)
-- **PyPI checker** (`pypi_checker.py`): Manual trigger via icon button, uses `httpx.AsyncClient` directly (no `AsyncExecutor` needed). PEP 503 name normalization ensures `my_app` and `my-app` are treated as the same package. Tri-state return: `True` (available) / `False` (taken) / `None` (error).
+- **PyPI checker** (`pypi_checker.py`): Manual trigger via icon button, uses `httpx.AsyncClient` directly (no `AsyncExecutor` needed). PEP 503 name normalization ensures `my_app` and `my-app` are treated as the same package. Tri-state return: `True` (available) / `False` (taken) / `None` (error). Also provides `validate_package_format()` and `extract_package_name()` for the Add Packages dialog's per-package PyPI validation — each package is checked live before adding, with format validation and existence confirmation via the same async client.
 - **About dialog** (`feature_handlers.py`): Loads `ABOUT.md` with app info, tech stack, features. Supports `app://` internal links — clicking `[Help](app://help)` or `[Git Cheat Sheet](app://git-cheat-sheet)` closes the About dialog and opens the target dialog directly. The `_create_markdown_dialog()` helper accepts an optional `on_internal_link` callback for this.
 - **Settings system** (`settings_manager.py`): `AppSettings` dataclass loaded from `platformdirs.user_data_dir("UV Forge")/settings.json`. Persists default project path, GitHub root, Python version, preferred IDE, and git default. Threaded into `AppState` at startup; settings dialog allows live editing.
 - **Log viewer** (`feature_handlers.py`, `dialogs.py`): AppBar button reads today's log file (`PROJECT_DIR/logs/app_{date}.log`). Log lines are parsed into coloured segments (timestamp, level, location, message) with level-based colouring. Location segments (e.g., `app.core.state:load:42`) are clickable — hover shows underline, click opens the source file at that line in the user's preferred IDE via URL schemes (`vscode://file/...`, `cursor://`, `zed://`). Falls back to CLI commands on non-macOS. `__main__` module is resolved to `app/main.py`.
+- **Recent projects history** (`history_manager.py`): `ProjectHistoryEntry` dataclass stored in `SETTINGS_DIR/recent_projects.json` (reuses `platformdirs` path from `settings_manager`). Saves after each successful build; capped at 5 entries, deduped by name+path. History dialog shows tappable rows with project name, path, timestamp, framework/project type badges, and package count. "Restore" populates all state fields and UI controls directly (folders set as-is, no template reload). `clear_history()` empties the file.
 - **Two-phase git setup** (if git enabled):
   - Phase 1 (`handle_git_init`): Creates local repo + bare hub at configurable hub path (from `settings.default_github_root`), connects via remote origin
   - Phase 2 (`finalize_git_setup`): Called after all files created; stages, commits, and pushes to hub automatically
@@ -177,7 +179,7 @@ Ruff is configured in `pyproject.toml` and enforced via a git pre-commit hook (`
 
 ## Development Guidelines
 
-- **Run `uv run pytest` before committing** — 537 tests, coverage automatic
+- **Run `uv run pytest` before committing** — 572 tests, coverage automatic
 - **Ruff runs automatically on commit** via pre-commit hook — fix any errors before committing
 - **Add tests** in `tests/core/`, `tests/handlers/`, or `tests/utils/` for new functionality
 - **Use `wrap_async()` for new async handlers** wrapping coroutines for Flet callbacks
