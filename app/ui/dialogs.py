@@ -1672,8 +1672,23 @@ def create_log_viewer_dialog(
     log_text_ref = log_content
 
     def on_copy_click(e):
-        e.page.set_clipboard(log_text_ref)
-        copy_btn.text = "Copied!"
+        import subprocess
+        import sys
+
+        try:
+            if sys.platform == "darwin":
+                subprocess.run(["pbcopy"], input=log_text_ref.encode(), check=True)
+            elif sys.platform == "win32":
+                subprocess.run(["clip"], input=log_text_ref.encode(), check=True)
+            else:
+                subprocess.run(
+                    ["xclip", "-selection", "clipboard"],
+                    input=log_text_ref.encode(),
+                    check=True,
+                )
+            copy_btn.text = "Copied!"
+        except FileNotFoundError, subprocess.CalledProcessError:
+            copy_btn.text = "Copy failed"
         e.page.update()
 
     copy_btn = ft.TextButton("Copy to Clipboard", on_click=on_copy_click)
