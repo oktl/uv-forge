@@ -381,6 +381,8 @@ class BuildHandlersMixin:
         self._set_validation_icon(self.controls.project_name_input, None)
         self._update_build_button_state()
 
+        self.controls.metadata_checkbox.value = False
+        self.controls.metadata_checkbox.label_style = None
         self._reload_and_merge_templates()
         self._update_metadata_summary()
 

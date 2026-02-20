@@ -302,16 +302,30 @@ For more information, visit: https://docs.astral.sh/uv/
             parts.append(self.state.license_type)
         self.controls.metadata_summary.value = " | ".join(parts) if parts else ""
 
-    async def on_metadata_click(self, _: ft.ControlEvent) -> None:
-        """Handle Project Metadata button click.
+    async def on_metadata_toggle(self, e: ft.ControlEvent) -> None:
+        """Handle Project Metadata checkbox toggle.
 
-        Opens a dialog for editing author, description, and license fields.
-        Values are stored on AppState and included in the build.
+        Always opens the metadata dialog. On save, keeps the checkbox checked.
+        On cancel with no metadata set, unchecks the checkbox.
         """
+        e.control.value = True
+        self._style_selected_checkbox(e.control)
+        self.page.update()
 
         def close_dialog(_=None):
             metadata_dialog.open = False
             self.state.active_dialog = None
+            # Uncheck if no metadata has been saved
+            has_metadata = any(
+                [
+                    self.state.author_name,
+                    self.state.author_email,
+                    self.state.description,
+                    self.state.license_type,
+                ]
+            )
+            self.controls.metadata_checkbox.value = has_metadata
+            self._style_selected_checkbox(self.controls.metadata_checkbox)
             self.page.update()
 
         def on_save(author_name, author_email, description, license_type):

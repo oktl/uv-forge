@@ -106,7 +106,7 @@ class Controls:
         self.main_title: ft.Text
         self.check_pypi_button: ft.IconButton
         self.pypi_status_text: ft.Text
-        self.metadata_button: ft.Button
+        self.metadata_checkbox: ft.Checkbox
         self.metadata_summary: ft.Text
         self.section_titles: list[ft.Text]
         self.section_containers: list[ft.Container]
@@ -375,10 +375,10 @@ def create_controls(state: AppState, colors: dict) -> Controls:
     )
 
     # Metadata controls
-    controls.metadata_button = ft.Button(
-        "Project Metadata...",
-        tooltip="Set author, description, and license\nfor pyproject.toml",
-        style=_split_btn_style,
+    controls.metadata_checkbox = ft.Checkbox(
+        label="Set Project Metadata...",
+        value=False,
+        tooltip="Set author, description, and license for pyproject.toml.\nOpens a dialog to configure metadata.",
     )
     controls.metadata_summary = ft.Text(
         "",
@@ -532,7 +532,7 @@ def create_sections(controls: Controls, state: AppState) -> None:
                                     controls.include_starter_files_checkbox,
                                     ft.Row(
                                         controls=[
-                                            controls.metadata_button,
+                                            controls.metadata_checkbox,
                                             controls.metadata_summary,
                                         ],
                                         spacing=8,
