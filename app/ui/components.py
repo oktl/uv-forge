@@ -488,47 +488,64 @@ def create_sections(controls: Controls, state: AppState) -> None:
                 controls=[
                     controls.python_version_label,
                     controls.python_version_dropdown,
-                    controls.create_git_checkbox,
-                    controls.ui_project_checkbox,
-                    controls.other_projects_checkbox,
                     ft.Row(
                         controls=[
-                            ft.Icon(
-                                ft.Icons.MERGE_TYPE,
-                                size=12,
-                                color=ft.Colors.GREY_500,
+                            ft.Column(
+                                controls=[
+                                    controls.create_git_checkbox,
+                                    controls.ui_project_checkbox,
+                                    controls.other_projects_checkbox,
+                                    ft.Row(
+                                        controls=[
+                                            ft.Icon(
+                                                ft.Icons.MERGE_TYPE,
+                                                size=12,
+                                                color=ft.Colors.GREY_500,
+                                            ),
+                                            ft.Text(
+                                                "Select both to merge templates",
+                                                size=11,
+                                                italic=True,
+                                                color=ft.Colors.GREY_500,
+                                            ),
+                                            ft.Icon(
+                                                ft.Icons.INFO_OUTLINE,
+                                                size=12,
+                                                color=UIConfig.COLOR_INFO,
+                                                tooltip=(
+                                                    "When both a UI Framework and a Project Type are selected, "
+                                                    "their folder structures are merged automatically.\n"
+                                                    "Matching folders are combined, unique folders from each are "
+                                                    "included, and file lists are unioned."
+                                                ),
+                                            ),
+                                        ],
+                                        spacing=4,
+                                    ),
+                                ],
+                                spacing=0,
+                                expand=True,
                             ),
-                            ft.Text(
-                                "Select both to merge templates",
-                                size=11,
-                                italic=True,
-                                color=ft.Colors.GREY_500,
-                            ),
-                            ft.Icon(
-                                ft.Icons.INFO_OUTLINE,
-                                size=12,
-                                color=UIConfig.COLOR_INFO,
-                                tooltip=(
-                                    "When both a UI Framework and a Project Type are selected, "
-                                    "their folder structures are merged automatically.\n"
-                                    "Matching folders are combined, unique folders from each are "
-                                    "included, and file lists are unioned."
-                                ),
+                            ft.Column(
+                                controls=[
+                                    controls.include_starter_files_checkbox,
+                                    ft.Row(
+                                        controls=[
+                                            controls.metadata_button,
+                                            controls.metadata_summary,
+                                        ],
+                                        spacing=8,
+                                        vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                                    ),
+                                ],
+                                spacing=0,
+                                expand=True,
                             ),
                         ],
-                        spacing=4,
-                    ),
-                    controls.include_starter_files_checkbox,
-                    ft.Row(
-                        controls=[
-                            controls.metadata_button,
-                            controls.metadata_summary,
-                        ],
-                        spacing=8,
-                        vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                        spacing=UIConfig.SPACING_LARGE,
+                        vertical_alignment=ft.CrossAxisAlignment.START,
                     ),
                 ],
-                alignment=ft.MainAxisAlignment.CENTER,
             ),
         ],
         state.is_dark_mode,
