@@ -376,7 +376,7 @@ class BuildHandlersMixin:
         self._reload_and_merge_templates()
 
         self._set_status("All fields reset.", "info", update=True)
-        await self.controls.project_path_input.focus()
+        await self.controls.project_name_input.focus()
 
     async def on_reset(self, _: ft.ControlEvent) -> None:
         """Handle Reset button click — shows confirmation dialog first."""
