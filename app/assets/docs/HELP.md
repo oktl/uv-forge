@@ -130,7 +130,7 @@ A **confirmation dialog** will appear showing a summary of your project settings
 
 ## Settings
 
-Click the **gear icon** (⚙) in the app bar to open the Settings dialog. Settings are saved automatically and persist across sessions.
+Open from the **⋮** overflow menu in the app bar → **Settings**. Settings are saved automatically and persist across sessions.
 
 **Configurable options:**
 - **Default Project Path** — Where new projects are created (e.g., `~/Projects`)
@@ -141,9 +141,25 @@ Click the **gear icon** (⚙) in the app bar to open the Settings dialog. Settin
 
 Settings are stored in `~/Library/Application Support/UV Forge/settings.json` on macOS (platform-appropriate location on other OSes via `platformdirs`).
 
+## Recent Projects
+
+Open from the **⋮** overflow menu in the app bar → **Recent Projects**. Shows your last 5 successful builds with project details.
+
+Each entry displays:
+- **Project name and path**
+- **Timestamp** of when it was built
+- **Framework / project type badges** (if applicable)
+- **Package count**
+
+Click **Restore** on any entry to populate all UI fields with that project's configuration (name, path, folders, packages, options). This sets the folder structure as-is without reloading from templates.
+
+Click **Clear History** to remove all saved entries.
+
+History is stored alongside settings in `~/Library/Application Support/UV Forge/recent_projects.json` (platform-appropriate location via `platformdirs`).
+
 ## Log Viewer
 
-Click the **article icon** (📄) in the app bar to open the Log Viewer dialog. It displays today's application log with colour-coded entries:
+Open from the **⋮** overflow menu in the app bar → **View Logs**. It displays today's application log with colour-coded entries:
 
 - **Coloured by level** — DEBUG (grey), INFO (grey), SUCCESS (green), WARNING (amber), ERROR (red), CRITICAL (bold red)
 - **Clickable locations** — Hover over a location segment (e.g., `app.core.state:load:42`) to see an underline; click to open the source file at that line in your preferred IDE
@@ -165,9 +181,8 @@ Log files are stored in the `logs/` directory and rotate daily. The viewer alway
 ## Tips & Tricks
 
 - **Reset Button** (`⌘R`) - Restore all settings to defaults (preserves dark/light mode preference)
-- **Theme Toggle** - Click the sun/moon icon to switch between light and dark mode
-- **Help Button** - Click the "?" icon to view this help documentation
-- **About Button** - Click the "i" icon to view app info, tech stack, and features (with links back to Help and Git Cheat Sheet)
+- **Theme Toggle** - Click the sun/moon icon in the app bar to switch between light and dark mode
+- **Overflow Menu** (⋮) - Access Help, Settings, Recent Projects, Git Cheat Sheet, View Logs, and About from the app bar menu
 - **Real-time Validation** - The app shows validation status with ✓ (valid) and ✗ (invalid) icons
 - **Warning Banner** - Any issues are displayed below the project name field
 - **Status Messages** - See what's happening in the status bar during build
