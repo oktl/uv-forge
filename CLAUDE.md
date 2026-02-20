@@ -62,7 +62,7 @@ app/
 │   ├── uv_handler.py         # run_uv_init(), install_package(), setup_virtual_env()
 │   ├── git_handler.py        # handle_git_init(), finalize_git_setup() — two-phase git setup
 ├── ui/
-│   ├── components.py         # Controls class + build_main_view(page, state)
+│   ├── components.py         # Controls class + build_main_view(page, state); appbar overflow menu
 │   ├── dialogs.py            # 12 dialog functions + 5 shared helpers; all theme-aware via is_dark_mode
 │   ├── dialog_data.py        # Framework/project type categories, checkbox labels — dialog display metadata
 │   ├── theme_manager.py      # get_theme_colors() singleton
@@ -103,6 +103,10 @@ def wrap_async(coro_func):
     return wrapper
 
 # Buttons: on_click, Checkboxes: on_change, Dropdowns: on_select
+
+# PopupMenuItem uses content=, NOT text=
+ft.PopupMenuItem(icon=ft.Icons.SETTINGS, content=ft.Text("Settings"))
+# Empty PopupMenuItem() creates a divider
 ```
 
 ---
@@ -156,7 +160,8 @@ Files use `{{project_name}}` placeholders, substituted at build time with a norm
 - **PyPI checker** (`pypi_checker.py`): Manual trigger via icon button, uses `httpx.AsyncClient` directly (no `AsyncExecutor` needed). PEP 503 name normalization ensures `my_app` and `my-app` are treated as the same package. Tri-state return: `True` (available) / `False` (taken) / `None` (error). Also provides `validate_package_format()` and `extract_package_name()` for the Add Packages dialog's per-package PyPI validation — each package is checked live before adding, with format validation and existence confirmation via the same async client.
 - **About dialog** (`feature_handlers.py`): Loads `ABOUT.md` with app info, tech stack, features. Supports `app://` internal links — clicking `[Help](app://help)` or `[Git Cheat Sheet](app://git-cheat-sheet)` closes the About dialog and opens the target dialog directly. The `_create_markdown_dialog()` helper accepts an optional `on_internal_link` callback for this.
 - **Settings system** (`settings_manager.py`): `AppSettings` dataclass loaded from `platformdirs.user_data_dir("UV Forge")/settings.json`. Persists default project path, GitHub root, Python version, preferred IDE, and git default. Threaded into `AppState` at startup; settings dialog allows live editing.
-- **Log viewer** (`feature_handlers.py`, `dialogs.py`): AppBar button reads today's log file (`PROJECT_DIR/logs/app_{date}.log`). Log lines are parsed into coloured segments (timestamp, level, location, message) with level-based colouring. Location segments (e.g., `app.core.state:load:42`) are clickable — hover shows underline, click opens the source file at that line in the user's preferred IDE via URL schemes (`vscode://file/...`, `cursor://`, `zed://`). Falls back to CLI commands on non-macOS. `__main__` module is resolved to `app/main.py`.
+- **AppBar overflow menu** (`components.py`): Only the theme toggle is a direct appbar action. All other actions (Recent Projects, Settings, Help, Git Cheat Sheet, View Logs, About) are `PopupMenuItem`s inside a `PopupMenuButton` overflow menu (⋮). Handler attachment uses `controls.*_menu_item.on_click` instead of `controls.*_button.on_click`.
+- **Log viewer** (`feature_handlers.py`, `dialogs.py`): Overflow menu item reads today's log file (`PROJECT_DIR/logs/app_{date}.log`). Log lines are parsed into coloured segments (timestamp, level, location, message) with level-based colouring. Location segments (e.g., `app.core.state:load:42`) are clickable — hover shows underline, click opens the source file at that line in the user's preferred IDE via URL schemes (`vscode://file/...`, `cursor://`, `zed://`). Falls back to CLI commands on non-macOS. `__main__` module is resolved to `app/main.py`.
 - **Recent projects history** (`history_manager.py`): `ProjectHistoryEntry` dataclass stored in `SETTINGS_DIR/recent_projects.json` (reuses `platformdirs` path from `settings_manager`). Saves after each successful build; capped at 5 entries, deduped by name+path. History dialog shows tappable rows with project name, path, timestamp, framework/project type badges, and package count. "Restore" populates all state fields and UI controls directly (folders set as-is, no template reload). `clear_history()` empties the file.
 - **Two-phase git setup** (if git enabled):
   - Phase 1 (`handle_git_init`): Creates local repo + bare hub at configurable hub path (from `settings.default_github_root`), connects via remote origin
