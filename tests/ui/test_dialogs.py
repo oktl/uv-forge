@@ -7,6 +7,7 @@ import flet as ft
 import pytest
 
 from app.core.models import BuildSummaryConfig
+from app.core.state import AppState
 from app.ui.dialogs import (
     _build_project_tree_lines,
     _parse_log_line,
@@ -14,6 +15,7 @@ from app.ui.dialogs import (
     create_about_dialog,
     create_add_packages_dialog,
     create_log_viewer_dialog,
+    create_metadata_dialog,
     create_project_type_dialog,
 )
 
@@ -687,4 +689,54 @@ def test_create_add_packages_dialog_light_mode():
         is_dark_mode=False,
     )
 
+    assert isinstance(dialog, ft.AlertDialog)
+
+
+# ========== Metadata Dialog Tests ==========
+
+
+def test_create_metadata_dialog_basic():
+    """Test metadata dialog creates a valid AlertDialog."""
+    state = AppState()
+    dialog = create_metadata_dialog(
+        state=state,
+        on_save_callback=lambda *args: None,
+        on_close_callback=lambda _: None,
+        is_dark_mode=True,
+    )
+
+    assert isinstance(dialog, ft.AlertDialog)
+    assert dialog.modal is True
+    assert len(dialog.actions) == 2  # Save and Cancel
+
+
+def test_create_metadata_dialog_light_mode():
+    """Test metadata dialog works in light mode."""
+    state = AppState()
+    dialog = create_metadata_dialog(
+        state=state,
+        on_save_callback=lambda *args: None,
+        on_close_callback=lambda _: None,
+        is_dark_mode=False,
+    )
+
+    assert isinstance(dialog, ft.AlertDialog)
+
+
+def test_create_metadata_dialog_pre_populated():
+    """Test metadata dialog pre-populates from state."""
+    state = AppState()
+    state.author_name = "Tim"
+    state.author_email = "tim@example.com"
+    state.description = "A project"
+    state.license_type = "MIT"
+
+    dialog = create_metadata_dialog(
+        state=state,
+        on_save_callback=lambda *args: None,
+        on_close_callback=lambda _: None,
+        is_dark_mode=True,
+    )
+
+    # Dialog should be created (values are inside the content controls)
     assert isinstance(dialog, ft.AlertDialog)

@@ -94,6 +94,10 @@ class ProjectConfig:
     folders: list[str | dict[str, Any] | FolderSpec] = field(default_factory=list)
     packages: list[str] = field(default_factory=list)
     github_root: Path | None = None
+    author_name: str = ""
+    author_email: str = ""
+    description: str = ""
+    license_type: str = ""
 
     @property
     def full_path(self) -> Path:
@@ -184,6 +188,10 @@ class BuildSummaryConfig:
     file_count: int
     packages: list[str] = field(default_factory=list)
     folders: list[str | dict] = field(default_factory=list)
+    author_name: str = ""
+    author_email: str = ""
+    description: str = ""
+    license_type: str = ""
 
     @classmethod
     def from_project_config(
@@ -218,4 +226,8 @@ class BuildSummaryConfig:
             file_count=file_count,
             packages=config.packages,
             folders=folders,
+            author_name=config.author_name,
+            author_email=config.author_email,
+            description=config.description,
+            license_type=config.license_type,
         )

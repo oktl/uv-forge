@@ -22,6 +22,7 @@ from app.ui.dialogs import (
     create_help_dialog,
     create_history_dialog,
     create_log_viewer_dialog,
+    create_metadata_dialog,
     create_settings_dialog,
 )
 from app.ui.theme_manager import get_theme_colors
@@ -289,6 +290,48 @@ For more information, visit: https://docs.astral.sh/uv/
 
         self.page.overlay.append(history_dialog)
         history_dialog.open = True
+        self.state.active_dialog = close_dialog
+        self.page.update()
+
+    def _update_metadata_summary(self) -> None:
+        """Update the metadata summary text next to the button."""
+        parts = []
+        if self.state.author_name:
+            parts.append(self.state.author_name)
+        if self.state.license_type:
+            parts.append(self.state.license_type)
+        self.controls.metadata_summary.value = " | ".join(parts) if parts else ""
+
+    async def on_metadata_click(self, _: ft.ControlEvent) -> None:
+        """Handle Project Metadata button click.
+
+        Opens a dialog for editing author, description, and license fields.
+        Values are stored on AppState and included in the build.
+        """
+
+        def close_dialog(_=None):
+            metadata_dialog.open = False
+            self.state.active_dialog = None
+            self.page.update()
+
+        def on_save(author_name, author_email, description, license_type):
+            self.state.author_name = author_name
+            self.state.author_email = author_email
+            self.state.description = description
+            self.state.license_type = license_type
+            self._update_metadata_summary()
+            close_dialog()
+            self._show_snackbar("Metadata saved")
+
+        metadata_dialog = create_metadata_dialog(
+            state=self.state,
+            on_save_callback=on_save,
+            on_close_callback=close_dialog,
+            is_dark_mode=self.state.is_dark_mode,
+        )
+
+        self.page.overlay.append(metadata_dialog)
+        metadata_dialog.open = True
         self.state.active_dialog = close_dialog
         self.page.update()
 

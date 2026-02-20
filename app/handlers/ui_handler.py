@@ -64,6 +64,7 @@ def attach_handlers(page: ft.Page, state: AppState) -> None:
     # Load default folder template and package list on startup
     handlers._load_framework_template(None)
     handlers._update_package_display()
+    handlers._update_metadata_summary()
 
     # Set initial UI state (path icon if default path exists, button disabled)
     if state.path_valid:
@@ -120,6 +121,7 @@ def attach_handlers(page: ft.Page, state: AppState) -> None:
     )
     controls.history_menu_item.on_click = wrap_async(handlers.on_history_click)
     controls.log_viewer_menu_item.on_click = wrap_async(handlers.on_log_viewer_click)
+    controls.metadata_button.on_click = wrap_async(handlers.on_metadata_click)
     controls.settings_menu_item.on_click = wrap_async(handlers.on_settings_click)
     controls.help_menu_item.on_click = wrap_async(handlers.on_help_click)
     controls.about_menu_item.on_click = wrap_async(handlers.on_about_click)

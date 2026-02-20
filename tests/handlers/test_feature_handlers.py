@@ -34,6 +34,8 @@ class MockControls:
         self.warning_banner = Mock(value="")
         self.status_icon = Mock(visible=False)
         self.status_text = Mock(value="")
+        self.metadata_button = Mock()
+        self.metadata_summary = Mock(value="")
         self.section_titles = []
         self.section_containers = []
 
@@ -120,3 +122,86 @@ def test_open_file_in_ide_missing_file(handler_setup, tmp_path):
         handlers._open_file_in_ide("app.nonexistent.module", 1)
 
     mock_sub.Popen.assert_not_called()
+
+
+# ========== Metadata Handler Tests ==========
+
+
+@pytest.mark.asyncio
+async def test_on_metadata_click_opens_dialog(handler_setup):
+    """Test on_metadata_click opens a metadata dialog."""
+    handlers, page, controls, state = handler_setup
+
+    await handlers.on_metadata_click(None)
+
+    assert len(page.overlay) == 1
+    assert isinstance(page.overlay[0], ft.AlertDialog)
+    assert page.overlay[0].open is True
+    assert state.active_dialog is not None
+
+
+@pytest.mark.asyncio
+async def test_on_metadata_click_sets_active_dialog(handler_setup):
+    """Test opening metadata dialog sets state.active_dialog."""
+    handlers, page, controls, state = handler_setup
+
+    await handlers.on_metadata_click(None)
+
+    assert state.active_dialog is not None
+    assert callable(state.active_dialog)
+
+
+@pytest.mark.asyncio
+async def test_on_metadata_close_clears_active_dialog(handler_setup):
+    """Test closing metadata dialog clears state.active_dialog."""
+    handlers, page, controls, state = handler_setup
+
+    await handlers.on_metadata_click(None)
+    assert state.active_dialog is not None
+
+    state.active_dialog()
+    assert state.active_dialog is None
+
+
+def test_update_metadata_summary_with_author_and_license(handler_setup):
+    """Test _update_metadata_summary shows author and license."""
+    handlers, page, controls, state = handler_setup
+
+    state.author_name = "Tim"
+    state.license_type = "MIT"
+    handlers._update_metadata_summary()
+
+    assert controls.metadata_summary.value == "Tim | MIT"
+
+
+def test_update_metadata_summary_author_only(handler_setup):
+    """Test _update_metadata_summary shows author only."""
+    handlers, page, controls, state = handler_setup
+
+    state.author_name = "Tim"
+    state.license_type = ""
+    handlers._update_metadata_summary()
+
+    assert controls.metadata_summary.value == "Tim"
+
+
+def test_update_metadata_summary_license_only(handler_setup):
+    """Test _update_metadata_summary shows license only."""
+    handlers, page, controls, state = handler_setup
+
+    state.author_name = ""
+    state.license_type = "MIT"
+    handlers._update_metadata_summary()
+
+    assert controls.metadata_summary.value == "MIT"
+
+
+def test_update_metadata_summary_empty(handler_setup):
+    """Test _update_metadata_summary is empty when no metadata."""
+    handlers, page, controls, state = handler_setup
+
+    state.author_name = ""
+    state.license_type = ""
+    handlers._update_metadata_summary()
+
+    assert controls.metadata_summary.value == ""

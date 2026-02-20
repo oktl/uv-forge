@@ -137,6 +137,10 @@ class BuildHandlersMixin:
             else DEFAULT_FOLDERS.copy(),
             packages=list(self.state.packages),
             github_root=Path(self.state.settings.default_github_root),
+            author_name=self.state.author_name,
+            author_email=self.state.author_email,
+            description=self.state.description,
+            license_type=self.state.license_type,
         )
 
         def _on_build_progress(msg: str) -> None:
@@ -323,6 +327,10 @@ class BuildHandlersMixin:
             file_count=file_count,
             packages=list(self.state.packages),
             folders=list(self.state.folders),
+            author_name=self.state.author_name,
+            author_email=self.state.author_email,
+            description=self.state.description,
+            license_type=self.state.license_type,
         )
 
         dialog = create_build_summary_dialog(
@@ -374,6 +382,7 @@ class BuildHandlersMixin:
         self._update_build_button_state()
 
         self._reload_and_merge_templates()
+        self._update_metadata_summary()
 
         self._set_status("All fields reset.", "info", update=True)
         await self.controls.project_name_input.focus()

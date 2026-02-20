@@ -1519,6 +1519,18 @@ def create_build_summary_dialog(
         type_name = config.project_type.replace("_", " ").title()
         rows.append(_create_summary_row("Project Type:", type_name))
 
+    if config.author_name or config.author_email:
+        author_display = config.author_name
+        if config.author_email:
+            author_display += (
+                f" <{config.author_email}>" if author_display else config.author_email
+            )
+        rows.append(_create_summary_row("Author:", author_display))
+    if config.description:
+        rows.append(_create_summary_row("Description:", config.description))
+    if config.license_type:
+        rows.append(_create_summary_row("License:", config.license_type))
+
     # Collapsible project tree preview
     tree_controls = _build_project_tree_controls(config)
     tree_container = ft.Container(
@@ -1848,6 +1860,109 @@ def create_log_viewer_dialog(
     )
 
 
+def create_metadata_dialog(
+    state,
+    on_save_callback: collections.abc.Callable,
+    on_close_callback: collections.abc.Callable,
+    is_dark_mode: bool,
+) -> ft.AlertDialog:
+    """Create a dialog for editing project metadata fields.
+
+    Args:
+        state: Current AppState instance to populate fields from.
+        on_save_callback: Callback receiving (author_name, author_email, description, license_type).
+        on_close_callback: Callback when Cancel is clicked.
+        is_dark_mode: Whether dark mode is active.
+
+    Returns:
+        Configured AlertDialog for editing metadata.
+    """
+    from app.core.constants import LICENSE_TYPES
+
+    colors = get_theme_colors(is_dark_mode)
+    label_style = ft.TextStyle(size=13, color=colors["section_title"])
+
+    author_name_field = ft.TextField(
+        label="Author Name",
+        value=state.author_name,
+        expand=True,
+        label_style=label_style,
+        autofocus=True,
+    )
+
+    author_email_field = ft.TextField(
+        label="Author Email",
+        value=state.author_email,
+        expand=True,
+        label_style=label_style,
+    )
+
+    description_field = ft.TextField(
+        label="Description",
+        value=state.description,
+        expand=True,
+        multiline=True,
+        min_lines=2,
+        max_lines=3,
+        label_style=label_style,
+    )
+
+    license_options = [ft.dropdown.Option(key="", text="(None)")] + [
+        ft.dropdown.Option(lt) for lt in LICENSE_TYPES
+    ]
+    license_dropdown = ft.Dropdown(
+        label="License",
+        value=state.license_type,
+        options=license_options,
+        width=250,
+        label_style=label_style,
+    )
+
+    def on_save_click(_):
+        on_save_callback(
+            author_name_field.value or "",
+            author_email_field.value or "",
+            description_field.value or "",
+            license_dropdown.value or "",
+        )
+
+    return ft.AlertDialog(
+        modal=True,
+        title=_create_dialog_title(
+            "Project Metadata", colors, icon=ft.Icons.DESCRIPTION
+        ),
+        content=ft.Container(
+            content=ft.Column(
+                [
+                    ft.Text(
+                        "Set metadata fields for pyproject.toml.",
+                        size=13,
+                        color=colors.get("section_title"),
+                    ),
+                    ft.Container(height=8),
+                    author_name_field,
+                    author_email_field,
+                    ft.Divider(height=16, color=colors.get("section_border")),
+                    description_field,
+                    license_dropdown,
+                ],
+                tight=True,
+                spacing=10,
+            ),
+            width=450,
+            padding=UIConfig.DIALOG_CONTENT_PADDING,
+        ),
+        actions=_create_dialog_actions(
+            "Save",
+            on_save_click,
+            on_close_callback,
+            ft.Icons.SAVE,
+            is_dark_mode,
+        ),
+        actions_alignment=ft.MainAxisAlignment.END,
+    )
+
+
 def create_settings_dialog(
     settings,
     on_save_callback: collections.abc.Callable,
@@ -1971,6 +2086,21 @@ def create_settings_dialog(
         value=settings.git_enabled_default,
     )
 
+    # --- Author defaults ---
+    author_name_field = ft.TextField(
+        label="Default Author Name",
+        value=settings.default_author_name,
+        expand=True,
+        label_style=label_style,
+    )
+
+    author_email_field = ft.TextField(
+        label="Default Author Email",
+        value=settings.default_author_email,
+        expand=True,
+        label_style=label_style,
+    )
+
     # --- Save handler ---
     def on_save_click(_):
         from app.core.settings_manager import AppSettings
@@ -1984,6 +2114,8 @@ def create_settings_dialog(
             preferred_ide=ide_dropdown.value or settings.preferred_ide,
             custom_ide_path=custom_ide_field.value or "",
             git_enabled_default=git_checkbox.value,
+            default_author_name=author_name_field.value or "",
+            default_author_email=author_email_field.value or "",
         )
         on_save_callback(updated)
 
@@ -2016,6 +2148,15 @@ def create_settings_dialog(
                     ),
                     ft.Row([python_version_dropdown], spacing=16),
                     git_checkbox,
+                    ft.Divider(height=16, color=colors.get("section_border")),
+                    ft.Text(
+                        "Author",
+                        weight=ft.FontWeight.W_600,
+                        size=14,
+                        color=colors["main_title"],
+                    ),
+                    author_name_field,
+                    author_email_field,
                     ft.Divider(height=16, color=colors.get("section_border")),
                     ft.Text(
                         "IDE",

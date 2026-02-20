@@ -162,23 +162,126 @@ def configure_pyproject(
     project_name: str,
     framework: str | None = None,
     project_type: str | None = None,
+    author_name: str = "",
+    author_email: str = "",
+    description: str = "",
+    license_type: str = "",
 ) -> None:
-    """Update pyproject.toml with package and entry point configuration.
+    """Update pyproject.toml with package, entry point, and metadata configuration.
 
     Appends hatch build configuration and, when appropriate, a project
-    scripts entry point to the existing pyproject.toml file.
+    scripts entry point to the existing pyproject.toml file. Also modifies
+    the [project] section to set authors, description, and license when provided.
 
     Args:
         project_path: Path to the project directory.
         project_name: Name of the project for the entry point script.
         framework: UI framework name, or None.
         project_type: Project type name, or None.
+        author_name: Author name for pyproject.toml authors field.
+        author_email: Author email for pyproject.toml authors field.
+        description: Project description for pyproject.toml.
+        license_type: SPDX license identifier for pyproject.toml.
     """
+    pyproject_file = project_path / "pyproject.toml"
+
+    # First, modify existing [project] section for metadata fields
+    if author_name or author_email or description or license_type:
+        content = pyproject_file.read_text(encoding="utf-8")
+        content = _apply_metadata_to_pyproject(
+            content, author_name, author_email, description, license_type
+        )
+        pyproject_file.write_text(content, encoding="utf-8")
+
+    # Append hatch build config and entry point
     entry_point = _resolve_entry_point(framework, project_type)
 
     config = '\n[tool.hatch.build.targets.wheel]\npackages = ["app"]\n'
     if entry_point is not None:
         config += f'\n[project.scripts]\n{project_name} = "{entry_point}"\n'
 
-    with open(project_path / "pyproject.toml", "a") as f:
+    with open(pyproject_file, "a") as f:
         f.write(config)
+
+
+def _apply_metadata_to_pyproject(
+    content: str,
+    author_name: str,
+    author_email: str,
+    description: str,
+    license_type: str,
+) -> str:
+    """Apply metadata fields to pyproject.toml content.
+
+    Performs targeted line replacements on the UV-generated pyproject.toml
+    format, which has a predictable structure.
+
+    Args:
+        content: Current pyproject.toml content.
+        author_name: Author name.
+        author_email: Author email.
+        description: Project description.
+        license_type: SPDX license identifier.
+
+    Returns:
+        Modified pyproject.toml content.
+    """
+    lines = content.split("\n")
+    result_lines = []
+    in_project = False
+
+    for line in lines:
+        if line.strip() == "[project]":
+            in_project = True
+            result_lines.append(line)
+            continue
+        if in_project and line.strip().startswith("[") and line.strip() != "[project]":
+            in_project = False
+
+        if in_project and line.startswith("description"):
+            if description:
+                result_lines.append(f'description = "{description}"')
+            else:
+                result_lines.append(line)
+            continue
+
+        result_lines.append(line)
+
+    content = "\n".join(result_lines)
+
+    # Add authors if provided
+    if author_name or author_email:
+        author_parts = []
+        if author_name:
+            author_parts.append(f'name = "{author_name}"')
+        if author_email:
+            author_parts.append(f'email = "{author_email}"')
+        authors_line = "authors = [{" + ", ".join(author_parts) + "}]"
+
+        # Insert after the description line or after version line
+        insert_lines = content.split("\n")
+        insert_idx = None
+        for i, line in enumerate(insert_lines):
+            if line.startswith("description") or line.startswith("version"):
+                insert_idx = i + 1
+        if insert_idx is not None:
+            insert_lines.insert(insert_idx, authors_line)
+            content = "\n".join(insert_lines)
+
+    # Add license if provided
+    if license_type:
+        license_line = f'license = "{license_type}"'
+        insert_lines = content.split("\n")
+        insert_idx = None
+        for i, line in enumerate(insert_lines):
+            if (
+                line.startswith("authors")
+                or line.startswith("description")
+                or line.startswith("version")
+            ):
+                insert_idx = i + 1
+        if insert_idx is not None:
+            insert_lines.insert(insert_idx, license_line)
+            content = "\n".join(insert_lines)
+
+    return content

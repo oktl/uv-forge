@@ -315,3 +315,112 @@ class TestConfigurePyprojectWithContext:
 
             content = (project_path / "pyproject.toml").read_text()
             assert 'myapp = "app.main:run"' in content
+
+
+class TestConfigurePyprojectMetadata:
+    """Tests for configure_pyproject with metadata fields."""
+
+    @staticmethod
+    def _uv_pyproject():
+        """Return a minimal UV-generated pyproject.toml."""
+        return (
+            '[project]\n'
+            'name = "myapp"\n'
+            'version = "0.1.0"\n'
+            'description = ""\n'
+            'readme = "README.md"\n'
+            'requires-python = ">=3.14"\n'
+            'dependencies = []\n'
+        )
+
+    def test_author_name_only(self):
+        """Author name without email produces correct authors line."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            project_path = Path(tmpdir)
+            (project_path / "pyproject.toml").write_text(self._uv_pyproject())
+
+            configure_pyproject(
+                project_path, "myapp", author_name="Tim"
+            )
+
+            content = (project_path / "pyproject.toml").read_text()
+            assert 'authors = [{name = "Tim"}]' in content
+
+    def test_author_name_and_email(self):
+        """Author name and email both appear in authors line."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            project_path = Path(tmpdir)
+            (project_path / "pyproject.toml").write_text(self._uv_pyproject())
+
+            configure_pyproject(
+                project_path, "myapp",
+                author_name="Tim", author_email="tim@example.com",
+            )
+
+            content = (project_path / "pyproject.toml").read_text()
+            assert 'name = "Tim"' in content
+            assert 'email = "tim@example.com"' in content
+
+    def test_description_replaces_empty(self):
+        """Description replaces the empty UV default."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            project_path = Path(tmpdir)
+            (project_path / "pyproject.toml").write_text(self._uv_pyproject())
+
+            configure_pyproject(
+                project_path, "myapp", description="A cool project"
+            )
+
+            content = (project_path / "pyproject.toml").read_text()
+            assert 'description = "A cool project"' in content
+            assert 'description = ""' not in content
+
+    def test_license_added(self):
+        """License SPDX identifier is added."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            project_path = Path(tmpdir)
+            (project_path / "pyproject.toml").write_text(self._uv_pyproject())
+
+            configure_pyproject(
+                project_path, "myapp", license_type="MIT"
+            )
+
+            content = (project_path / "pyproject.toml").read_text()
+            assert 'license = "MIT"' in content
+
+    def test_all_metadata_fields(self):
+        """All metadata fields together produce correct output."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            project_path = Path(tmpdir)
+            (project_path / "pyproject.toml").write_text(self._uv_pyproject())
+
+            configure_pyproject(
+                project_path, "myapp",
+                author_name="Tim",
+                author_email="tim@example.com",
+                description="My project",
+                license_type="Apache-2.0",
+            )
+
+            content = (project_path / "pyproject.toml").read_text()
+            assert 'description = "My project"' in content
+            assert 'name = "Tim"' in content
+            assert 'email = "tim@example.com"' in content
+            assert 'license = "Apache-2.0"' in content
+            # Hatch config still appended
+            assert '[tool.hatch.build.targets.wheel]' in content
+
+    def test_no_metadata_leaves_file_unchanged(self):
+        """No metadata fields leaves the [project] section unchanged."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            project_path = Path(tmpdir)
+            original = self._uv_pyproject()
+            (project_path / "pyproject.toml").write_text(original)
+
+            configure_pyproject(project_path, "myapp")
+
+            content = (project_path / "pyproject.toml").read_text()
+            # Original content preserved at the start
+            assert 'description = ""' in content
+            assert "authors" not in content
+            assert 'license = ' not in content

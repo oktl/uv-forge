@@ -151,5 +151,18 @@ IDE_MACOS_APP_NAMES: dict[str, str] = {
     "PyCharm": "PyCharm",
 }
 
+# License types for project metadata (SPDX identifiers)
+LICENSE_TYPES = [
+    "MIT",
+    "Apache-2.0",
+    "GPL-3.0",
+    "BSD-3-Clause",
+    "BSD-2-Clause",
+    "ISC",
+    "MPL-2.0",
+    "LGPL-3.0",
+    "Unlicense",
+]
+
 # Default folder structure (used as final fallback)
 DEFAULT_FOLDERS = ["core", "ui", "utils", "assets"]

@@ -54,6 +54,12 @@ class AppState:
     other_project_enabled: bool = False
     project_type: str | None = None
 
+    # Project metadata (for pyproject.toml)
+    author_name: str = ""
+    author_email: str = ""
+    description: str = ""
+    license_type: str = ""
+
     # Folder management
     folders: list[str | dict[str, Any]] = field(default_factory=list)
     auto_save_folders: bool = False
@@ -84,6 +90,10 @@ class AppState:
         if not self.python_version:
             self.python_version = self.settings.default_python_version
         self.git_enabled = self.settings.git_enabled_default
+        if not self.author_name:
+            self.author_name = self.settings.default_author_name
+        if not self.author_email:
+            self.author_email = self.settings.default_author_email
 
     def reset(self) -> None:
         """Reset state to initial values.

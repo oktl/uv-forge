@@ -36,6 +36,8 @@ class AppSettings:
     preferred_ide: str = "VS Code"
     custom_ide_path: str = ""
     git_enabled_default: bool = True
+    default_author_name: str = ""
+    default_author_email: str = ""
 
 
 def load_settings() -> AppSettings:

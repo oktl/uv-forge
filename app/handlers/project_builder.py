@@ -124,6 +124,10 @@ def _create_project_scaffold(
         config.project_name,
         framework=config.effective_framework,
         project_type=config.project_type,
+        author_name=config.author_name,
+        author_email=config.author_email,
+        description=config.description,
+        license_type=config.license_type,
     )
 
 

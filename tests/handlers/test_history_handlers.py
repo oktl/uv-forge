@@ -56,6 +56,8 @@ class MockControls:
         self.packages_label = Mock(value="Packages: 0")
         self.packages_container = Mock(content=Mock(controls=[]))
         self.subfolders_container = Mock(content=Mock(controls=[]))
+        self.metadata_button = Mock()
+        self.metadata_summary = Mock(value="")
 
 
 def _sample_folders():
