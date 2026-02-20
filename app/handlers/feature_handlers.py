@@ -366,6 +366,7 @@ For more information, visit: https://docs.astral.sh/uv/
             save_settings(updated_settings)
             self.state.settings = updated_settings
             close_dialog()
+            self._reload_and_merge_templates()
             self._show_snackbar("Settings saved")
 
         settings_dialog = create_settings_dialog(

@@ -62,8 +62,7 @@ def attach_handlers(page: ft.Page, state: AppState) -> None:
     handlers = Handlers(page, controls, state)
 
     # Load default folder template and package list on startup
-    handlers._load_framework_template(None)
-    handlers._update_package_display()
+    handlers._reload_and_merge_templates()
     handlers._update_metadata_summary()
 
     # Set initial UI state (path icon if default path exists, button disabled)

@@ -1641,6 +1641,53 @@ def create_build_summary_dialog(
         vertical_alignment=ft.CrossAxisAlignment.CENTER,
     )
 
+    post_build_command_field = ft.TextField(
+        value=config.post_build_command,
+        hint_text="e.g. uv run pre-commit install",
+        width=390,
+        text_size=13,
+        content_padding=ft.padding.symmetric(horizontal=10, vertical=8),
+        disabled=not config.post_build_command_enabled,
+    )
+
+    post_build_enabled = config.post_build_command_enabled
+    post_build_checkbox = ft.Checkbox(
+        label="Run post-build command",
+        value=post_build_enabled,
+        label_style=green if post_build_enabled else None,
+        on_change=on_checkbox_change,
+    )
+
+    def on_post_build_toggle(e):
+        post_build_command_field.disabled = not e.control.value
+        e.control.label_style = (
+            ft.TextStyle(color=UIConfig.COLOR_CHECKBOX_ACTIVE)
+            if e.control.value
+            else None
+        )
+        e.page.update()
+
+    post_build_checkbox.on_change = on_post_build_toggle
+
+    post_build_row = ft.Row(
+        [
+            ft.Icon(ft.Icons.PLAY_ARROW, size=16, color=ft.Colors.GREY_400),
+            post_build_checkbox,
+        ],
+        spacing=6,
+        vertical_alignment=ft.CrossAxisAlignment.CENTER,
+    )
+
+    post_build_command_row = ft.Row(
+        [
+            ft.Container(width=22),
+            ft.Text("Run:", size=12, color=colors.get("section_title")),
+            post_build_command_field,
+        ],
+        spacing=6,
+        vertical_alignment=ft.CrossAxisAlignment.CENTER,
+    )
+
     dialog = ft.AlertDialog(
         modal=True,
         title=_create_dialog_title("Confirm Build", colors, ft.Icons.BUILD_CIRCLE),
@@ -1658,6 +1705,8 @@ def create_build_summary_dialog(
                     open_folder_row,
                     open_vscode_row,
                     open_terminal_row,
+                    post_build_row,
+                    post_build_command_row,
                 ],
                 tight=True,
                 spacing=8,
@@ -1680,6 +1729,8 @@ def create_build_summary_dialog(
     # Keep legacy alias for backward compatibility in tests
     dialog.open_vscode_checkbox = open_vscode_checkbox
     dialog.open_terminal_checkbox = open_terminal_checkbox
+    dialog.post_build_checkbox = post_build_checkbox
+    dialog.post_build_command_field = post_build_command_field
     return dialog
 
 
@@ -2104,6 +2155,28 @@ def create_settings_dialog(
         label_style=label_style,
     )
 
+    # --- Post-build command ---
+    post_build_enabled_checkbox = ft.Checkbox(
+        label="Enable post-build command",
+        value=settings.post_build_command_enabled,
+    )
+
+    post_build_command_field = ft.TextField(
+        label="Post-build Command",
+        value=settings.post_build_command,
+        hint_text="uv run pre-commit install && uv run pytest",
+        width=field_width,
+        label_style=label_style,
+    )
+
+    post_build_packages_field = ft.TextField(
+        label="Required Packages",
+        value=settings.post_build_packages,
+        hint_text="pre-commit, ruff",
+        width=field_width,
+        label_style=label_style,
+    )
+
     # --- Save handler ---
     def on_save_click(_):
         from app.core.settings_manager import AppSettings
@@ -2119,6 +2192,9 @@ def create_settings_dialog(
             git_enabled_default=git_checkbox.value,
             default_author_name=author_name_field.value or "",
             default_author_email=author_email_field.value or "",
+            post_build_command=post_build_command_field.value or "",
+            post_build_command_enabled=post_build_enabled_checkbox.value,
+            post_build_packages=post_build_packages_field.value or "",
         )
         on_save_callback(updated)
 
@@ -2169,6 +2245,16 @@ def create_settings_dialog(
                     ),
                     ide_dropdown,
                     custom_ide_field,
+                    ft.Divider(height=16, color=colors.get("section_border")),
+                    ft.Text(
+                        "Automation",
+                        weight=ft.FontWeight.W_600,
+                        size=14,
+                        color=colors["main_title"],
+                    ),
+                    post_build_enabled_checkbox,
+                    post_build_command_field,
+                    post_build_packages_field,
                 ],
                 tight=True,
                 spacing=10,

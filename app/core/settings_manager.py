@@ -38,6 +38,9 @@ class AppSettings:
     git_enabled_default: bool = True
     default_author_name: str = ""
     default_author_email: str = ""
+    post_build_command: str = ""
+    post_build_command_enabled: bool = False
+    post_build_packages: str = ""
 
 
 def load_settings() -> AppSettings:

@@ -127,6 +127,7 @@ A **confirmation dialog** will appear showing a summary of your project settings
 - **Open project folder after build** — Opens the created project in Finder/Explorer (checked by default)
 - **Open in preferred IDE** — Opens the project in your preferred IDE immediately after creation (checked by default; IDE is configurable in Settings)
 - **Open terminal at project root** — Opens a terminal window in the project directory
+- **Run post-build command** — Runs a configurable shell command in the new project directory (e.g., `uv run pre-commit install && uv run pytest`). The checkbox and command default from Settings but can be overridden per-build. Any required packages (e.g., `pre-commit`) are automatically installed during the build when this is enabled.
 
 ## Settings
 
@@ -138,6 +139,7 @@ Open from the **⋮** overflow menu in the app bar → **Settings**. Settings ar
 - **Python Version** — Default Python version for new projects
 - **Preferred IDE** — IDE used for "Open in IDE" after build (VS Code, PyCharm, Zed, Cursor, etc.)
 - **Git Default** — Whether the Git checkbox is checked by default for new projects
+- **Post-build Command** — A shell command to run automatically after each successful build (e.g., `uv run pre-commit install`). Toggle it on/off with the "Enable post-build command" checkbox. You can also specify required packages (comma-separated) that will be automatically added to every project when the post-build command is enabled.
 
 Settings are stored in `~/Library/Application Support/UV Forge/settings.json` on macOS (platform-appropriate location on other OSes via `platformdirs`).
 

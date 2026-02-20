@@ -192,6 +192,8 @@ class BuildSummaryConfig:
     author_email: str = ""
     description: str = ""
     license_type: str = ""
+    post_build_command: str = ""
+    post_build_command_enabled: bool = False
 
     @classmethod
     def from_project_config(

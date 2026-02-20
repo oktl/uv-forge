@@ -29,6 +29,14 @@ class TestAppSettings:
         assert settings.custom_ide_path == ""
         assert settings.git_enabled_default is True
 
+    def test_post_build_command_default_empty(self):
+        settings = AppSettings()
+        assert settings.post_build_command == ""
+
+    def test_post_build_command_enabled_default_false(self):
+        settings = AppSettings()
+        assert settings.post_build_command_enabled is False
+
     def test_custom_values(self):
         settings = AppSettings(
             default_project_path="/custom/path",
@@ -173,6 +181,24 @@ class TestSaveSettings:
             assert loaded.custom_ide_path == original.custom_ide_path
             assert loaded.default_python_version == original.default_python_version
             assert loaded.git_enabled_default == original.git_enabled_default
+
+    def test_post_build_command_roundtrip(self, tmp_path):
+        fake_file = tmp_path / "settings.json"
+        with (
+            patch("app.core.settings_manager.SETTINGS_FILE", fake_file),
+            patch("app.core.settings_manager.SETTINGS_DIR", tmp_path),
+        ):
+            original = AppSettings(post_build_command="uv run pytest")
+            save_settings(original)
+            loaded = load_settings()
+            assert loaded.post_build_command == "uv run pytest"
+
+    def test_missing_post_build_command_defaults_empty(self, tmp_path):
+        fake_file = tmp_path / "settings.json"
+        fake_file.write_text(json.dumps({"preferred_ide": "VS Code"}))
+        with patch("app.core.settings_manager.SETTINGS_FILE", fake_file):
+            settings = load_settings()
+            assert settings.post_build_command == ""
 
 
 class TestSettingsConstants:

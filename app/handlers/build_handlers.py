@@ -5,6 +5,7 @@ import sys
 from pathlib import Path
 
 import flet as ft
+from loguru import logger
 
 from app.core.async_executor import AsyncExecutor
 from app.core.constants import (
@@ -105,11 +106,56 @@ class BuildHandlersMixin:
         except FileNotFoundError:
             self._show_snackbar(f"{ide_name} not found", is_error=True)
 
+    def _run_post_build_command(self, project_path: Path, command: str) -> None:
+        """Run a user-configured command in the new project directory.
+
+        Executes via the system shell with a 30-second timeout. Logs full
+        output and shows a snackbar summary. Failures are logged but never
+        block the remaining post-build actions.
+
+        Args:
+            project_path: Working directory for the command.
+            command: Shell command string to execute.
+        """
+        if not command.strip():
+            return
+
+        logger.info("Running post-build command: {}", command)
+        try:
+            result = subprocess.run(
+                command,
+                cwd=str(project_path),
+                shell=True,
+                capture_output=True,
+                text=True,
+                timeout=30,
+            )
+            if result.returncode == 0:
+                logger.info("Post-build command succeeded: {}", result.stdout.strip())
+                self._show_snackbar("Post-build command completed")
+            else:
+                logger.warning(
+                    "Post-build command failed (exit {}): {}",
+                    result.returncode,
+                    result.stderr.strip(),
+                )
+                self._show_snackbar(
+                    f"Post-build command failed (exit {result.returncode})",
+                    is_error=True,
+                )
+        except subprocess.TimeoutExpired:
+            logger.warning("Post-build command timed out after 30s: {}", command)
+            self._show_snackbar("Post-build command timed out", is_error=True)
+        except Exception as exc:
+            logger.warning("Post-build command error: {}", exc)
+            self._show_snackbar(f"Post-build command error: {exc}", is_error=True)
+
     async def _execute_build(
         self,
         open_folder: bool = False,
         open_ide: bool = False,
         open_terminal: bool = False,
+        post_build_command: str = "",
     ) -> None:
         """Execute the project build after confirmation.
 
@@ -117,6 +163,7 @@ class BuildHandlersMixin:
             open_folder: Whether to open the project in the OS file manager after build.
             open_ide: Whether to open the project in the preferred IDE after build.
             open_terminal: Whether to open a terminal at the project root after build.
+            post_build_command: Optional shell command to run in the project directory.
         """
         self.controls.progress_ring.visible = True
         self.controls.build_project_button.disabled = True
@@ -172,6 +219,8 @@ class BuildHandlersMixin:
             add_to_history(entry)
 
             project_path = config.project_path / config.project_name
+            if post_build_command:
+                self._run_post_build_command(project_path, post_build_command)
             if open_folder:
                 self._open_in_file_manager(project_path)
             if open_ide:
@@ -297,6 +346,8 @@ class BuildHandlersMixin:
             open_folder = dialog.open_folder_checkbox.value
             open_ide = dialog.open_ide_checkbox.value
             open_terminal = dialog.open_terminal_checkbox.value
+            post_build_enabled = dialog.post_build_checkbox.value
+            post_build_cmd = dialog.post_build_command_field.value
             dialog.open = False
             self.state.active_dialog = None
             self.page.update()
@@ -304,6 +355,7 @@ class BuildHandlersMixin:
                 open_folder=open_folder,
                 open_ide=open_ide,
                 open_terminal=open_terminal,
+                post_build_command=post_build_cmd if post_build_enabled else "",
             )
 
         def on_cancel(_=None):
@@ -331,6 +383,8 @@ class BuildHandlersMixin:
             author_email=self.state.author_email,
             description=self.state.description,
             license_type=self.state.license_type,
+            post_build_command=self.state.settings.post_build_command,
+            post_build_command_enabled=self.state.settings.post_build_command_enabled,
         )
 
         dialog = create_build_summary_dialog(

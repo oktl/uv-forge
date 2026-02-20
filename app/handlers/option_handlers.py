@@ -279,6 +279,9 @@ class OptionHandlersMixin:
     def _collect_state_packages(self) -> list[str]:
         """Build the package list from current framework/project type selections.
 
+        Includes post-build required packages when the post-build command is
+        enabled in settings.
+
         Returns:
             List of package name strings derived from the active selections.
         """
@@ -289,4 +292,11 @@ class OptionHandlersMixin:
                 packages.append(fw_pkg)
         if self.state.other_project_enabled and self.state.project_type:
             packages.extend(PROJECT_TYPE_PACKAGE_MAP.get(self.state.project_type, []))
+        if self.state.settings.post_build_command_enabled:
+            extra = self.state.settings.post_build_packages
+            if extra:
+                existing = {p.lower() for p in packages}
+                for pkg in (p.strip() for p in extra.split(",")):
+                    if pkg and pkg.lower() not in existing:
+                        packages.append(pkg)
         return packages

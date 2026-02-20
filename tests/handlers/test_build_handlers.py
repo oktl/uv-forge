@@ -1,4 +1,4 @@
-"""Tests for BuildHandlersMixin static helpers: _open_in_file_manager, _open_in_terminal."""
+"""Tests for BuildHandlersMixin helpers."""
 
 import subprocess
 import sys
@@ -7,6 +7,8 @@ from unittest.mock import Mock, call, patch
 
 import pytest
 
+from app.core.settings_manager import AppSettings
+from app.core.state import AppState
 from app.handlers.build_handlers import BuildHandlersMixin
 
 
@@ -90,3 +92,87 @@ class TestOpenInTerminal:
             "subprocess.Popen", side_effect=FileNotFoundError
         ):
             BuildHandlersMixin._open_in_terminal(tmp_path)  # should not raise
+
+
+class TestRunPostBuildCommand:
+    """Tests for BuildHandlersMixin._run_post_build_command."""
+
+    def _make_mixin(self):
+        """Create a minimal BuildHandlersMixin with a mock _show_snackbar."""
+        mixin = BuildHandlersMixin.__new__(BuildHandlersMixin)
+        mixin._show_snackbar = Mock()
+        return mixin
+
+    def test_empty_command_is_noop(self, tmp_path):
+        mixin = self._make_mixin()
+        with patch("app.handlers.build_handlers.subprocess.run") as mock_run:
+            mixin._run_post_build_command(tmp_path, "")
+        mock_run.assert_not_called()
+        mixin._show_snackbar.assert_not_called()
+
+    def test_whitespace_only_command_is_noop(self, tmp_path):
+        mixin = self._make_mixin()
+        with patch("app.handlers.build_handlers.subprocess.run") as mock_run:
+            mixin._run_post_build_command(tmp_path, "   ")
+        mock_run.assert_not_called()
+
+    def test_successful_command(self, tmp_path):
+        mixin = self._make_mixin()
+        mock_result = Mock(returncode=0, stdout="ok", stderr="")
+        with patch(
+            "app.handlers.build_handlers.subprocess.run", return_value=mock_result
+        ) as mock_run:
+            mixin._run_post_build_command(tmp_path, "echo hello")
+        mock_run.assert_called_once_with(
+            "echo hello",
+            cwd=str(tmp_path),
+            shell=True,
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        mixin._show_snackbar.assert_called_once_with("Post-build command completed")
+
+    def test_failed_command_shows_error(self, tmp_path):
+        mixin = self._make_mixin()
+        mock_result = Mock(returncode=1, stdout="", stderr="bad input")
+        with patch(
+            "app.handlers.build_handlers.subprocess.run", return_value=mock_result
+        ):
+            mixin._run_post_build_command(tmp_path, "false")
+        mixin._show_snackbar.assert_called_once_with(
+            "Post-build command failed (exit 1)", is_error=True
+        )
+
+    def test_timeout_shows_error(self, tmp_path):
+        mixin = self._make_mixin()
+        with patch(
+            "app.handlers.build_handlers.subprocess.run",
+            side_effect=subprocess.TimeoutExpired("cmd", 30),
+        ):
+            mixin._run_post_build_command(tmp_path, "sleep 60")
+        mixin._show_snackbar.assert_called_once_with(
+            "Post-build command timed out", is_error=True
+        )
+
+    def test_unexpected_exception_shows_error(self, tmp_path):
+        mixin = self._make_mixin()
+        with patch(
+            "app.handlers.build_handlers.subprocess.run",
+            side_effect=OSError("no such file"),
+        ):
+            mixin._run_post_build_command(tmp_path, "nonexistent")
+        mixin._show_snackbar.assert_called_once()
+        call_args = mixin._show_snackbar.call_args
+        assert "error" in call_args[0][0].lower() or call_args[1].get("is_error")
+
+    def test_uses_correct_cwd(self, tmp_path):
+        mixin = self._make_mixin()
+        project_dir = tmp_path / "my-project"
+        project_dir.mkdir()
+        mock_result = Mock(returncode=0, stdout="", stderr="")
+        with patch(
+            "app.handlers.build_handlers.subprocess.run", return_value=mock_result
+        ) as mock_run:
+            mixin._run_post_build_command(project_dir, "ls")
+        assert mock_run.call_args[1]["cwd"] == str(project_dir)
