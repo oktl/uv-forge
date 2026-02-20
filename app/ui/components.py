@@ -492,7 +492,7 @@ def create_sections(controls: Controls, state: AppState) -> None:
                         controls=[
                             ft.Column(
                                 controls=[
-                                    controls.create_git_checkbox,
+                                    # controls.create_git_checkbox,
                                     controls.ui_project_checkbox,
                                     controls.other_projects_checkbox,
                                     ft.Row(
@@ -528,6 +528,7 @@ def create_sections(controls: Controls, state: AppState) -> None:
                             ),
                             ft.Column(
                                 controls=[
+                                    controls.create_git_checkbox,
                                     controls.include_starter_files_checkbox,
                                     ft.Row(
                                         controls=[
