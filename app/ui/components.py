@@ -51,8 +51,13 @@ class Controls:
         reset_button: Button to reset all fields.
         exit_button: Button to exit the application.
         progress_ring: Progress indicator for async operations.
-        help_button: Button to show help dialog.
-        git_cheat_sheet_button: Button to show Git cheat sheet dialog.
+        overflow_menu: PopupMenuButton containing infrequent actions.
+        help_menu_item: Menu item to show help dialog.
+        git_cheat_sheet_menu_item: Menu item to show Git cheat sheet dialog.
+        about_menu_item: Menu item to show about dialog.
+        settings_menu_item: Menu item to show settings dialog.
+        history_menu_item: Menu item to show recent projects dialog.
+        log_viewer_menu_item: Menu item to show log viewer dialog.
         theme_toggle_button: Button to toggle theme.
         main_title: Main title text.
         section_titles: List of section title texts.
@@ -90,12 +95,13 @@ class Controls:
         self.reset_button: ft.Button
         self.exit_button: ft.Button
         self.progress_ring: ft.ProgressRing
-        self.about_button: ft.IconButton
-        self.help_button: ft.IconButton
-        self.git_cheat_sheet_button: ft.IconButton
-        self.settings_button: ft.IconButton
-        self.history_button: ft.IconButton
-        self.log_viewer_button: ft.IconButton
+        self.about_menu_item: ft.PopupMenuItem
+        self.help_menu_item: ft.PopupMenuItem
+        self.git_cheat_sheet_menu_item: ft.PopupMenuItem
+        self.settings_menu_item: ft.PopupMenuItem
+        self.history_menu_item: ft.PopupMenuItem
+        self.log_viewer_menu_item: ft.PopupMenuItem
+        self.overflow_menu: ft.PopupMenuButton
         self.theme_toggle_button: ft.IconButton
         self.main_title: ft.Text
         self.check_pypi_button: ft.IconButton
@@ -160,40 +166,46 @@ def create_controls(state: AppState, colors: dict) -> Controls:
         tooltip="Toggle dark/light mode",
     )
 
-    controls.git_cheat_sheet_button = ft.IconButton(
-        icon=ft.Icons.MENU_BOOK,
-        icon_size=UIConfig.ICON_SIZE_DEFAULT,
-        tooltip="Git Cheat Sheet",
-    )
-
-    controls.help_button = ft.IconButton(
-        icon=ft.Icons.HELP_OUTLINE,
-        icon_size=UIConfig.ICON_SIZE_DEFAULT,
-        tooltip="Help & Documentation",
-    )
-
-    controls.about_button = ft.IconButton(
-        icon=ft.Icons.INFO_OUTLINE,
-        icon_size=UIConfig.ICON_SIZE_DEFAULT,
-        tooltip="About",
-    )
-
-    controls.settings_button = ft.IconButton(
-        icon=ft.Icons.SETTINGS,
-        icon_size=UIConfig.ICON_SIZE_DEFAULT,
-        tooltip="Settings",
-    )
-
-    controls.history_button = ft.IconButton(
+    # Overflow menu items
+    controls.history_menu_item = ft.PopupMenuItem(
         icon=ft.Icons.HISTORY,
-        icon_size=UIConfig.ICON_SIZE_DEFAULT,
-        tooltip="Recent Projects",
+        content=ft.Text("Recent Projects"),
+    )
+    controls.settings_menu_item = ft.PopupMenuItem(
+        icon=ft.Icons.SETTINGS,
+        content=ft.Text("Settings"),
+    )
+    controls.help_menu_item = ft.PopupMenuItem(
+        icon=ft.Icons.HELP_OUTLINE,
+        content=ft.Text("Help & Documentation"),
+    )
+    controls.git_cheat_sheet_menu_item = ft.PopupMenuItem(
+        icon=ft.Icons.MENU_BOOK,
+        content=ft.Text("Git Cheat Sheet"),
+    )
+    controls.log_viewer_menu_item = ft.PopupMenuItem(
+        icon=ft.Icons.ARTICLE,
+        content=ft.Text("View Logs"),
+    )
+    controls.about_menu_item = ft.PopupMenuItem(
+        icon=ft.Icons.INFO_OUTLINE,
+        content=ft.Text("About"),
     )
 
-    controls.log_viewer_button = ft.IconButton(
-        icon=ft.Icons.ARTICLE,
+    controls.overflow_menu = ft.PopupMenuButton(
+        icon=ft.Icons.MORE_VERT,
         icon_size=UIConfig.ICON_SIZE_DEFAULT,
-        tooltip="View Logs",
+        tooltip="More options",
+        items=[
+            controls.history_menu_item,
+            controls.settings_menu_item,
+            ft.PopupMenuItem(),  # Divider
+            controls.help_menu_item,
+            controls.git_cheat_sheet_menu_item,
+            controls.log_viewer_menu_item,
+            ft.PopupMenuItem(),  # Divider
+            controls.about_menu_item,
+        ],
     )
 
     # Project path controls
@@ -587,12 +599,8 @@ def create_app_bars(page: ft.Page, controls: Controls, colors: dict) -> None:
         ),
         bgcolor=ft.Colors.TRANSPARENT,
         actions=[
-            controls.history_button,
-            controls.log_viewer_button,
-            controls.settings_button,
-            controls.help_button,
-            controls.about_button,
             controls.theme_toggle_button,
+            controls.overflow_menu,
         ],
         toolbar_height=UIConfig.APPBAR_TOOLBAR_HEIGHT,
     )

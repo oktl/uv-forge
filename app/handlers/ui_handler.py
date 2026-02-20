@@ -115,14 +115,14 @@ def attach_handlers(page: ft.Page, state: AppState) -> None:
     controls.exit_button.on_click = wrap_async(handlers.on_exit)
 
     # --- UI Feature Handlers ---
-    controls.git_cheat_sheet_button.on_click = wrap_async(
+    controls.git_cheat_sheet_menu_item.on_click = wrap_async(
         handlers.on_git_cheat_sheet_click
     )
-    controls.history_button.on_click = wrap_async(handlers.on_history_click)
-    controls.log_viewer_button.on_click = wrap_async(handlers.on_log_viewer_click)
-    controls.settings_button.on_click = wrap_async(handlers.on_settings_click)
-    controls.help_button.on_click = wrap_async(handlers.on_help_click)
-    controls.about_button.on_click = wrap_async(handlers.on_about_click)
+    controls.history_menu_item.on_click = wrap_async(handlers.on_history_click)
+    controls.log_viewer_menu_item.on_click = wrap_async(handlers.on_log_viewer_click)
+    controls.settings_menu_item.on_click = wrap_async(handlers.on_settings_click)
+    controls.help_menu_item.on_click = wrap_async(handlers.on_help_click)
+    controls.about_menu_item.on_click = wrap_async(handlers.on_about_click)
     controls.theme_toggle_button.on_click = wrap_async(handlers.on_theme_toggle)
 
     # --- Keyboard Shortcuts ---
