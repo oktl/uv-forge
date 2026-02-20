@@ -7,7 +7,7 @@ so users can restore a previous project's full configuration.
 
 import datetime
 import json
-from dataclasses import asdict, dataclass, fields
+from dataclasses import asdict, dataclass, field, fields
 from typing import Any
 
 from app.core.settings_manager import SETTINGS_DIR
@@ -46,7 +46,8 @@ class ProjectHistoryEntry:
     project_type: str | None
     folders: list[str | dict[str, Any]]
     packages: list[str]
-    built_at: str
+    dev_packages: list[str] = field(default_factory=list)
+    built_at: str = ""
 
 
 def load_history() -> list[ProjectHistoryEntry]:
@@ -141,6 +142,7 @@ def make_history_entry(
     project_type: str | None,
     folders: list,
     packages: list[str],
+    dev_packages: list[str] | None = None,
 ) -> ProjectHistoryEntry:
     """Create a ProjectHistoryEntry with the current timestamp.
 
@@ -172,5 +174,6 @@ def make_history_entry(
         project_type=project_type,
         folders=list(folders),
         packages=list(packages),
+        dev_packages=list(dev_packages) if dev_packages else [],
         built_at=datetime.datetime.now(datetime.UTC).isoformat(),
     )

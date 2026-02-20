@@ -87,6 +87,7 @@ class Controls:
         self.add_package_button: ft.Button
         self.remove_package_button: ft.Button
         self.clear_packages_button: ft.Button
+        self.toggle_dev_button: ft.Button
         self.include_starter_files_checkbox: ft.Checkbox
         self.path_preview_text: ft.Text
         self.status_icon: ft.Icon
@@ -374,6 +375,12 @@ def create_controls(state: AppState, colors: dict) -> Controls:
         style=_split_btn_style,
     )
 
+    controls.toggle_dev_button = ft.Button(
+        "Toggle Dev",
+        tooltip="Toggle selected package between runtime and dev dependency.",
+        style=_split_btn_style,
+    )
+
     # Metadata controls
     controls.metadata_checkbox = ft.Checkbox(
         label="Set Project Metadata...",
@@ -608,7 +615,12 @@ def create_sections(controls: Controls, state: AppState) -> None:
                                     controls.remove_package_button,
                                 ],
                             ),
-                            controls.clear_packages_button,
+                            ft.Row(
+                                controls=[
+                                    controls.clear_packages_button,
+                                    controls.toggle_dev_button,
+                                ],
+                            ),
                         ],
                         spacing=UIConfig.SPACING_SMALL,
                     ),

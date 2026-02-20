@@ -272,6 +272,8 @@ class OptionHandlersMixin:
             pkg for pkg in manual if pkg not in new_auto_set
         ]
         self.state.auto_packages = new_auto
+        # Prune dev_packages to only include packages still in the list
+        self.state.dev_packages &= set(self.state.packages)
 
         self._update_folder_display()
         self._update_package_display()

@@ -103,7 +103,9 @@ def setup_virtual_env(project_path: Path, python_version: str) -> None:
     )
 
 
-def install_packages(project_path: Path, package_names: list[str]) -> None:
+def install_packages(
+    project_path: Path, package_names: list[str], *, dev: bool = False
+) -> None:
     """Install multiple packages in a single uv add invocation.
 
     Resolves all dependencies together in one subprocess call.
@@ -111,6 +113,7 @@ def install_packages(project_path: Path, package_names: list[str]) -> None:
     Args:
         project_path: Path to the project directory.
         package_names: List of package names to install. No-op if empty.
+        dev: If True, install as dev dependencies via ``uv add --dev``.
 
     Raises:
         subprocess.CalledProcessError: If uv add command fails.
@@ -118,8 +121,12 @@ def install_packages(project_path: Path, package_names: list[str]) -> None:
     if not package_names:
         return
     uv_path = get_uv_path()
+    cmd = [uv_path, "add"]
+    if dev:
+        cmd.append("--dev")
+    cmd.extend(package_names)
     subprocess.run(
-        [uv_path, "add", *package_names],
+        cmd,
         cwd=project_path,
         capture_output=True,
         text=True,

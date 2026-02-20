@@ -1273,7 +1273,8 @@ def create_add_packages_dialog(
     only — the Add button works regardless of check results.
 
     Args:
-        on_add_callback: Callback function(packages: list[str]) called with parsed names.
+        on_add_callback: Callback function(packages: list[str], dev: bool)
+            called with parsed names and whether they should be dev deps.
         on_close_callback: Callback function when Cancel is clicked.
         is_dark_mode: Whether dark mode is active.
 
@@ -1306,6 +1307,12 @@ def create_add_packages_dialog(
         max_lines=8,
         width=400,
         autofocus=True,
+    )
+
+    dev_checkbox = ft.Checkbox(
+        label="Add as dev dependencies",
+        value=False,
+        tooltip="Dev dependencies are installed with 'uv add --dev'\nand go into [dependency-groups] in pyproject.toml.",
     )
 
     # Results area for PyPI verification — hidden until first verify click
@@ -1437,7 +1444,7 @@ def create_add_packages_dialog(
             return
 
         warning_text.visible = False
-        on_add_callback(packages)
+        on_add_callback(packages, dev_checkbox.value)
 
     dialog = ft.AlertDialog(
         modal=True,
@@ -1456,6 +1463,7 @@ def create_add_packages_dialog(
                     ),
                     ft.Container(height=8),
                     packages_field,
+                    dev_checkbox,
                     ft.Row([verify_button], spacing=8),
                     warning_text,
                     results_column,
@@ -1558,6 +1566,13 @@ def create_build_summary_dialog(
 
     if config.packages:
         count = len(config.packages)
+        dev_set = set(config.dev_packages)
+        pkg_rows = []
+        for pkg in config.packages:
+            label = f"  • {pkg}"
+            if pkg in dev_set:
+                label += "  (dev)"
+            pkg_rows.append(ft.Text(label, size=12))
         rows.append(
             ft.Row(
                 [
@@ -1569,10 +1584,7 @@ def create_build_summary_dialog(
                                 size=13,
                                 color=colors.get("section_title"),
                             ),
-                            *[
-                                ft.Text(f"  • {pkg}", size=12)
-                                for pkg in config.packages
-                            ],
+                            *pkg_rows,
                         ],
                         spacing=2,
                         tight=True,

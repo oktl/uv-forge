@@ -73,6 +73,9 @@ class AppState:
     auto_packages: list[str] = field(
         default_factory=list
     )  # map-derived; used to detect manual additions
+    dev_packages: set[str] = field(
+        default_factory=set
+    )  # package names marked as dev dependencies
     selected_package_idx: int | None = None
 
     # UI state

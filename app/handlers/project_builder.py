@@ -44,24 +44,30 @@ def remove_partial_project(
         shutil.rmtree(bare_repo_path)
 
 
-def _collect_packages_to_install(config: ProjectConfig) -> list[str]:
+def _collect_packages_to_install(
+    config: ProjectConfig,
+) -> tuple[list[str], list[str]]:
     """Gather all packages required by the project configuration.
 
     Checks both the UI framework (guarded by ui_project_enabled) and
-    the project type (guarded by other_project_enabled) to build a
-    single list suitable for a batch ``uv add`` invocation.
+    the project type (guarded by other_project_enabled) to build
+    separate runtime and dev package lists.
 
     Args:
         config: ProjectConfig containing framework and project type settings.
 
     Returns:
-        List of package name strings to install (may be empty).
+        Tuple of (runtime_packages, dev_packages).
     """
-    # If the user has an explicit package list, use it directly
-    if config.packages:
-        return list(config.packages)
+    dev_set = set(config.dev_packages)
 
-    # Fallback: derive from framework and project type maps
+    # If the user has an explicit package list, split by dev status
+    if config.packages:
+        runtime = [p for p in config.packages if p not in dev_set]
+        dev = [p for p in config.packages if p in dev_set]
+        return runtime, dev
+
+    # Fallback: derive from framework and project type maps (always runtime)
     packages: list[str] = []
 
     if config.ui_project_enabled:
@@ -72,7 +78,7 @@ def _collect_packages_to_install(config: ProjectConfig) -> list[str]:
     if config.other_project_enabled:
         packages.extend(PROJECT_TYPE_PACKAGE_MAP.get(config.project_type, []))
 
-    return packages
+    return packages, []
 
 
 def _create_project_scaffold(
@@ -151,11 +157,12 @@ def _install_dependencies(
     _progress("Creating virtual environment...")
     setup_virtual_env(project_path, config.python_version)
 
-    packages = _collect_packages_to_install(config)
-    if packages:
-        count = len(packages)
-        _progress(f"Installing {count} package{'s' if count != 1 else ''}...")
-    install_packages(project_path, packages)
+    runtime_packages, dev_packages = _collect_packages_to_install(config)
+    total = len(runtime_packages) + len(dev_packages)
+    if total:
+        _progress(f"Installing {total} package{'s' if total != 1 else ''}...")
+    install_packages(project_path, runtime_packages)
+    install_packages(project_path, dev_packages, dev=True)
 
 
 def build_project(

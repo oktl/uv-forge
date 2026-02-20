@@ -27,6 +27,7 @@ class PackageHandlersMixin:
         """
         is_selected = self.state.selected_package_idx == idx
         is_auto = pkg in self.state.auto_packages
+        is_dev = pkg in self.state.dev_packages
 
         row_controls: list[ft.Control] = [
             ft.Text(
@@ -36,6 +37,10 @@ class PackageHandlersMixin:
                 expand=True,
             )
         ]
+        if is_dev:
+            row_controls.append(
+                ft.Text("dev", size=10, color=ft.Colors.AMBER_400, italic=True)
+            )
         if is_auto:
             row_controls.append(
                 ft.Text("auto", size=10, color=ft.Colors.GREY_500, italic=True)
@@ -97,16 +102,19 @@ class PackageHandlersMixin:
         """
         existing = set(self.state.packages)
 
-        def on_packages_entered(new_packages: list[str]) -> None:
+        def on_packages_entered(new_packages: list[str], dev: bool = False) -> None:
             added = [pkg for pkg in new_packages if pkg not in existing]
             self.state.packages.extend(added)
             existing.update(added)
+            if dev:
+                self.state.dev_packages.update(added)
             dialog.open = False
             self.state.active_dialog = None
             self._update_package_display()
             if added:
+                suffix = " as dev" if dev else ""
                 self._set_status(
-                    f"Added {len(added)} package(s): {', '.join(added)}",
+                    f"Added {len(added)} package(s){suffix}: {', '.join(added)}",
                     "success",
                     update=True,
                 )
@@ -132,6 +140,22 @@ class PackageHandlersMixin:
         self.state.active_dialog = on_close
         self.page.update()
 
+    async def on_toggle_dev(self, _: ft.ControlEvent) -> None:
+        """Toggle the selected package between runtime and dev dependency."""
+        if self.state.selected_package_idx is None:
+            self._set_warning("Select a package to toggle.", update=True)
+            return
+        idx = self.state.selected_package_idx
+        if 0 <= idx < len(self.state.packages):
+            pkg = self.state.packages[idx]
+            if pkg in self.state.dev_packages:
+                self.state.dev_packages.discard(pkg)
+                self._set_status(f"'{pkg}' moved to runtime.", "info", update=False)
+            else:
+                self.state.dev_packages.add(pkg)
+                self._set_status(f"'{pkg}' moved to dev.", "info", update=False)
+            self._update_package_display()
+
     async def on_clear_packages(self, _: ft.ControlEvent) -> None:
         """Handle Clear All packages button click.
 
@@ -148,6 +172,7 @@ class PackageHandlersMixin:
             self.state.active_dialog = None
             self.state.packages = []
             self.state.auto_packages = []
+            self.state.dev_packages = set()
             self.state.selected_package_idx = None
             self._update_package_display()
             self._set_status("All packages cleared.", "info", update=True)
@@ -184,6 +209,7 @@ class PackageHandlersMixin:
         idx = self.state.selected_package_idx
         if 0 <= idx < len(self.state.packages):
             pkg = self.state.packages.pop(idx)
+            self.state.dev_packages.discard(pkg)
             self.state.selected_package_idx = None
             self._update_package_display()
             self._set_status(f"Package '{pkg}' removed.", "success", update=True)

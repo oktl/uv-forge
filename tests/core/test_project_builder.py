@@ -102,7 +102,9 @@ class TestCollectPackagesToInstall:
     def test_explicit_packages_returned_directly(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             config = _make_config(tmpdir, packages=["httpx", "rich"])
-            assert _collect_packages_to_install(config) == ["httpx", "rich"]
+            runtime, dev = _collect_packages_to_install(config)
+            assert runtime == ["httpx", "rich"]
+            assert dev == []
 
     def test_explicit_packages_skip_framework_lookup(self):
         """Explicit list wins even when framework is set."""
@@ -113,14 +115,17 @@ class TestCollectPackagesToInstall:
                 ui_project_enabled=True,
                 framework="flet",
             )
-            assert _collect_packages_to_install(config) == ["mylib"]
+            runtime, dev = _collect_packages_to_install(config)
+            assert runtime == ["mylib"]
+            assert dev == []
 
     def test_framework_package_added_when_ui_enabled(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             config = _make_config(
                 tmpdir, ui_project_enabled=True, framework="flet"
             )
-            assert "flet" in _collect_packages_to_install(config)
+            runtime, dev = _collect_packages_to_install(config)
+            assert "flet" in runtime
 
     def test_builtin_framework_returns_no_package(self):
         """tkinter is built-in; FRAMEWORK_PACKAGE_MAP maps it to None."""
@@ -130,7 +135,9 @@ class TestCollectPackagesToInstall:
                 ui_project_enabled=True,
                 framework="tkinter (built-in)",
             )
-            assert _collect_packages_to_install(config) == []
+            runtime, dev = _collect_packages_to_install(config)
+            assert runtime == []
+            assert dev == []
 
     def test_project_type_packages_added_when_other_enabled(self):
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -139,9 +146,9 @@ class TestCollectPackagesToInstall:
                 other_project_enabled=True,
                 project_type="fastapi",
             )
-            pkgs = _collect_packages_to_install(config)
-            assert "fastapi" in pkgs
-            assert "uvicorn" in pkgs
+            runtime, dev = _collect_packages_to_install(config)
+            assert "fastapi" in runtime
+            assert "uvicorn" in runtime
 
     def test_both_flags_combine_packages(self):
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -152,14 +159,16 @@ class TestCollectPackagesToInstall:
                 other_project_enabled=True,
                 project_type="cli_click",
             )
-            pkgs = _collect_packages_to_install(config)
-            assert "flet" in pkgs
-            assert "click" in pkgs
+            runtime, dev = _collect_packages_to_install(config)
+            assert "flet" in runtime
+            assert "click" in runtime
 
     def test_no_flags_returns_empty(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             config = _make_config(tmpdir)
-            assert _collect_packages_to_install(config) == []
+            runtime, dev = _collect_packages_to_install(config)
+            assert runtime == []
+            assert dev == []
 
     def test_unknown_project_type_returns_empty(self):
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -168,7 +177,21 @@ class TestCollectPackagesToInstall:
                 other_project_enabled=True,
                 project_type="nonexistent_type",
             )
-            assert _collect_packages_to_install(config) == []
+            runtime, dev = _collect_packages_to_install(config)
+            assert runtime == []
+            assert dev == []
+
+    def test_dev_packages_split_from_runtime(self):
+        """Dev packages are separated from runtime when explicit list provided."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            config = _make_config(
+                tmpdir,
+                packages=["httpx", "pytest", "rich"],
+                dev_packages=["pytest"],
+            )
+            runtime, dev = _collect_packages_to_install(config)
+            assert runtime == ["httpx", "rich"]
+            assert dev == ["pytest"]
 
 
 class TestBuildProjectErrors:

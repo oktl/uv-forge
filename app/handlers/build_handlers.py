@@ -183,6 +183,7 @@ class BuildHandlersMixin:
             if self.state.folders
             else DEFAULT_FOLDERS.copy(),
             packages=list(self.state.packages),
+            dev_packages=list(self.state.dev_packages),
             github_root=Path(self.state.settings.default_github_root),
             author_name=self.state.author_name,
             author_email=self.state.author_email,
@@ -215,6 +216,7 @@ class BuildHandlersMixin:
                 project_type=config.project_type,
                 folders=config.folders,
                 packages=config.packages,
+                dev_packages=config.dev_packages,
             )
             add_to_history(entry)
 
@@ -267,6 +269,7 @@ class BuildHandlersMixin:
         self.state.project_type = entry.project_type
         self.state.folders = list(entry.folders)
         self.state.packages = list(entry.packages)
+        self.state.dev_packages = set(getattr(entry, "dev_packages", []))
 
         # Update UI controls
         self.controls.project_name_input.value = entry.project_name
@@ -378,6 +381,7 @@ class BuildHandlersMixin:
             folder_count=folder_count,
             file_count=file_count,
             packages=list(self.state.packages),
+            dev_packages=list(self.state.dev_packages),
             folders=list(self.state.folders),
             author_name=self.state.author_name,
             author_email=self.state.author_email,

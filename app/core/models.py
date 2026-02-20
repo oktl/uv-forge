@@ -93,6 +93,7 @@ class ProjectConfig:
     include_starter_files: bool = True
     folders: list[str | dict[str, Any] | FolderSpec] = field(default_factory=list)
     packages: list[str] = field(default_factory=list)
+    dev_packages: list[str] = field(default_factory=list)
     github_root: Path | None = None
     author_name: str = ""
     author_email: str = ""
@@ -187,6 +188,7 @@ class BuildSummaryConfig:
     folder_count: int
     file_count: int
     packages: list[str] = field(default_factory=list)
+    dev_packages: list[str] = field(default_factory=list)
     folders: list[str | dict] = field(default_factory=list)
     author_name: str = ""
     author_email: str = ""
@@ -227,6 +229,7 @@ class BuildSummaryConfig:
             folder_count=folder_count,
             file_count=file_count,
             packages=config.packages,
+            dev_packages=config.dev_packages,
             folders=folders,
             author_name=config.author_name,
             author_email=config.author_email,
