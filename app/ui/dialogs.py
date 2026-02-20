@@ -1882,10 +1882,12 @@ def create_metadata_dialog(
     colors = get_theme_colors(is_dark_mode)
     label_style = ft.TextStyle(size=13, color=colors["section_title"])
 
+    field_width = 410
+
     author_name_field = ft.TextField(
         label="Author Name",
         value=state.author_name,
-        expand=True,
+        width=field_width,
         label_style=label_style,
         autofocus=True,
     )
@@ -1893,14 +1895,14 @@ def create_metadata_dialog(
     author_email_field = ft.TextField(
         label="Author Email",
         value=state.author_email,
-        expand=True,
+        width=field_width,
         label_style=label_style,
     )
 
     description_field = ft.TextField(
         label="Description",
         value=state.description,
-        expand=True,
+        width=field_width,
         multiline=True,
         min_lines=2,
         max_lines=3,
@@ -1914,7 +1916,7 @@ def create_metadata_dialog(
         label="License",
         value=state.license_type,
         options=license_options,
-        width=250,
+        width=field_width,
         label_style=label_style,
     )
 
@@ -1985,6 +1987,7 @@ def create_settings_dialog(
     colors = get_theme_colors(is_dark_mode)
 
     label_style = ft.TextStyle(size=13, color=colors["section_title"])
+    field_width = 460
 
     # --- Default project path ---
     project_path_field = ft.TextField(
@@ -2049,7 +2052,7 @@ def create_settings_dialog(
         label="Default Python Version",
         value=settings.default_python_version,
         options=[ft.dropdown.Option(v) for v in PYTHON_VERSIONS],
-        width=200,
+        width=field_width,
         label_style=label_style,
     )
 
@@ -2061,7 +2064,7 @@ def create_settings_dialog(
         if settings.preferred_ide in ide_names
         else ide_names[0],
         options=[ft.dropdown.Option(name) for name in ide_names],
-        width=250,
+        width=field_width,
         label_style=label_style,
     )
 
@@ -2069,7 +2072,7 @@ def create_settings_dialog(
         label="Custom IDE Executable Path",
         value=settings.custom_ide_path,
         visible=settings.preferred_ide == "Other / Custom",
-        expand=True,
+        width=field_width,
         label_style=label_style,
         hint_text="/usr/local/bin/my-editor",
     )
@@ -2090,14 +2093,14 @@ def create_settings_dialog(
     author_name_field = ft.TextField(
         label="Default Author Name",
         value=settings.default_author_name,
-        expand=True,
+        width=field_width,
         label_style=label_style,
     )
 
     author_email_field = ft.TextField(
         label="Default Author Email",
         value=settings.default_author_email,
-        expand=True,
+        width=field_width,
         label_style=label_style,
     )
 
