@@ -105,6 +105,7 @@ class MockControls:
         self.check_pypi_button = MockControl()
         self.pypi_status_text = MockText()
         self.metadata_button = MockControl()
+        self.metadata_checkbox = MockControl(value=False)
         self.metadata_summary = MockText()
         self.section_titles = []
         self.section_containers = []

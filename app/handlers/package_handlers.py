@@ -94,7 +94,7 @@ class PackageHandlersMixin:
         self._set_status(f"Selected package: {pkg_name}", "info", update=False)
         self._update_package_display()
 
-    async def on_add_package(self, _: ft.ControlEvent) -> None:
+    async def on_add_package(self, e: ft.ControlEvent) -> None:
         """Handle Add Packages button click.
 
         Opens a dialog where the user can enter one or more package names
@@ -140,7 +140,7 @@ class PackageHandlersMixin:
         self.state.active_dialog = on_close
         self.page.update()
 
-    async def on_toggle_dev(self, _: ft.ControlEvent) -> None:
+    async def on_toggle_dev(self, e: ft.ControlEvent) -> None:
         """Toggle the selected package between runtime and dev dependency."""
         if self.state.selected_package_idx is None:
             self._set_warning("Select a package to toggle.", update=True)
@@ -156,7 +156,7 @@ class PackageHandlersMixin:
                 self._set_status(f"'{pkg}' moved to dev.", "info", update=False)
             self._update_package_display()
 
-    async def on_clear_packages(self, _: ft.ControlEvent) -> None:
+    async def on_clear_packages(self, e: ft.ControlEvent) -> None:
         """Handle Clear All packages button click.
 
         Shows a confirmation dialog, then removes all packages from the
@@ -198,7 +198,7 @@ class PackageHandlersMixin:
         self.state.active_dialog = cancel
         self.page.show_dialog(dialog)
 
-    async def on_remove_package(self, _: ft.ControlEvent) -> None:
+    async def on_remove_package(self, e: ft.ControlEvent) -> None:
         """Handle Remove Package button click.
 
         Removes the currently selected package from the install list.

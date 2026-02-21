@@ -36,7 +36,7 @@ class FeatureHandlersMixin:
     Expects HandlerBase helpers available via self.
     """
 
-    async def on_theme_toggle(self, _: ft.ControlEvent) -> None:
+    async def on_theme_toggle(self, e: ft.ControlEvent) -> None:
         """Handle theme toggle button click."""
         self.state.is_dark_mode = not self.state.is_dark_mode
         colors = get_theme_colors(self.state.is_dark_mode)
@@ -56,7 +56,7 @@ class FeatureHandlersMixin:
         self.page.bottom_appbar.bgcolor = colors["bottom_bar"]
         self.page.update()
 
-    async def on_help_click(self, _: ft.ControlEvent) -> None:
+    async def on_help_click(self, e: ft.ControlEvent) -> None:
         """Handle Help button click."""
         try:
             help_text = HELP_FILE.read_text(encoding="utf-8")
@@ -98,7 +98,7 @@ For more information, visit: https://docs.astral.sh/uv/
         self.state.active_dialog = close_dialog
         self.page.update()
 
-    async def on_git_cheat_sheet_click(self, _: ft.ControlEvent) -> None:
+    async def on_git_cheat_sheet_click(self, e: ft.ControlEvent) -> None:
         """Handle Git Cheat Sheet button click."""
         try:
             content = GIT_CHEAT_SHEET_FILE.read_text(encoding="utf-8")
@@ -133,7 +133,7 @@ For more information, visit: https://docs.astral.sh/uv/
         self.state.active_dialog = close_dialog
         self.page.update()
 
-    async def on_about_click(self, _: ft.ControlEvent) -> None:
+    async def on_about_click(self, e: ft.ControlEvent) -> None:
         """Handle About button click.
 
         Internal links (app://help, app://git-cheat-sheet) close the About
@@ -226,7 +226,7 @@ For more information, visit: https://docs.astral.sh/uv/
         except FileNotFoundError:
             pass
 
-    async def on_log_viewer_click(self, _: ft.ControlEvent) -> None:
+    async def on_log_viewer_click(self, e: ft.ControlEvent) -> None:
         """Handle Log Viewer button click.
 
         Reads today's log file and displays it in a dialog with coloured,
@@ -260,7 +260,7 @@ For more information, visit: https://docs.astral.sh/uv/
         self.state.active_dialog = close_dialog
         self.page.update()
 
-    async def on_history_click(self, _: ft.ControlEvent) -> None:
+    async def on_history_click(self, e: ft.ControlEvent) -> None:
         """Handle Recent Projects button click.
 
         Opens a dialog showing recent project builds. Selecting an entry
@@ -295,7 +295,7 @@ For more information, visit: https://docs.astral.sh/uv/
         self.state.active_dialog = close_dialog
         self.page.update()
 
-    async def on_presets_click(self, _: ft.ControlEvent) -> None:
+    async def on_presets_click(self, e: ft.ControlEvent) -> None:
         """Handle Presets menu item click.
 
         Opens a dialog for saving the current configuration as a named
@@ -390,7 +390,7 @@ For more information, visit: https://docs.astral.sh/uv/
         self.state.active_dialog = close_dialog
         self.page.update()
 
-    async def on_settings_click(self, _: ft.ControlEvent) -> None:
+    async def on_settings_click(self, e: ft.ControlEvent) -> None:
         """Handle Settings button click.
 
         Opens a dialog for editing user preferences (default paths, IDE,

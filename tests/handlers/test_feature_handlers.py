@@ -35,6 +35,7 @@ class MockControls:
         self.status_icon = Mock(visible=False)
         self.status_text = Mock(value="")
         self.metadata_button = Mock()
+        self.metadata_checkbox = Mock(value=False, label_style=None)
         self.metadata_summary = Mock(value="")
         self.section_titles = []
         self.section_containers = []
@@ -128,11 +129,13 @@ def test_open_file_in_ide_missing_file(handler_setup, tmp_path):
 
 
 @pytest.mark.asyncio
-async def test_on_metadata_click_opens_dialog(handler_setup):
-    """Test on_metadata_click opens a metadata dialog."""
+async def test_on_metadata_toggle_opens_dialog(handler_setup):
+    """Test on_metadata_toggle opens a metadata dialog."""
     handlers, page, controls, state = handler_setup
+    mock_event = Mock()
+    mock_event.control = controls.metadata_checkbox
 
-    await handlers.on_metadata_click(None)
+    await handlers.on_metadata_toggle(mock_event)
 
     assert len(page.overlay) == 1
     assert isinstance(page.overlay[0], ft.AlertDialog)
@@ -141,11 +144,13 @@ async def test_on_metadata_click_opens_dialog(handler_setup):
 
 
 @pytest.mark.asyncio
-async def test_on_metadata_click_sets_active_dialog(handler_setup):
+async def test_on_metadata_toggle_sets_active_dialog(handler_setup):
     """Test opening metadata dialog sets state.active_dialog."""
     handlers, page, controls, state = handler_setup
+    mock_event = Mock()
+    mock_event.control = controls.metadata_checkbox
 
-    await handlers.on_metadata_click(None)
+    await handlers.on_metadata_toggle(mock_event)
 
     assert state.active_dialog is not None
     assert callable(state.active_dialog)
@@ -155,8 +160,10 @@ async def test_on_metadata_click_sets_active_dialog(handler_setup):
 async def test_on_metadata_close_clears_active_dialog(handler_setup):
     """Test closing metadata dialog clears state.active_dialog."""
     handlers, page, controls, state = handler_setup
+    mock_event = Mock()
+    mock_event.control = controls.metadata_checkbox
 
-    await handlers.on_metadata_click(None)
+    await handlers.on_metadata_toggle(mock_event)
     assert state.active_dialog is not None
 
     state.active_dialog()

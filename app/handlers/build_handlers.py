@@ -441,7 +441,7 @@ class BuildHandlersMixin:
         )
         add_preset(preset)
 
-    async def on_build_project(self, _: ft.ControlEvent) -> None:
+    async def on_build_project(self, e: ft.ControlEvent) -> None:
         """Handle Build Project button click.
 
         Validates inputs and shows a confirmation dialog before building.
@@ -553,7 +553,7 @@ class BuildHandlersMixin:
         self._set_status("All fields reset.", "info", update=True)
         await self.controls.project_name_input.focus()
 
-    async def on_reset(self, _: ft.ControlEvent) -> None:
+    async def on_reset(self, e: ft.ControlEvent) -> None:
         """Handle Reset button click — shows confirmation dialog first."""
 
         async def do_reset(_):
@@ -610,7 +610,7 @@ class BuildHandlersMixin:
             else:
                 await self.on_exit(e)
 
-    async def on_exit(self, _: ft.ControlEvent) -> None:
+    async def on_exit(self, e: ft.ControlEvent) -> None:
         """Handle Exit button click — shows confirmation dialog first."""
 
         async def do_exit(_):

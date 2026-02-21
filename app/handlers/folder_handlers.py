@@ -215,7 +215,7 @@ class FolderHandlersMixin:
 
         return current, path[-1]
 
-    async def on_add_folder(self, _: ft.ControlEvent) -> None:
+    async def on_add_folder(self, e: ft.ControlEvent) -> None:
         """Handle Add Folder button click.
 
         Opens dialog to add a folder or file at a selected location.
@@ -297,7 +297,7 @@ class FolderHandlersMixin:
         self.state.active_dialog = close_dialog
         self.page.update()
 
-    async def on_remove_folder(self, _: ft.ControlEvent) -> None:
+    async def on_remove_folder(self, e: ft.ControlEvent) -> None:
         """Handle Remove Folder button click.
 
         Removes the currently selected folder or file from state.

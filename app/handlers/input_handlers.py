@@ -17,7 +17,7 @@ class InputHandlersMixin:
     Expects HandlerBase helpers available via self.
     """
 
-    async def on_copy_path(self, _: ft.ControlEvent) -> None:
+    async def on_copy_path(self, e: ft.ControlEvent) -> None:
         """Copy the full project path (base + name) to the system clipboard."""
         full_path = str(Path(self.state.project_path) / self.state.project_name)
         _clipboard_errors = (FileNotFoundError, subprocess.CalledProcessError)
@@ -36,7 +36,7 @@ class InputHandlersMixin:
         except _clipboard_errors:
             self._set_status("Could not copy to clipboard.", "error", update=True)
 
-    async def on_browse_click(self, _: ft.ControlEvent) -> None:
+    async def on_browse_click(self, e: ft.ControlEvent) -> None:
         """Handle the Browse button click.
 
         Opens a directory picker dialog and updates the project path.
@@ -135,7 +135,7 @@ class InputHandlersMixin:
         self.page.title = f"UV Forge — {name}" if self.state.name_valid else "UV Forge"
         self.page.update()
 
-    async def on_check_pypi(self, _: ft.ControlEvent) -> None:
+    async def on_check_pypi(self, e: ft.ControlEvent) -> None:
         """Check PyPI availability for the current project name."""
         name = self.state.project_name
         if not name or not self.state.name_valid:
