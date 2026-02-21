@@ -23,7 +23,7 @@ Key capabilities:
 ```bash
 uv run uv-forge              # Via entry point
 python app/main.py            # Direct execution
-uv run pytest                 # Run 593+ tests (coverage automatic)
+uv run pytest                 # Run 619+ tests (coverage automatic)
 uv run ruff check app         # Lint app/ (runs automatically on commit)
 uv run ruff format app        # Auto-format app/
 ```
@@ -47,6 +47,7 @@ app/
 │   ├── async_executor.py    # AsyncExecutor.run() — ThreadPoolExecutor wrapper
 │   ├── settings_manager.py  # AppSettings, load/save to platformdirs JSON
 │   ├── history_manager.py   # ProjectHistoryEntry, load/save/add_to_history — recent projects JSON
+│   ├── preset_manager.py   # ProjectPreset, load/save/add/delete presets — named project config presets
 │   └── logging_config.py    # Loguru setup: console + file handlers with rotation
 ├── handlers/
 │   ├── ui_handler.py         # Handlers class (mixin composition) + attach_handlers() wiring
@@ -55,15 +56,15 @@ app/
 │   ├── option_handlers.py    # OptionHandlersMixin — checkboxes, dialogs, template loading/merging
 │   ├── folder_handlers.py    # FolderHandlersMixin — folder tree display and management
 │   ├── package_handlers.py   # PackageHandlersMixin — package list display and management
-│   ├── build_handlers.py     # BuildHandlersMixin — build, reset, exit, keyboard shortcuts, history restore
-│   ├── feature_handlers.py   # FeatureHandlersMixin — theme toggle, help, git cheat sheet, about, settings, log viewer, history
+│   ├── build_handlers.py     # BuildHandlersMixin — build, reset, exit, keyboard shortcuts, history restore, preset apply/save
+│   ├── feature_handlers.py   # FeatureHandlersMixin — theme toggle, help, git cheat sheet, about, settings, log viewer, history, presets
 │   ├── project_builder.py    # build_project() orchestration — UV init, git, folders, packages
 │   ├── filesystem_handler.py # setup_app_structure(), folder creation, cleanup_on_error()
 │   ├── uv_handler.py         # run_uv_init(), install_package(), setup_virtual_env()
 │   ├── git_handler.py        # handle_git_init(), finalize_git_setup() — two-phase git setup
 ├── ui/
 │   ├── components.py         # Controls class + build_main_view(page, state); appbar overflow menu
-│   ├── dialogs.py            # 12 dialog functions + 5 shared helpers; all theme-aware via is_dark_mode
+│   ├── dialogs.py            # 13 dialog functions + 5 shared helpers; all theme-aware via is_dark_mode
 │   ├── dialog_data.py        # Framework/project type categories, checkbox labels — dialog display metadata
 │   ├── theme_manager.py      # get_theme_colors() singleton
 │   └── ui_config.py          # UI constants (colors, sizes)
@@ -161,9 +162,10 @@ Files use `{{project_name}}` placeholders, substituted at build time with a norm
 - **About dialog** (`feature_handlers.py`): Loads `ABOUT.md` with app info, tech stack, features. Supports `app://` internal links — clicking `[Help](app://help)` or `[Git Cheat Sheet](app://git-cheat-sheet)` closes the About dialog and opens the target dialog directly. The `_create_markdown_dialog()` helper accepts an optional `on_internal_link` callback for this.
 - **Settings system** (`settings_manager.py`): `AppSettings` dataclass loaded from `platformdirs.user_data_dir("UV Forge")/settings.json`. Persists default project path, GitHub root, Python version, preferred IDE, git default, default author name/email, and post-build command settings. Threaded into `AppState` at startup; settings dialog allows live editing.
 - **Project metadata** (`feature_handlers.py`, `dialogs.py`, `uv_handler.py`): "Project Metadata..." button in Set Options opens a dialog for author name, email, description, and license (SPDX). Author name/email default from settings and persist across resets. On build, `configure_pyproject()` modifies the UV-generated `pyproject.toml` to set `authors`, `description`, and `license` fields via targeted line replacement. `LICENSE_TYPES` list in `constants.py`. Metadata summary text shows "Author | License" next to the button.
-- **AppBar overflow menu** (`components.py`): Only the theme toggle is a direct appbar action. All other actions (Recent Projects, Settings, Help, Git Cheat Sheet, View Logs, About) are `PopupMenuItem`s inside a `PopupMenuButton` overflow menu (⋮). Handler attachment uses `controls.*_menu_item.on_click` instead of `controls.*_button.on_click`.
+- **AppBar overflow menu** (`components.py`): Only the theme toggle is a direct appbar action. All other actions (Recent Projects, Presets, Settings, Help, Git Cheat Sheet, View Logs, About) are `PopupMenuItem`s inside a `PopupMenuButton` overflow menu (⋮). Handler attachment uses `controls.*_menu_item.on_click` instead of `controls.*_button.on_click`.
 - **Log viewer** (`feature_handlers.py`, `dialogs.py`): Overflow menu item reads today's log file (`PROJECT_DIR/logs/app_{date}.log`). Log lines are parsed into coloured segments (timestamp, level, location, message) with level-based colouring. Location segments (e.g., `app.core.state:load:42`) are clickable — hover shows underline, click opens the source file at that line in the user's preferred IDE via URL schemes (`vscode://file/...`, `cursor://`, `zed://`). Falls back to CLI commands on non-macOS. `__main__` module is resolved to `app/main.py`.
 - **Recent projects history** (`history_manager.py`): `ProjectHistoryEntry` dataclass stored in `SETTINGS_DIR/recent_projects.json` (reuses `platformdirs` path from `settings_manager`). Saves after each successful build; capped at 5 entries, deduped by name+path. History dialog shows tappable rows with project name, path, timestamp, framework/project type badges, and package count. "Restore" populates all state fields and UI controls directly (folders set as-is, no template reload). `clear_history()` empties the file.
+- **Project presets** (`preset_manager.py`, `build_handlers.py`, `feature_handlers.py`, `dialogs.py`): Named project configuration presets that save a full setup (framework, project type, packages, dev packages, folders, metadata) for one-click reuse. `ProjectPreset` dataclass stored in `SETTINGS_DIR/presets.json`. No entry cap (unlike history's 5-limit); deduped by name. Overflow menu → "Presets" opens a dialog with: (1) save section at top — text field + "Save Current" button snapshots current state, (2) scrollable preset list below — click to select, then "Apply" or "Delete". Apply populates all config state and UI controls (like history restore) but skips project name/path. Delete removes the preset in-place without closing the dialog — uses Flet's mutable `.controls` list + `.update()` pattern to re-render the list column. Preset rows show name, timestamp, Python version/git/starter file details, framework/project type badges, and package counts (including dev).
 - **Post-build script hook** (`build_handlers.py`, `settings_manager.py`, `dialogs.py`): Configurable shell command that runs automatically after a successful build. Settings stores `post_build_command` (the command string), `post_build_command_enabled` (default on/off), and `post_build_packages` (comma-separated packages required by the command, e.g., `pre-commit`). The Confirm Build dialog shows a "Run post-build command" checkbox (default from settings) with an editable command field — users can override per-build. When enabled, required packages are auto-merged into the build's package list via `_collect_state_packages()` and appear in the Packages display. The command runs via `subprocess.run(shell=True, timeout=30)` after build success but before open actions. Output is logged via loguru; snackbar shows success/failure summary.
 - **Dev dependency groups** (`state.py`, `package_handlers.py`, `uv_handler.py`, `project_builder.py`): Packages can be marked as dev dependencies via a checkbox in the Add Packages dialog or by selecting a package and clicking "Toggle Dev". `AppState.dev_packages: set[str]` tracks dev package names. During build, `_collect_packages_to_install()` splits packages into `(runtime, dev)` tuples; dev packages are installed with `uv add --dev`, producing a `[dependency-groups]` section in `pyproject.toml`. The package display shows an amber "dev" badge next to dev packages. Dev status is preserved across template reloads and persisted in project history.
 - **Two-phase git setup** (if git enabled):
@@ -187,7 +189,7 @@ Ruff is configured in `pyproject.toml` and enforced via a git pre-commit hook (`
 
 ## Development Guidelines
 
-- **Run `uv run pytest` before committing** — 593 tests, coverage automatic
+- **Run `uv run pytest` before committing** — 619 tests, coverage automatic
 - **Ruff runs automatically on commit** via pre-commit hook — fix any errors before committing
 - **Add tests** in `tests/core/`, `tests/handlers/`, or `tests/utils/` for new functionality
 - **Use `wrap_async()` for new async handlers** wrapping coroutines for Flet callbacks

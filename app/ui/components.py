@@ -101,6 +101,7 @@ class Controls:
         self.git_cheat_sheet_menu_item: ft.PopupMenuItem
         self.settings_menu_item: ft.PopupMenuItem
         self.history_menu_item: ft.PopupMenuItem
+        self.presets_menu_item: ft.PopupMenuItem
         self.log_viewer_menu_item: ft.PopupMenuItem
         self.overflow_menu: ft.PopupMenuButton
         self.theme_toggle_button: ft.IconButton
@@ -174,6 +175,10 @@ def create_controls(state: AppState, colors: dict) -> Controls:
         icon=ft.Icons.HISTORY,
         content=ft.Text("Recent Projects"),
     )
+    controls.presets_menu_item = ft.PopupMenuItem(
+        icon=ft.Icons.BOOKMARK_OUTLINE,
+        content=ft.Text("Presets"),
+    )
     controls.settings_menu_item = ft.PopupMenuItem(
         icon=ft.Icons.SETTINGS,
         content=ft.Text("Settings"),
@@ -201,6 +206,7 @@ def create_controls(state: AppState, colors: dict) -> Controls:
         tooltip="More options",
         items=[
             controls.history_menu_item,
+            controls.presets_menu_item,
             controls.settings_menu_item,
             ft.PopupMenuItem(),  # Divider
             controls.help_menu_item,

@@ -159,6 +159,36 @@ Click **Clear History** to remove all saved entries.
 
 History is stored alongside settings in `~/Library/Application Support/UV Forge/recent_projects.json` (platform-appropriate location via `platformdirs`).
 
+## Presets
+
+Open from the **⋮** overflow menu in the app bar → **Presets**. Presets let you save a full project configuration as a named template for one-click reuse.
+
+### Saving a Preset
+Enter a name in the text field at the top of the dialog and click **Save Current**. This captures your current configuration:
+- Python version, git, and starter files settings
+- UI framework and project type selections
+- Folder structure (as-is, no template reload on apply)
+- All packages (including dev dependencies)
+- Project metadata (author, email, description, license)
+
+Saving with an existing name overwrites the previous preset.
+
+### Applying a Preset
+Click a preset in the list to select it, then click **Apply**. This populates all configuration fields and UI controls — your project name and path are left unchanged so you can apply the same stack to different projects.
+
+### Deleting a Preset
+Select a preset and click **Delete**. The preset is removed from the list immediately — the dialog stays open so you can continue managing your presets.
+
+Each preset displays:
+- **Preset name** and save timestamp
+- **Configuration details** (Python version, git, starter files)
+- **Framework / project type badges** (if applicable)
+- **Package count** (including dev packages in amber)
+
+There is no limit on the number of presets you can save.
+
+Presets are stored alongside settings in `~/Library/Application Support/UV Forge/presets.json` (platform-appropriate location via `platformdirs`).
+
 ## Log Viewer
 
 Open from the **⋮** overflow menu in the app bar → **View Logs**. It displays today's application log with colour-coded entries:
@@ -184,7 +214,7 @@ Log files are stored in the `logs/` directory and rotate daily. The viewer alway
 
 - **Reset Button** (`⌘R`) - Restore all settings to defaults (preserves dark/light mode preference)
 - **Theme Toggle** - Click the sun/moon icon in the app bar to switch between light and dark mode
-- **Overflow Menu** (⋮) - Access Help, Settings, Recent Projects, Git Cheat Sheet, View Logs, and About from the app bar menu
+- **Overflow Menu** (⋮) - Access Help, Settings, Recent Projects, Presets, Git Cheat Sheet, View Logs, and About from the app bar menu
 - **Real-time Validation** - The app shows validation status with ✓ (valid) and ✗ (invalid) icons
 - **Warning Banner** - Any issues are displayed below the project name field
 - **Status Messages** - See what's happening in the status bar during build

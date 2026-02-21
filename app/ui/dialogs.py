@@ -2510,3 +2510,351 @@ def create_history_dialog(
     )
 
     return dialog
+
+
+def create_presets_dialog(
+    presets: list,
+    on_apply_callback: collections.abc.Callable,
+    on_save_callback: collections.abc.Callable,
+    on_close_callback: collections.abc.Callable,
+    on_delete_callback: collections.abc.Callable,
+    is_dark_mode: bool,
+) -> ft.AlertDialog:
+    """Create a dialog for managing project presets.
+
+    The dialog has two sections: a save field at the top for saving
+    the current configuration as a named preset, and a scrollable list
+    of existing presets below that can be selected, applied, or deleted.
+
+    Args:
+        presets: List of ProjectPreset objects, newest first.
+        on_apply_callback: Callback receiving the selected preset on apply.
+        on_save_callback: Callback receiving the preset name string on save.
+        on_close_callback: Callback when Cancel is clicked or dialog dismissed.
+        on_delete_callback: Callback receiving the selected preset on delete.
+        is_dark_mode: Whether dark mode is active.
+
+    Returns:
+        Configured AlertDialog for managing project presets.
+    """
+    colors = get_theme_colors(is_dark_mode)
+    selected_index: dict[str, int | None] = {"value": None}
+    row_containers: list[ft.Container] = []
+
+    # Empty state widget — shown when all presets are deleted
+    empty_state = ft.Column(
+        [
+            ft.Icon(ft.Icons.BOOKMARK_OUTLINE, size=48, color=ft.Colors.GREY_500),
+            ft.Text(
+                "No saved presets",
+                size=16,
+                color=ft.Colors.GREY_500,
+                text_align=ft.TextAlign.CENTER,
+            ),
+            ft.Text(
+                "Save your current configuration using the field above.",
+                size=13,
+                color=ft.Colors.GREY_600,
+                text_align=ft.TextAlign.CENTER,
+            ),
+        ],
+        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+        spacing=8,
+    )
+
+    # The scrollable column that holds preset rows (or empty state).
+    # Keeping a reference lets _on_delete swap content in-place.
+    list_column = ft.Column(spacing=6, scroll=ft.ScrollMode.AUTO)
+
+    def _highlight(idx: int) -> None:
+        for i, container in enumerate(row_containers):
+            if i == idx:
+                container.bgcolor = (
+                    ft.Colors.BLUE_900 if is_dark_mode else ft.Colors.BLUE_100
+                )
+                container.border = ft.Border.all(1, ft.Colors.BLUE_400)
+            else:
+                container.bgcolor = None
+                container.border = ft.Border.all(
+                    1, ft.Colors.GREY_700 if is_dark_mode else ft.Colors.GREY_300
+                )
+
+    def _on_row_click(idx: int):
+        def handler(_):
+            selected_index["value"] = idx
+            _highlight(idx)
+            apply_btn.disabled = False
+            delete_btn.disabled = False
+            for c in row_containers:
+                c.update()
+            apply_btn.update()
+            delete_btn.update()
+
+        return handler
+
+    def _on_apply(_):
+        idx = selected_index["value"]
+        if idx is not None and idx < len(presets):
+            on_apply_callback(presets[idx])
+
+    def _on_delete(_):
+        """Remove the selected preset and update the list in-place.
+
+        Flet pattern: mutate the Column's .controls list, then call
+        .update() on it — the UI re-renders without closing the dialog.
+        """
+        idx = selected_index["value"]
+        if idx is None or idx >= len(presets):
+            return
+
+        # Persist deletion via the callback
+        on_delete_callback(presets[idx])
+
+        # Remove from data and UI
+        presets.pop(idx)
+        row_containers.pop(idx)
+
+        # Reassign on_click handlers so indices stay correct
+        for new_idx, container in enumerate(row_containers):
+            container.on_click = _on_row_click(new_idx)
+
+        # Reset selection
+        selected_index["value"] = None
+        apply_btn.disabled = True
+        delete_btn.disabled = True
+
+        if row_containers:
+            # Update the column with remaining rows
+            list_column.controls = list(row_containers)
+            list_container.height = min(len(row_containers) * 80, 320)
+        else:
+            # Swap to empty state — replace the column content
+            list_column.controls = [empty_state]
+            list_column.scroll = None
+            list_container.height = None
+            # Hide action buttons when no presets remain
+            apply_btn.visible = False
+            delete_btn.visible = False
+
+        list_container.update()
+        apply_btn.update()
+        delete_btn.update()
+
+    def _on_save(_):
+        name = name_field.value.strip() if name_field.value else ""
+        if name:
+            on_save_callback(name)
+
+    # Save section
+    name_field = ft.TextField(
+        hint_text="Preset name...",
+        expand=True,
+        border_color=ft.Colors.GREY_600,
+        focused_border_color=ft.Colors.BLUE_400,
+        on_submit=_on_save,
+    )
+    save_btn = ft.FilledButton(
+        "Save Current",
+        icon=ft.Icons.SAVE_OUTLINED,
+        on_click=_on_save,
+        style=ft.ButtonStyle(
+            bgcolor={
+                ft.ControlState.DEFAULT: ft.Colors.GREEN_700,
+                ft.ControlState.HOVERED: ft.Colors.GREEN_600,
+                ft.ControlState.PRESSED: ft.Colors.GREEN_800,
+            },
+        ),
+    )
+    save_section = ft.Container(
+        content=ft.Column(
+            [
+                ft.Text(
+                    "Save current configuration as a preset:",
+                    size=13,
+                    color=ft.Colors.GREY_400 if is_dark_mode else ft.Colors.GREY_600,
+                ),
+                ft.Row([name_field, save_btn], spacing=8),
+            ],
+            spacing=6,
+            tight=True,
+        ),
+        padding=ft.Padding(left=0, top=0, right=0, bottom=12),
+        border=ft.Border(
+            bottom=ft.BorderSide(
+                1, ft.Colors.GREY_700 if is_dark_mode else ft.Colors.GREY_300
+            )
+        ),
+    )
+
+    # Action buttons
+    apply_btn = ft.FilledButton(
+        "Apply",
+        icon=ft.Icons.CHECK,
+        disabled=True,
+        on_click=_on_apply,
+        style=ft.ButtonStyle(
+            bgcolor={
+                ft.ControlState.DEFAULT: ft.Colors.BLUE_600,
+                ft.ControlState.FOCUSED: ft.Colors.BLUE_400,
+                ft.ControlState.HOVERED: ft.Colors.BLUE_500,
+                ft.ControlState.PRESSED: ft.Colors.BLUE_700,
+                ft.ControlState.DISABLED: ft.Colors.GREY_700,
+            },
+            side={
+                ft.ControlState.DEFAULT: ft.BorderSide(0, ft.Colors.TRANSPARENT),
+                ft.ControlState.FOCUSED: ft.BorderSide(2, ft.Colors.WHITE),
+            },
+        ),
+    )
+    delete_btn = ft.TextButton(
+        "Delete",
+        icon=ft.Icons.DELETE_OUTLINE,
+        disabled=True,
+        on_click=_on_delete,
+        style=ft.ButtonStyle(color=ft.Colors.RED_400),
+    )
+
+    # Preset list
+    if not presets:
+        list_column.controls = [empty_state]
+        list_column.scroll = None
+    else:
+        for i, preset in enumerate(presets):
+            badges = []
+            if preset.ui_project_enabled and preset.framework:
+                badges.append(preset.framework)
+            if preset.other_project_enabled and preset.project_type:
+                badges.append(preset.project_type)
+
+            badge_row = []
+            for badge_text in badges:
+                badge_row.append(
+                    ft.Container(
+                        content=ft.Text(badge_text, size=11, color=ft.Colors.WHITE),
+                        bgcolor=ft.Colors.BLUE_700,
+                        border_radius=4,
+                        padding=ft.Padding.symmetric(horizontal=6, vertical=2),
+                    )
+                )
+            if preset.packages:
+                pkg_count = len(preset.packages)
+                badge_row.append(
+                    ft.Text(
+                        f"{pkg_count} pkg{'s' if pkg_count != 1 else ''}",
+                        size=11,
+                        color=ft.Colors.GREY_500,
+                        italic=True,
+                    )
+                )
+            if preset.dev_packages:
+                dev_count = len(preset.dev_packages)
+                badge_row.append(
+                    ft.Text(
+                        f"{dev_count} dev",
+                        size=11,
+                        color=ft.Colors.AMBER_400,
+                        italic=True,
+                    )
+                )
+
+            # Parse saved_at for display
+            try:
+                dt = __import__("datetime").datetime.fromisoformat(preset.saved_at)
+                time_str = dt.strftime("%b %d, %H:%M")
+            except ValueError, AttributeError:
+                time_str = preset.saved_at[:16] if preset.saved_at else ""
+
+            # Build details line
+            details = []
+            if preset.python_version:
+                details.append(f"Python {preset.python_version}")
+            if preset.git_enabled:
+                details.append("Git")
+            if preset.include_starter_files:
+                details.append("Starter files")
+            details_text = " · ".join(details)
+
+            row = ft.Container(
+                content=ft.Column(
+                    [
+                        ft.Row(
+                            [
+                                ft.Text(
+                                    preset.name,
+                                    weight=ft.FontWeight.W_600,
+                                    size=14,
+                                    color=colors["main_title"],
+                                    expand=True,
+                                ),
+                                ft.Text(
+                                    time_str,
+                                    size=11,
+                                    color=ft.Colors.GREY_500,
+                                ),
+                            ],
+                        ),
+                        ft.Text(
+                            details_text,
+                            size=12,
+                            color=ft.Colors.GREY_500,
+                        ),
+                        ft.Row(badge_row, spacing=6) if badge_row else ft.Container(),
+                    ],
+                    spacing=2,
+                    tight=True,
+                ),
+                border=ft.Border.all(
+                    1, ft.Colors.GREY_700 if is_dark_mode else ft.Colors.GREY_300
+                ),
+                border_radius=6,
+                padding=10,
+                on_click=_on_row_click(i),
+                ink=True,
+            )
+            row_containers.append(row)
+
+        list_column.controls = list(row_containers)
+
+    # Wrap list_column in a container so we can adjust height on delete
+    list_container = ft.Container(
+        content=list_column,
+        height=min(len(presets) * 80, 320) if presets else None,
+        padding=ft.Padding(left=0, top=20, right=0, bottom=20) if not presets else None,
+    )
+
+    content = ft.Container(
+        content=ft.Column(
+            [save_section, list_container],
+            spacing=12,
+            tight=True,
+        ),
+        width=500,
+        padding=UIConfig.DIALOG_CONTENT_PADDING,
+    )
+
+    cancel_bg_focused = ft.Colors.GREY_700 if is_dark_mode else ft.Colors.GREY_300
+    cancel_btn = ft.OutlinedButton(
+        "Cancel",
+        on_click=on_close_callback,
+        style=ft.ButtonStyle(
+            bgcolor={
+                ft.ControlState.DEFAULT: ft.Colors.TRANSPARENT,
+                ft.ControlState.FOCUSED: cancel_bg_focused,
+                ft.ControlState.HOVERED: cancel_bg_focused,
+            },
+            side={
+                ft.ControlState.DEFAULT: ft.BorderSide(1, ft.Colors.GREY_500),
+                ft.ControlState.FOCUSED: ft.BorderSide(2, ft.Colors.WHITE),
+            },
+        ),
+    )
+
+    actions = [delete_btn, apply_btn, cancel_btn] if presets else [cancel_btn]
+
+    return ft.AlertDialog(
+        modal=True,
+        title=_create_dialog_title("Presets", colors, icon=ft.Icons.BOOKMARK_OUTLINE),
+        content=content,
+        actions=actions,
+        actions_alignment=ft.MainAxisAlignment.END,
+    )

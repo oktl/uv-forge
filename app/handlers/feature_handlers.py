@@ -15,6 +15,7 @@ from app.core.constants import (
     SUPPORTED_IDES,
 )
 from app.core.history_manager import clear_history, load_history
+from app.core.preset_manager import delete_preset, load_presets
 from app.core.settings_manager import save_settings
 from app.ui.dialogs import (
     create_about_dialog,
@@ -23,6 +24,7 @@ from app.ui.dialogs import (
     create_history_dialog,
     create_log_viewer_dialog,
     create_metadata_dialog,
+    create_presets_dialog,
     create_settings_dialog,
 )
 from app.ui.theme_manager import get_theme_colors
@@ -290,6 +292,45 @@ For more information, visit: https://docs.astral.sh/uv/
 
         self.page.overlay.append(history_dialog)
         history_dialog.open = True
+        self.state.active_dialog = close_dialog
+        self.page.update()
+
+    async def on_presets_click(self, _: ft.ControlEvent) -> None:
+        """Handle Presets menu item click.
+
+        Opens a dialog for saving the current configuration as a named
+        preset, and for browsing/applying/deleting existing presets.
+        """
+        presets = load_presets()
+
+        def close_dialog(_=None):
+            presets_dialog.open = False
+            self.state.active_dialog = None
+            self.page.update()
+
+        def on_apply(preset):
+            close_dialog()
+            self._apply_preset(preset)
+
+        def on_save(name):
+            self._save_current_as_preset(name)
+            close_dialog()
+            self._show_snackbar(f"Preset saved: {name}")
+
+        def on_delete(preset):
+            delete_preset(preset.name)
+
+        presets_dialog = create_presets_dialog(
+            presets=presets,
+            on_apply_callback=on_apply,
+            on_save_callback=on_save,
+            on_close_callback=close_dialog,
+            on_delete_callback=on_delete,
+            is_dark_mode=self.state.is_dark_mode,
+        )
+
+        self.page.overlay.append(presets_dialog)
+        presets_dialog.open = True
         self.state.active_dialog = close_dialog
         self.page.update()
 

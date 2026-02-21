@@ -15,6 +15,7 @@ from app.core.constants import (
 )
 from app.core.history_manager import add_to_history, make_history_entry
 from app.core.models import BuildSummaryConfig, ProjectConfig
+from app.core.preset_manager import add_preset, make_preset
 from app.core.validator import validate_project_name
 from app.handlers.handler_base import wrap_async
 from app.handlers.project_builder import build_project
@@ -334,6 +335,111 @@ class BuildHandlersMixin:
 
         self._show_snackbar(f"Restored: {entry.project_name}")
         self.page.update()
+
+    def _apply_preset(self, preset) -> None:
+        """Populate state and UI controls from a preset.
+
+        Like _restore_from_history but skips project_name and project_path,
+        since those are per-project and not part of a preset.
+
+        Args:
+            preset: A ProjectPreset with the saved configuration.
+        """
+        self.state.python_version = preset.python_version
+        self.state.git_enabled = preset.git_enabled
+        self.state.include_starter_files = preset.include_starter_files
+        self.state.ui_project_enabled = preset.ui_project_enabled
+        self.state.framework = preset.framework
+        self.state.other_project_enabled = preset.other_project_enabled
+        self.state.project_type = preset.project_type
+        self.state.folders = list(preset.folders)
+        self.state.packages = list(preset.packages)
+        self.state.dev_packages = set(getattr(preset, "dev_packages", []))
+
+        # Metadata
+        self.state.author_name = getattr(preset, "author_name", "")
+        self.state.author_email = getattr(preset, "author_email", "")
+        self.state.description = getattr(preset, "description", "")
+        self.state.license_type = getattr(preset, "license_type", "")
+
+        # Update UI controls
+        self.controls.python_version_dropdown.value = preset.python_version
+        self.controls.create_git_checkbox.value = preset.git_enabled
+        self.controls.include_starter_files_checkbox.value = (
+            preset.include_starter_files
+        )
+        self.controls.ui_project_checkbox.value = preset.ui_project_enabled
+        self.controls.other_projects_checkbox.value = preset.other_project_enabled
+
+        # Update checkbox labels
+        if preset.ui_project_enabled and preset.framework:
+            self.controls.ui_project_checkbox.label = (
+                f"UI Framework: {preset.framework}"
+            )
+        else:
+            self.controls.ui_project_checkbox.label = UI_PROJECT_CHECKBOX_LABEL
+
+        if preset.other_project_enabled and preset.project_type:
+            self.controls.other_projects_checkbox.label = (
+                f"Project Type: {preset.project_type}"
+            )
+        else:
+            self.controls.other_projects_checkbox.label = OTHER_PROJECT_CHECKBOX_LABEL
+
+        # Style checkboxes
+        for cb in (
+            self.controls.create_git_checkbox,
+            self.controls.include_starter_files_checkbox,
+            self.controls.ui_project_checkbox,
+            self.controls.other_projects_checkbox,
+        ):
+            self._style_selected_checkbox(cb)
+
+        # Update metadata summary
+        self._update_metadata_summary()
+        has_metadata = any(
+            [
+                self.state.author_name,
+                self.state.author_email,
+                self.state.description,
+                self.state.license_type,
+            ]
+        )
+        self.controls.metadata_checkbox.value = has_metadata
+        self._style_selected_checkbox(self.controls.metadata_checkbox)
+
+        # Refresh displays
+        self._update_folder_display()
+        self._update_package_display()
+        self._update_build_button_state()
+
+        self._show_snackbar(f"Preset applied: {preset.name}")
+        self.page.update()
+
+    def _save_current_as_preset(self, name: str) -> None:
+        """Save the current state as a named preset.
+
+        Args:
+            name: User-given label for the preset.
+        """
+        preset = make_preset(
+            name=name,
+            python_version=self.state.python_version,
+            git_enabled=self.state.git_enabled,
+            include_starter_files=self.state.include_starter_files,
+            ui_project_enabled=self.state.ui_project_enabled,
+            framework=self.state.framework,
+            other_project_enabled=self.state.other_project_enabled,
+            project_type=self.state.project_type,
+            folders=self.state.folders,
+            packages=self.state.packages,
+            dev_packages=list(self.state.dev_packages),
+            author_name=self.state.author_name,
+            author_email=self.state.author_email,
+            description=self.state.description,
+            license_type=self.state.license_type,
+        )
+        add_preset(preset)
 
     async def on_build_project(self, _: ft.ControlEvent) -> None:
         """Handle Build Project button click.
