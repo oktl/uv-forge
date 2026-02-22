@@ -7,7 +7,6 @@
       "subfolders": [
         "experiments",
         "notes",
-        "scratch",
         "screens"
       ]
     },
@@ -22,32 +21,19 @@
       ]
     },
     {
-      "name": "config",
-      "files": [
-        "config.py",
-        "constants.py" ,
-        "logger.py"
-      ]
-    },
-    {
       "name": "core",
       "files": [
-        "state.py",
-        "state_validator.py",
-        "ui_state_sync.py"
+        "async_executor.py",
+        "constants.py",
+        "logging_config.py",
+        "state.py"
       ]
       },
     {
       "name": "handlers",
       "files": [
-        "button_state.py",
-        "event_handlers.py",
-        "handler_factory.py"
-      ]
-    },
-    {
-      "name": "services",
-      "files": [
+        "handler_base",
+        "ui_handler.py"
       ]
     },
     {
