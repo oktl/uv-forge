@@ -654,7 +654,7 @@ def create_app_bars(page: ft.Page, controls: Controls, colors: dict) -> None:
     """
     page.appbar = ft.AppBar(
         title=ft.Text(
-            "Create New Project with UV",
+            "Forge a New Project with uv",
             size=UIConfig.APPBAR_TITLE_SIZE,
             color=colors["main_title"],
         ),
@@ -690,6 +690,12 @@ def create_layout(controls: Controls) -> ft.Column:
     """
     return ft.Column(
         controls=[
+            ft.Image(
+                src="images/badge.png",
+                # width=100,
+                # height=100,
+                # fit=ft.BoxFit.CONTAIN,
+            ),
             ft.Container(height=UIConfig.VSPACE_SMALL),  # Spacer
             controls.section_containers[0],  # Set Project Path and Name
             controls.section_containers[1],  # Set Options

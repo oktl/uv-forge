@@ -56,7 +56,7 @@ class ThemeManager:
                 "section_title": ft.Colors.BLUE_GREY_300,
                 "section_border": ft.Colors.BLUE_GREY_700,
                 "status_default": ft.Colors.GREY_400,
-                "main_title": ft.Colors.BLUE_300,
+                "main_title": ft.Colors.BLUE_600,
                 "bottom_bar": ft.Colors.BLUE_GREY_900,
             }
         return {
