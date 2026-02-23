@@ -30,3 +30,7 @@ Thumbs.db
 # IDE
 .vscode/
 
+# AI files
+.claude/
+CLAUDE.md
+
