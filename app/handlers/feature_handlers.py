@@ -347,8 +347,11 @@ For more information, visit: https://docs.astral.sh/uv/
         """Handle Project Metadata checkbox toggle.
 
         Always opens the metadata dialog. On save, keeps the checkbox checked.
-        On cancel with no metadata set, unchecks the checkbox.
+        On cancel, restores the checkbox to its state before the dialog opened.
         """
+        # on_change fires with the new value; capture what it was before the click
+        prev_checked = not e.control.value
+        save_called = [False]
         e.control.value = True
         self._style_selected_checkbox(e.control)
         self.page.update()
@@ -356,20 +359,14 @@ For more information, visit: https://docs.astral.sh/uv/
         def close_dialog(_=None):
             metadata_dialog.open = False
             self.state.active_dialog = None
-            # Uncheck if no metadata has been saved
-            has_metadata = any(
-                [
-                    self.state.author_name,
-                    self.state.author_email,
-                    self.state.description,
-                    self.state.license_type,
-                ]
-            )
-            self.controls.metadata_checkbox.value = has_metadata
-            self._style_selected_checkbox(self.controls.metadata_checkbox)
+            if not save_called[0]:
+                # User cancelled — restore checkbox to pre-dialog state
+                self.controls.metadata_checkbox.value = prev_checked
+                self._style_selected_checkbox(self.controls.metadata_checkbox)
             self.page.update()
 
         def on_save(author_name, author_email, description, license_type):
+            save_called[0] = True
             self.state.author_name = author_name
             self.state.author_email = author_email
             self.state.description = description

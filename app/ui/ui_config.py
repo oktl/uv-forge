@@ -54,13 +54,18 @@ class UIConfig:
     SECTION_TITLE_SIZE = 16
     APPBAR_TITLE_SIZE = 14
     APPBAR_TOOLBAR_HEIGHT = 30
-    SECTION_WIDTH = 700
+    SECTION_WIDTH = 780  # Project Structure section (right column)
+    LEFT_SECTION_WIDTH = 520  # Path and Options sections (left column)
     SPLIT_CONTAINER_WIDTH = (
-        300  # fits two containers + 8px gap within SECTION_WIDTH border/padding
+        350  # fits two containers + gap within SECTION_WIDTH border/padding
     )
-    SUBFOLDERS_HEIGHT = 160
+    SUBFOLDERS_HEIGHT = 410
+    STRUCTURE_DIVIDER_HEIGHT = 540  # vertical divider between folder/package columns
     BUTTON_WIDTH_BUILD = 300
     BUTTON_WIDTH_ACTION = 110  # Reset and Exit buttons
+    BUTTON_WIDTH_STRUCTURE = (
+        170  # folder/package split-panel buttons (two per row in 350px container)
+    )
 
     # Folder Tree Display
     FOLDER_TREE_INDENT_PX = 14  # pixels per indent level

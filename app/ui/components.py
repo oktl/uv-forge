@@ -117,7 +117,10 @@ class Controls:
 
 
 def create_section_box(
-    title: str, content: list[ft.Control], is_dark: bool = False
+    title: str,
+    content: list[ft.Control],
+    is_dark: bool = False,
+    width: int = UIConfig.SECTION_WIDTH,
 ) -> tuple[ft.Container, ft.Text]:
     """Create a bordered section with a title and content.
 
@@ -125,6 +128,7 @@ def create_section_box(
         title: Section heading text.
         content: List of Flet controls to display inside the section.
         is_dark: Whether dark mode is active (default False).
+        width: Width of the section container (default SECTION_WIDTH).
 
     Returns:
         Tuple of (container, title_text) for theme update access.
@@ -148,7 +152,7 @@ def create_section_box(
         border=ft.Border.all(UIConfig.BORDER_WIDTH_THIN, colors["section_border"]),
         border_radius=UIConfig.BORDER_RADIUS_DEFAULT,
         padding=UIConfig.PADDING_SECTION,
-        width=UIConfig.SECTION_WIDTH,
+        width=width,
     )
     return container, title_text
 
@@ -341,12 +345,14 @@ def create_controls(state: AppState, colors: dict) -> Controls:
         "Add Folder/File",
         tooltip="Add a folder or file to the template\nlist in the display.\n\n⌘F / Ctrl+F",
         style=_split_btn_style,
+        width=UIConfig.BUTTON_WIDTH_STRUCTURE,
     )
 
     controls.remove_folder_button = ft.Button(
         "Remove Folder/File",
         tooltip="To remove folder or file from the displayed template\n click the folder or file in the display\nand then click this button.",
         style=_split_btn_style,
+        width=UIConfig.BUTTON_WIDTH_STRUCTURE,
     )
 
     # Package management controls
@@ -369,24 +375,28 @@ def create_controls(state: AppState, colors: dict) -> Controls:
         "Add Packages...",
         tooltip="Open dialog to add one or more packages to the install list.\n\n⌘P / Ctrl+P",
         style=_split_btn_style,
+        width=UIConfig.BUTTON_WIDTH_STRUCTURE,
     )
 
     controls.remove_package_button = ft.Button(
         "Remove Package",
         tooltip="Click a package in the list to select it,\nthen click Remove to delete it.",
         style=_split_btn_style,
+        width=UIConfig.BUTTON_WIDTH_STRUCTURE,
     )
 
     controls.clear_packages_button = ft.Button(
         "Clear Packages",
         tooltip="Remove all packages from the install list.",
         style=_split_btn_style,
+        width=UIConfig.BUTTON_WIDTH_STRUCTURE,
     )
 
     controls.toggle_dev_button = ft.Button(
         "Toggle Dev",
         tooltip="Toggle selected package between runtime and dev dependency.",
         style=_split_btn_style,
+        width=UIConfig.BUTTON_WIDTH_STRUCTURE,
     )
 
     # Metadata controls
@@ -491,6 +501,7 @@ def create_sections(controls: Controls, state: AppState) -> None:
             ),
         ],
         state.is_dark_mode,
+        width=UIConfig.LEFT_SECTION_WIDTH,
     )
     controls.section_containers.append(project_name_container)
     controls.section_titles.append(project_name_title)
@@ -565,6 +576,7 @@ def create_sections(controls: Controls, state: AppState) -> None:
             ),
         ],
         state.is_dark_mode,
+        width=UIConfig.LEFT_SECTION_WIDTH,
     )
     controls.section_containers.append(options_container)
     controls.section_titles.append(options_title)
@@ -611,7 +623,7 @@ def create_sections(controls: Controls, state: AppState) -> None:
                             width=UIConfig.BORDER_WIDTH_DEFAULT,
                             color=ft.Colors.GREY_700,
                         ),
-                        height=280,
+                        height=UIConfig.STRUCTURE_DIVIDER_HEIGHT,
                     ),
                     ft.Column(
                         controls=[
@@ -688,18 +700,30 @@ def create_layout(controls: Controls) -> ft.Column:
     Returns:
         The root Column control containing the complete UI layout.
     """
+    left_column = ft.Column(
+        controls=[
+            controls.section_containers[0],  # Set Project Path and Name
+            controls.section_containers[1],  # Set Options
+        ],
+        spacing=UIConfig.SPACING_SMALL,
+        alignment=ft.MainAxisAlignment.START,
+    )
+
     return ft.Column(
         controls=[
             ft.Image(
                 src="images/badge.png",
-                # width=100,
-                # height=100,
-                # fit=ft.BoxFit.CONTAIN,
             ),
             ft.Container(height=UIConfig.VSPACE_SMALL),  # Spacer
-            controls.section_containers[0],  # Set Project Path and Name
-            controls.section_containers[1],  # Set Options
-            controls.section_containers[2],  # Add or Remove Folders
+            ft.Row(
+                controls=[
+                    left_column,
+                    controls.section_containers[2],  # Project Structure
+                ],
+                spacing=UIConfig.SPACING_LARGE,
+                alignment=ft.MainAxisAlignment.CENTER,
+                vertical_alignment=ft.CrossAxisAlignment.START,
+            ),
             ft.Container(
                 content=ft.Row(
                     controls=[
