@@ -57,7 +57,7 @@ uv-forge
 ## Running from Source
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/oktl/uv-forge.git
 cd uv-forge
 uv run uv-forge        # Via entry point
 python app/main.py     # Direct execution
