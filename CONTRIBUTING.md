@@ -20,7 +20,7 @@ Thanks for your interest in contributing! UV Forge is a Flet desktop app for sca
 You'll need Python 3.12+, `uv`, and Git.
 
 ```bash
-git clone https://github.com/<your-fork>/uv-forge.git
+git clone https://github.com/oktl/uv-forge.git
 cd uv-forge
 uv run uv-forge        # Run the app
 uv run pytest          # Run the test suite (625 tests)
@@ -98,4 +98,4 @@ Small, focused PRs are much easier to review than large ones. If you're planning
 
 ## Questions?
 
-Open a [GitHub issue](https://github.com/your-repo/uv-forge/issues) — happy to help get you oriented.
+Open a [GitHub issue](https://github.com/oktl/uv-forge/issues) — happy to help get you oriented.
