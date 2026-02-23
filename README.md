@@ -211,4 +211,4 @@ uv run ruff format app     # Auto-format
 
 ## License
 
-MIT
+[PolyForm Noncommercial 1.0.0](LICENSE) — free for personal, educational, and noncommercial use. Commercial use is not permitted.
