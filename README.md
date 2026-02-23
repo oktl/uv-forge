@@ -209,6 +209,12 @@ uv run ruff format app     # Auto-format
 
 ---
 
+## Contributing
+
+Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on reporting bugs, adding templates, and submitting pull requests.
+
+---
+
 ## License
 
 [PolyForm Noncommercial 1.0.0](LICENSE) — free for personal, educational, and noncommercial use. Commercial use is not permitted.
