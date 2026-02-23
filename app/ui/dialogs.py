@@ -2272,8 +2272,10 @@ def create_settings_dialog(
                 ],
                 tight=True,
                 spacing=10,
+                scroll=ft.ScrollMode.AUTO,
             ),
             width=500,
+            height=800,
             padding=UIConfig.DIALOG_CONTENT_PADDING,
         ),
         actions=_create_dialog_actions(
