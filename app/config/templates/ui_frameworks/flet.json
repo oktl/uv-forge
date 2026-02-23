@@ -46,14 +46,13 @@
       ]
     },
     {
-      "name": "utils",
-      "files": [
-        "async_executor.py"     
-      ]
-    },
-    {
       "name": "tests",
       "root_level": true,
+      "subfolders": [
+        "core",
+        "handlers",
+        "ui"
+      ],
       "files": [
         "conftest.py",
         "test_app.py"
