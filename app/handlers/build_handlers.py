@@ -102,6 +102,10 @@ class BuildHandlersMixin:
                 subprocess.Popen(
                     ["open", "-a", IDE_MACOS_APP_NAMES[ide_name], str(project_path)]
                 )
+            elif sys.platform == "win32":
+                # On Windows, IDE launchers like 'code' are .cmd batch scripts
+                # and require shell=True to be resolved from PATH.
+                subprocess.Popen([command, str(project_path)], shell=True)
             else:
                 subprocess.Popen([command, str(project_path)])
         except FileNotFoundError:
