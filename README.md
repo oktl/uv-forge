@@ -6,7 +6,7 @@ Pick a UI framework or project type, (or both), configure your options, and UV F
 
 ---
 
-![](app/assets/images/looksliethis.png)
+![](app/assets/images/lookslikethis.png)
 
 ## ✨ Key Features
 
