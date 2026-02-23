@@ -1,8 +1,8 @@
 # 🛠️ UV Forge
 
-> UV Forge is a high-performance desktop application designed to "forge" Python projects using the uv package manager. It bridges the gap between powerful command-line tooling and a visual, intuitive workflow, allowing developers to scaffold production-ready environments in seconds.
+> UV Forge is a high-performance [Flet](https://flet.dev) desktop application designed to "forge" new Python projects using the [uv](https://docs.astral.sh/uv/) package manager. It bridges the gap between powerful command-line tooling and a visual, intuitive workflow, allowing developers to scaffold production-ready environments in seconds.  
 
-UV Forge is a [Flet](https://flet.dev) desktop application that scaffolds new Python projects using [uv](https://docs.astral.sh/uv/). Pick a UI framework or project type, (or both), configure your options, and UV Forge generates a fully wired project: folder structure, boilerplate files, package installation, virtual environment, git repo, and pyproject.toml — all in one click.
+Pick a UI framework or project type, (or both), configure your options, and UV Forge generates a fully wired project: folder structure, boilerplate files, package installation, virtual environment, git repo, and pyproject.toml — all in one click.
 
 ---
 
@@ -32,7 +32,7 @@ UV Forge is a [Flet](https://flet.dev) desktop application that scaffolds new Py
 
 ## Requirements
 
-- **Python 3.14+**
+- **Python 3.12+**
 - **UV** — [install UV](https://docs.astral.sh/uv/getting-started/installation/)
 - **Git** (optional, for repository initialization)
 
@@ -197,7 +197,7 @@ uv run ruff format app     # Auto-format
 
 | Component                                            | Version  |
 | ---------------------------------------------------- | -------- |
-| Python                                               | 3.14+    |
+| Python                                               | 3.12+    |
 | [Flet](https://flet.dev)                             | 0.80.5+  |
 | [uv](https://docs.astral.sh/uv/)                     | external |
 | [httpx](https://www.python-httpx.org/)               | 0.28+    |

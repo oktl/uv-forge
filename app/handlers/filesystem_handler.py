@@ -4,6 +4,8 @@ This module handles creating directories, __init__.py files, and processing
 nested folder structures from configuration specifications.
 """
 
+from __future__ import annotations
+
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 

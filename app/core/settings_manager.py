@@ -59,7 +59,7 @@ def load_settings() -> AppSettings:
 
     try:
         data = json.loads(SETTINGS_FILE.read_text(encoding="utf-8"))
-    except json.JSONDecodeError, OSError:
+    except (json.JSONDecodeError, OSError):
         return AppSettings()
 
     # Forward-compatible: only use keys that exist as fields

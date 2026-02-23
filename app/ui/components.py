@@ -4,6 +4,8 @@ This module defines the Controls class for storing UI control references and
 the build_main_view function for constructing the application's visual layout.
 """
 
+from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 import flet as ft

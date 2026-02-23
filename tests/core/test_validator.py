@@ -108,7 +108,7 @@ def test_validate_path_unwritable_parent():
             test_path = readonly_dir / "new_project"
             is_valid, error_msg = validate_path(test_path)
             assert not is_valid, "Path under read-only dir should be rejected"
-            assert "not writable" in error_msg.lower()
+            assert "not writable" in error_msg.lower() or "permission denied" in error_msg.lower()
         finally:
             os.chmod(readonly_dir, 0o755)
 

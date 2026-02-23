@@ -4,6 +4,8 @@ This module provides standardized, theme-aware dialog components
 that maintain consistent styling and behavior across the application.
 """
 
+from __future__ import annotations
+
 import ast
 import collections.abc
 from pathlib import Path
@@ -1899,7 +1901,7 @@ def create_log_viewer_dialog(
                     check=True,
                 )
             copy_btn.text = "Copied!"
-        except FileNotFoundError, subprocess.CalledProcessError:
+        except (FileNotFoundError, subprocess.CalledProcessError):
             copy_btn.text = "Copy failed"
         e.page.update()
 
@@ -2421,7 +2423,7 @@ def create_history_dialog(
             try:
                 dt = __import__("datetime").datetime.fromisoformat(entry.built_at)
                 time_str = dt.strftime("%b %d, %H:%M")
-            except ValueError, AttributeError:
+            except (ValueError, AttributeError):
                 time_str = entry.built_at[:16] if entry.built_at else ""
 
             row = ft.Container(
@@ -2761,7 +2763,7 @@ def create_presets_dialog(
             try:
                 dt = __import__("datetime").datetime.fromisoformat(preset.saved_at)
                 time_str = dt.strftime("%b %d, %H:%M")
-            except ValueError, AttributeError:
+            except (ValueError, AttributeError):
                 time_str = preset.saved_at[:16] if preset.saved_at else ""
 
             # Build details line

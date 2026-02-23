@@ -62,7 +62,7 @@ def load_history() -> list[ProjectHistoryEntry]:
 
     try:
         data = json.loads(HISTORY_FILE.read_text(encoding="utf-8"))
-    except json.JSONDecodeError, OSError:
+    except (json.JSONDecodeError, OSError):
         return []
 
     if not isinstance(data, list):

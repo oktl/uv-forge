@@ -69,7 +69,7 @@ def load_presets() -> list[ProjectPreset]:
 
     try:
         data = json.loads(PRESETS_FILE.read_text(encoding="utf-8"))
-    except json.JSONDecodeError, OSError:
+    except (json.JSONDecodeError, OSError):
         return []
 
     if not isinstance(data, list):
