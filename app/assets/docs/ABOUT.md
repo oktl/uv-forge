@@ -8,12 +8,16 @@ A desktop application for creating Python projects with UV — the fast Python p
 
 ## Tech Stack
 
-- **Python** 3.14+
-- **Flet** 0.80.5+ (UI framework)
-- **UV** (package & project manager)
-- **httpx** (async HTTP for PyPI checks)
-- **platformdirs** (cross-platform settings storage)
-- **Git** (optional, for repository initialization)
+| Component                                            | Version  |
+| ---------------------------------------------------- | -------- |
+| Python                                               | 3.12+    |
+| [Flet](https://flet.dev)                             | 0.80.5+  |
+| [uv](https://docs.astral.sh/uv/)                     | external |
+| [httpx](https://www.python-httpx.org/)               | 0.28+    |
+| [loguru](https://loguru.readthedocs.io/)             | 0.7+     |
+| [platformdirs](https://platformdirs.readthedocs.io/) | 4.0+     |
+
+**Git** (optional, for repository initialization)
 
 ---
 
