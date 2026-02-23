@@ -2,16 +2,19 @@
 
 > UV Forge is a high-performance [Flet](https://flet.dev) desktop application designed to "forge" new Python projects using the [uv](https://docs.astral.sh/uv/) package manager. It bridges the gap between powerful command-line tooling and a visual, intuitive workflow, allowing developers to scaffold production-ready environments in seconds.  
 
-Pick a UI framework or project type, (or both), configure your options, and UV Forge generates a fully wired project: folder structure, boilerplate files, package installation, virtual environment, git repo, and pyproject.toml — all in one click.
+Pick a UI framework or project type, (or both), configure your options, and UV Forge generates a fully wired project: folder structure, boilerplate files, package installation, virtual environment, git repo, and pyproject.toml, and optionally does an initial commit  — all in one click.
 
 ---
+
+![](app/assets/images/looksliethis.png)
 
 ## ✨ Key Features
 
 - **uv-Powered Core** - Leverages the lightning-fast uv executable for virtual environment management and dependency resolution.
 - **Intelligent Scaffolding** - Dynamically generates project structures based on your selections, from basic scripts to complex Flet UIs or Web Scraping suites. Key files (e.g. `main.py`, `state.py`, `components.py`) are populated with starter boilerplate instead of created empty, with `{{project_name}}` placeholders auto-substituted.
-- **Template Portability** - Uses a flexible, dictionary-based template system in config/templates/ that allows for easy addition or removal of frameworks.
+- **Template Portability** - Uses a flexible, dictionary-based folder/file/package template system in config/templates/ that allows for easy addition or removal of frameworks.
 - **Template Merging** — Select both a UI framework and project type; their folder structures are intelligently merged.
+- **Template Previewing** - Templates can be previewed and modified in the app - add or remove folders and files, same with dependency packages. The file/folder list and the pacakages list update automatically. Dependency packages can be marked dev and placed in the dev list in pyrproject.toml.
 - **10 UI Frameworks** — Flet, PyQt6, PySide6, tkinter, customtkinter, Kivy, Pygame, NiceGUI, Streamlit, Gradio.
 - **21 Project Types** — Django, FastAPI, Flask, data science, ML (PyTorch/TensorFlow/scikit-learn), CLI tools (Click/Typer/Rich), REST/GraphQL/gRPC APIs, web scraping, browser automation, async apps, and more.
 - **PyPI Guardrails** — Verify your package name is available on PyPI before building (PEP 503 normalization, async). Real-time validation checks project names against PyPI to prevent naming conflicts before you even start coding.
