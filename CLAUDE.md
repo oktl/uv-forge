@@ -1,6 +1,6 @@
 # CLAUDE.md - UV Forge
 
-**Version:** 0.1.0 | **Python:** 3.14+ | **UI:** Flet 0.80.5+ | **Package Manager:** UV
+**Version:** 0.1.0 | **Python:** 3.12+ | **UI:** Flet 0.80.5+ | **Package Manager:** UV
 
 ---
 
@@ -200,7 +200,7 @@ Ruff is configured in `pyproject.toml` and enforced via a git pre-commit hook (`
 
 ## Dependencies
 
-**Runtime:** Python 3.14+, UV (external), Flet 0.80.5+, httpx 0.28+, platformdirs 4.0+, Git (optional)
+**Runtime:** Python 3.12+, UV (external), Flet 0.80.5+, httpx 0.28+, platformdirs 4.0+, Git (optional)
 
 **Dev:** pytest >=8.0, pytest-asyncio >=0.23, pytest-cov >=7.0, ruff >=0.15
 
