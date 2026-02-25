@@ -1500,6 +1500,8 @@ def create_build_summary_dialog(
     on_cancel_callback,
     is_dark_mode: bool,
     ide_name: str = "VS Code",
+    open_folder_default: bool = False,
+    open_terminal_default: bool = False,
 ) -> ft.AlertDialog:
     """Create a confirmation dialog showing project summary before build.
 
@@ -1509,6 +1511,8 @@ def create_build_summary_dialog(
         on_cancel_callback: Callback when Cancel is clicked
         is_dark_mode: Whether dark mode is active
         ide_name: Display name of the preferred IDE for the open-in checkbox.
+        open_folder_default: Initial value for the open folder checkbox.
+        open_terminal_default: Initial value for the open terminal checkbox.
 
     Returns:
         Configured AlertDialog with project summary
@@ -1611,7 +1615,7 @@ def create_build_summary_dialog(
 
     open_folder_checkbox = ft.Checkbox(
         label="Open project folder after build",
-        value=False,
+        value=open_folder_default,
         on_change=on_checkbox_change,
     )
 
@@ -1642,7 +1646,7 @@ def create_build_summary_dialog(
 
     open_terminal_checkbox = ft.Checkbox(
         label="Open terminal at project root",
-        value=False,
+        value=open_terminal_default,
         on_change=on_checkbox_change,
     )
 
@@ -2047,12 +2051,12 @@ def create_settings_dialog(
     Returns:
         Configured AlertDialog for editing settings.
     """
-    from app.core.constants import PYTHON_VERSIONS, SUPPORTED_IDES
+    from app.core.constants import LICENSE_TYPES, PYTHON_VERSIONS, SUPPORTED_IDES
 
     colors = get_theme_colors(is_dark_mode)
 
     label_style = ft.TextStyle(size=13, color=colors["section_title"])
-    field_width = 460
+    col_width = 410
 
     # --- Default project path ---
     project_path_field = ft.TextField(
@@ -2117,7 +2121,7 @@ def create_settings_dialog(
         label="Default Python Version",
         value=settings.default_python_version,
         options=[ft.dropdown.Option(v) for v in PYTHON_VERSIONS],
-        width=field_width,
+        expand=True,
         label_style=label_style,
     )
 
@@ -2129,7 +2133,7 @@ def create_settings_dialog(
         if settings.preferred_ide in ide_names
         else ide_names[0],
         options=[ft.dropdown.Option(name) for name in ide_names],
-        width=field_width,
+        expand=True,
         label_style=label_style,
     )
 
@@ -2137,7 +2141,7 @@ def create_settings_dialog(
         label="Custom IDE Executable Path",
         value=settings.custom_ide_path,
         visible=settings.preferred_ide == "Other / Custom",
-        width=field_width,
+        expand=True,
         label_style=label_style,
         hint_text="/usr/local/bin/my-editor",
     )
@@ -2154,19 +2158,48 @@ def create_settings_dialog(
         value=settings.git_enabled_default,
     )
 
+    # --- Starter files default ---
+    starter_files_checkbox = ft.Checkbox(
+        label="Include starter files by default",
+        value=settings.starter_files_default,
+    )
+
     # --- Author defaults ---
     author_name_field = ft.TextField(
         label="Default Author Name",
         value=settings.default_author_name,
-        width=field_width,
+        expand=True,
         label_style=label_style,
     )
 
     author_email_field = ft.TextField(
         label="Default Author Email",
         value=settings.default_author_email,
-        width=field_width,
+        expand=True,
         label_style=label_style,
+    )
+
+    # --- Default license ---
+    license_options = [ft.dropdown.Option(key="", text="(None)")] + [
+        ft.dropdown.Option(lt) for lt in LICENSE_TYPES
+    ]
+    license_dropdown = ft.Dropdown(
+        label="Default License",
+        value=settings.default_license or "",
+        options=license_options,
+        expand=True,
+        label_style=label_style,
+    )
+
+    # --- After-build actions ---
+    open_folder_checkbox = ft.Checkbox(
+        label="Open project folder after build",
+        value=settings.open_folder_default,
+    )
+
+    open_terminal_checkbox = ft.Checkbox(
+        label="Open terminal at project root",
+        value=settings.open_terminal_default,
     )
 
     # --- Post-build command ---
@@ -2179,7 +2212,7 @@ def create_settings_dialog(
         label="Post-build Command",
         value=settings.post_build_command,
         hint_text="uv run pre-commit install && uv run pytest",
-        width=field_width,
+        expand=True,
         label_style=label_style,
     )
 
@@ -2187,7 +2220,7 @@ def create_settings_dialog(
         label="Required Packages",
         value=settings.post_build_packages,
         hint_text="pre-commit, ruff",
-        width=field_width,
+        expand=True,
         label_style=label_style,
     )
 
@@ -2204,78 +2237,109 @@ def create_settings_dialog(
             preferred_ide=ide_dropdown.value or settings.preferred_ide,
             custom_ide_path=custom_ide_field.value or "",
             git_enabled_default=git_checkbox.value,
+            starter_files_default=starter_files_checkbox.value,
             default_author_name=author_name_field.value or "",
             default_author_email=author_email_field.value or "",
+            default_license=license_dropdown.value or "",
+            open_folder_default=open_folder_checkbox.value,
+            open_terminal_default=open_terminal_checkbox.value,
             post_build_command=post_build_command_field.value or "",
             post_build_command_enabled=post_build_enabled_checkbox.value,
             post_build_packages=post_build_packages_field.value or "",
         )
         on_save_callback(updated)
 
+    # --- Two-column layout helpers ---
+    def _section_header(text: str, caption: str = "") -> ft.Control:
+        children: list[ft.Control] = [
+            ft.Text(
+                text,
+                weight=ft.FontWeight.W_600,
+                size=14,
+                color=colors["main_title"],
+            )
+        ]
+        if caption:
+            children.append(
+                ft.Text(
+                    caption,
+                    size=11,
+                    color=colors.get("section_title"),
+                    italic=True,
+                )
+            )
+        return ft.Column(children, spacing=1, tight=True)
+
+    def _col_label(text: str) -> ft.Column:
+        return ft.Column(
+            [
+                ft.Text(
+                    text,
+                    weight=ft.FontWeight.W_700,
+                    size=15,
+                    color=colors["main_title"],
+                ),
+                ft.Divider(height=4, color=colors.get("section_border")),
+            ],
+            spacing=4,
+            tight=True,
+        )
+
+    left_col = ft.Column(
+        [
+            _col_label("Pre-Build"),
+            _section_header("Paths", "Where new projects and git repos are created"),
+            project_path_row,
+            github_root_row,
+            ft.Divider(height=8, color=colors.get("section_border")),
+            _section_header("Defaults", "Pre-selected options for each new project"),
+            python_version_dropdown,
+            git_checkbox,
+            starter_files_checkbox,
+            ft.Divider(height=8, color=colors.get("section_border")),
+            _section_header("Author", "Pre-filled in the Project Metadata dialog"),
+            author_name_field,
+            author_email_field,
+            license_dropdown,
+        ],
+        tight=True,
+        spacing=8,
+    )
+
+    right_col = ft.Column(
+        [
+            _col_label("Post-Build"),
+            _section_header("IDE", "Choose your preferred IDE to open after build"),
+            ide_dropdown,
+            custom_ide_field,
+            open_folder_checkbox,
+            open_terminal_checkbox,
+            ft.Divider(height=8, color=colors.get("section_border")),
+            _section_header(
+                "Automation", "Runs automatically after a successful build"
+            ),
+            post_build_enabled_checkbox,
+            post_build_command_field,
+            post_build_packages_field,
+        ],
+        tight=True,
+        spacing=8,
+    )
+
     dialog = ft.AlertDialog(
         modal=True,
         title=_create_dialog_title("Settings", colors, icon=ft.Icons.SETTINGS),
         content=ft.Container(
-            content=ft.Column(
+            content=ft.Row(
                 [
-                    ft.Text(
-                        "Configure default values for new projects.",
-                        size=13,
-                        color=colors.get("section_title"),
-                    ),
-                    ft.Container(height=8),
-                    ft.Text(
-                        "Paths",
-                        weight=ft.FontWeight.W_600,
-                        size=14,
-                        color=colors["main_title"],
-                    ),
-                    project_path_row,
-                    github_root_row,
-                    ft.Divider(height=16, color=colors.get("section_border")),
-                    ft.Text(
-                        "Defaults",
-                        weight=ft.FontWeight.W_600,
-                        size=14,
-                        color=colors["main_title"],
-                    ),
-                    ft.Row([python_version_dropdown], spacing=16),
-                    git_checkbox,
-                    ft.Divider(height=16, color=colors.get("section_border")),
-                    ft.Text(
-                        "Author",
-                        weight=ft.FontWeight.W_600,
-                        size=14,
-                        color=colors["main_title"],
-                    ),
-                    author_name_field,
-                    author_email_field,
-                    ft.Divider(height=16, color=colors.get("section_border")),
-                    ft.Text(
-                        "IDE",
-                        weight=ft.FontWeight.W_600,
-                        size=14,
-                        color=colors["main_title"],
-                    ),
-                    ide_dropdown,
-                    custom_ide_field,
-                    ft.Divider(height=16, color=colors.get("section_border")),
-                    ft.Text(
-                        "Automation",
-                        weight=ft.FontWeight.W_600,
-                        size=14,
-                        color=colors["main_title"],
-                    ),
-                    post_build_enabled_checkbox,
-                    post_build_command_field,
-                    post_build_packages_field,
+                    ft.Container(content=left_col, width=col_width),
+                    ft.VerticalDivider(width=1, color=colors.get("section_border")),
+                    ft.Container(content=right_col, width=col_width),
                 ],
-                tight=True,
-                spacing=10,
-                scroll=ft.ScrollMode.AUTO,
+                spacing=16,
+                vertical_alignment=ft.CrossAxisAlignment.START,
             ),
-            width=500,
-            height=800,
+            width=col_width * 2 + 33,
             padding=UIConfig.DIALOG_CONTENT_PADDING,
         ),
         actions=_create_dialog_actions(

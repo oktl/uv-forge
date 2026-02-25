@@ -93,6 +93,9 @@ class AppState:
         if not self.python_version:
             self.python_version = self.settings.default_python_version
         self.git_enabled = self.settings.git_enabled_default
+        self.include_starter_files = self.settings.starter_files_default
+        if not self.license_type:
+            self.license_type = self.settings.default_license
         if not self.author_name:
             self.author_name = self.settings.default_author_name
         if not self.author_email:

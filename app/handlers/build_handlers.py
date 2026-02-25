@@ -507,6 +507,8 @@ class BuildHandlersMixin:
             on_cancel_callback=on_cancel,
             is_dark_mode=self.state.is_dark_mode,
             ide_name=self.state.settings.preferred_ide,
+            open_folder_default=self.state.settings.open_folder_default,
+            open_terminal_default=self.state.settings.open_terminal_default,
         )
 
         self.page.overlay.append(dialog)

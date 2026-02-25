@@ -55,7 +55,7 @@ class UIConfig:
     APPBAR_TITLE_SIZE = 14
     APPBAR_TOOLBAR_HEIGHT = 30
     SECTION_WIDTH = 780  # Project Structure section (right column)
-    LEFT_SECTION_WIDTH = 520  # Path and Options sections (left column)
+    LEFT_SECTION_WIDTH = 660  # Path and Options sections (left column)
     SPLIT_CONTAINER_WIDTH = (
         350  # fits two containers + gap within SECTION_WIDTH border/padding
     )

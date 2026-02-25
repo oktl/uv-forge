@@ -28,6 +28,10 @@ class AppSettings:
         preferred_ide: Display name of the preferred IDE (key in SUPPORTED_IDES).
         custom_ide_path: Executable path when preferred_ide is "Other / Custom".
         git_enabled_default: Whether git init is enabled by default.
+        starter_files_default: Whether to include starter files by default.
+        default_license: Default SPDX license identifier for new projects.
+        open_folder_default: Whether to open project folder after build by default.
+        open_terminal_default: Whether to open terminal at project root after build by default.
     """
 
     default_project_path: str = str(Path.home() / "Projects")
@@ -36,8 +40,12 @@ class AppSettings:
     preferred_ide: str = "VS Code"
     custom_ide_path: str = ""
     git_enabled_default: bool = True
+    starter_files_default: bool = True
+    default_license: str = ""
     default_author_name: str = ""
     default_author_email: str = ""
+    open_folder_default: bool = False
+    open_terminal_default: bool = False
     post_build_command: str = ""
     post_build_command_enabled: bool = False
     post_build_packages: str = ""
