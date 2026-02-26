@@ -23,7 +23,7 @@ Pick a UI framework or project type, (or both), configure your options, and UV F
 - **Project Metadata** — Configure author, email, description, and license (SPDX); written directly into `pyproject.toml`
 - **Post-Build Automation** — Optionally run a configurable shell command after each successful build (e.g. `uv run pre-commit install`)
 - **Safety First** - Includes a robust rollback system that cleans up partially created directories if a build fails, keeping your workspace pristine.
-- **Presets** — Save full project configurations as named presets for one-click reuse
+- **Presets** — Save full project configurations as named presets for one-click reuse. Ships with 4 built-in starter presets (Flet Desktop App, FastAPI Backend, Data Science Starter, CLI Tool) for instant project setup
 - **Recent Projects** — Restore any of your last 5 builds with a single click
 - **Settings** — Configurable defaults for project path, GitHub root, Python version, preferred IDE, and git behaviour
 - **Log Viewer** — Colour-coded log display with clickable source locations that open directly in your IDE

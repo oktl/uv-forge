@@ -194,6 +194,19 @@ History is stored alongside settings in `~/Library/Application Support/UV Forge/
 
 Open from the **⋮** overflow menu in the app bar → **Presets**. Presets let you save a full project configuration as a named template for one-click reuse.
 
+### Built-in Starter Presets
+
+UV Forge ships with 4 built-in presets so new users can start building immediately:
+
+| Preset | Framework / Type | Packages |
+| --- | --- | --- |
+| **Flet Desktop App** | Flet (UI) | flet + pytest, ruff (dev) |
+| **FastAPI Backend** | FastAPI | fastapi, uvicorn + pytest, ruff, httpx (dev) |
+| **Data Science Starter** | Data Analysis | pandas, numpy, matplotlib, jupyter |
+| **CLI Tool (Typer)** | CLI (Typer) | typer[all] + pytest, ruff (dev) |
+
+All built-in presets use Python 3.13, Git enabled, starter files enabled, and MIT license. They appear at the bottom of the presets list with a teal **Built-in** badge and cannot be deleted. If you save a user preset with the same name, it will override the built-in.
+
 ### Saving a Preset
 
 Enter a name in the text field at the top of the dialog and click **Save Current**. This captures your current configuration:
@@ -208,22 +221,23 @@ Saving with an existing name overwrites the previous preset.
 
 ### Applying a Preset
 
-Click a preset in the list to select it, then click **Apply**. This populates all configuration fields and UI controls — your project name and path are left unchanged so you can apply the same stack to different projects.
+Click a preset in the list to select it, then click **Apply**. This populates all configuration fields and UI controls — your project name and path are left unchanged so you can apply the same stack to different projects. Any post-build packages from Settings (e.g. `pre-commit`) are automatically merged in.
 
 ### Deleting a Preset
 
-Select a preset and click **Delete**. The preset is removed from the list immediately — the dialog stays open so you can continue managing your presets.
+Select a preset and click **Delete**. The preset is removed from the list immediately — the dialog stays open so you can continue managing your presets. Built-in presets cannot be deleted.
 
 Each preset displays:
 
 - **Preset name** and save timestamp
+- **Built-in badge** (teal) for factory presets
 - **Configuration details** (Python version, git, starter files)
 - **Framework / project type badges** (if applicable)
 - **Package count** (including dev packages in amber)
 
-There is no limit on the number of presets you can save.
+There is no limit on the number of user presets you can save.
 
-Presets are stored alongside settings in `~/Library/Application Support/UV Forge/presets.json` (platform-appropriate location via `platformdirs`).
+Presets are stored alongside settings in `~/Library/Application Support/UV Forge/presets.json` (platform-appropriate location via `platformdirs`). Built-in presets are not written to disk.
 
 ## Log Viewer
 

@@ -114,13 +114,16 @@ Settings stored in `~/Library/Application Support/UV Forge/settings.json` (macOS
 
 ## Presets vs Recent Projects
 
-| Feature  | Presets                    | Recent Projects        |
-| -------- | -------------------------- | ---------------------- |
-| Purpose  | Reusable project templates | History of past builds |
-| Limit    | Unlimited                  | Last 5 builds          |
-| Saves    | Config only (no name/path) | Full build snapshot    |
-| On apply | Keeps current name & path  | Restores everything    |
-| Storage  | `presets.json`             | `recent_projects.json` |
+| Feature   | Presets                    | Recent Projects        |
+| --------- | -------------------------- | ---------------------- |
+| Purpose   | Reusable project templates | History of past builds |
+| Limit     | Unlimited (user presets)   | Last 5 builds          |
+| Built-ins | 4 starter presets included | None                   |
+| Saves     | Config only (no name/path) | Full build snapshot    |
+| On apply  | Keeps current name & path  | Restores everything    |
+| Storage   | `presets.json`             | `recent_projects.json` |
+
+**Built-in presets:** Flet Desktop App, FastAPI Backend, Data Science Starter, CLI Tool (Typer). Shown with a teal "Built-in" badge; cannot be deleted.
 
 ---
 
