@@ -2,6 +2,54 @@
 
 This module provides standardized, theme-aware dialog components
 that maintain consistent styling and behavior across the application.
+
+Design Note
+-----------
+This file is intentionally large. Each dialog function is a self-contained
+mini-UI: it creates form fields, wires up local callbacks, manages internal
+state, and returns a configured AlertDialog. Splitting them into separate
+files was considered but rejected — the shared helpers (_create_dialog_title,
+_create_dialog_actions, _build_badge_row, etc.) are used across many dialogs,
+and the consistent pattern makes the file easy to navigate despite its size.
+Pure data-transform logic (tree building) lives in tree_builder.py.
+
+Table of Contents
+=================
+
+Helpers (private)
+-----------------
+  create_tooltip .................. line ~77
+  _create_dialog_title ............ line ~99
+  _create_dialog_actions .......... line ~126
+  _create_summary_row ............. line ~191
+  _build_badge_row ................ line ~210
+  _autofocus_selected_radio ....... line ~274
+  _create_none_option_container ... line ~297
+  _parse_log_location ............. line ~338
+  _parse_log_line ................. line ~356
+
+Public dialog functions
+-----------------------
+  create_confirm_dialog ........... line ~448
+  create_dialog_text_field ........ line ~534
+  _create_markdown_dialog ......... line ~559  (shared by help/about/git cheat sheet)
+  create_help_dialog .............. line ~619
+  create_git_cheat_sheet_dialog ... line ~648
+  create_about_dialog ............. line ~678
+  create_edit_file_dialog ......... line ~707
+  create_preview_formatted_dialog . line ~761
+  _create_categorized_radio_dialog  line ~810  (shared by project type/framework)
+  create_project_type_dialog ...... line ~942
+  create_framework_dialog ......... line ~974
+  create_add_item_dialog .......... line ~1006
+  create_build_error_dialog ....... line ~1166
+  create_add_packages_dialog ...... line ~1227
+  create_build_summary_dialog ..... line ~1458
+  create_log_viewer_dialog ........ line ~1736
+  create_metadata_dialog .......... line ~1808
+  create_settings_dialog .......... line ~1913
+  create_history_dialog ........... line ~2234
+  create_presets_dialog ........... line ~2434
 """
 
 from __future__ import annotations
@@ -14,6 +62,7 @@ from typing import TYPE_CHECKING
 import flet as ft
 
 from app.ui.theme_manager import get_theme_colors
+from app.ui.tree_builder import build_project_tree_controls
 from app.ui.ui_config import UIConfig
 
 if TYPE_CHECKING:
@@ -158,261 +207,68 @@ def _create_summary_row(label: str, value: str) -> ft.Row:
     )
 
 
-def _build_project_tree_lines(config: BuildSummaryConfig) -> list[str]:
-    """Build a Unicode box-drawing tree of the full project structure.
+def _build_badge_row(
+    entry,
+    include_dev: bool = False,
+) -> list[ft.Control]:
+    """Build a list of badge controls for a history entry or preset.
 
-    Includes root-level files created by UV init (pyproject.toml, README.md, etc.),
-    the app/ directory with __init__.py and main.py, and all template folders/files.
-
-    Args:
-        config: BuildSummaryConfig with project name, git_enabled, and folders.
-
-    Returns:
-        List of strings, one per tree line.
-    """
-    lines: list[str] = [f"{config.project_name}/"]
-
-    # Separate root-level and app-level template folders
-    root_folders = []
-    app_folders = []
-    for folder in config.folders:
-        if isinstance(folder, dict) and folder.get("root_level", False):
-            root_folders.append(folder)
-        else:
-            app_folders.append(folder)
-
-    # Root-level files created by UV init
-    root_files = [".python-version", "README.md", "pyproject.toml"]
-    if config.git_enabled:
-        root_files.insert(0, ".gitignore")
-
-    # All root-level entries: files first, then app/, then root template folders
-    root_entries: list[dict | str] = []
-    root_entries.extend(root_files)
-    root_entries.append("__app__")  # Sentinel for app/ directory
-    root_entries.extend(root_folders)
-
-    def _add_entries(
-        entries: list[dict | str], prefix: str, parent_create_init: bool = True
-    ) -> None:
-        """Recursively add tree entries with box-drawing prefixes."""
-        for i, entry in enumerate(entries):
-            is_last = i == len(entries) - 1
-            connector = "└── " if is_last else "├── "
-            child_prefix = prefix + ("    " if is_last else "│   ")
-
-            if isinstance(entry, str):
-                if entry == "__app__":
-                    _add_app_dir(prefix, connector, child_prefix)
-                else:
-                    lines.append(f"{prefix}{connector}{entry}")
-            elif isinstance(entry, dict):
-                _add_folder(entry, prefix, connector, child_prefix)
-
-    def _add_subfolder(
-        name: str,
-        parent_create_init: bool,
-        prefix: str,
-        connector: str,
-        child_prefix: str,
-    ) -> None:
-        """Add a string subfolder (inherits parent's create_init)."""
-        lines.append(f"{prefix}{connector}{name}/")
-        if parent_create_init:
-            lines.append(f"{child_prefix}└── __init__.py")
-
-    def _add_folder(
-        folder: dict, prefix: str, connector: str, child_prefix: str
-    ) -> None:
-        """Add a template folder and its contents to the tree."""
-        name = folder.get("name", "")
-        lines.append(f"{prefix}{connector}{name}/")
-
-        create_init = folder.get("create_init", True)
-
-        # Collect all children: __init__.py, files, then subfolders
-        file_children: list[str] = []
-        if create_init:
-            file_children.append("__init__.py")
-        file_children.extend(folder.get("files", []) or [])
-
-        subfolders = folder.get("subfolders", []) or []
-        total = len(file_children) + len(subfolders)
-        idx = 0
-
-        for file in file_children:
-            idx += 1
-            is_last = idx == total
-            conn = "└── " if is_last else "├── "
-            lines.append(f"{child_prefix}{conn}{file}")
-
-        for sf in subfolders:
-            idx += 1
-            is_last = idx == total
-            conn = "└── " if is_last else "├── "
-            sf_child_prefix = child_prefix + ("    " if is_last else "│   ")
-            if isinstance(sf, str):
-                _add_subfolder(sf, create_init, child_prefix, conn, sf_child_prefix)
-            elif isinstance(sf, dict):
-                _add_folder(sf, child_prefix, conn, sf_child_prefix)
-
-    def _add_app_dir(prefix: str, connector: str, child_prefix: str) -> None:
-        """Add the app/ directory with __init__.py, main.py, and template folders."""
-        lines.append(f"{prefix}{connector}app/")
-
-        app_children: list[dict | str] = ["__init__.py", "main.py"]
-        app_children.extend(app_folders)
-        _add_entries(app_children, child_prefix)
-
-    _add_entries(root_entries, "")
-    return lines
-
-
-def _build_project_tree_controls(config: BuildSummaryConfig) -> list[ft.Control]:
-    """Build a list of Flet Row controls for the project tree with icons.
-
-    Same structure as _build_project_tree_lines() but returns styled Flet
-    controls with folder/file icons matching the Subfolders container.
+    Creates blue pill badges for framework/project type and grey italic
+    text for package counts. Used by both history and presets dialogs.
 
     Args:
-        config: BuildSummaryConfig with project name, git_enabled, and folders.
+        entry: A ProjectHistoryEntry or ProjectPreset with ui_project_enabled,
+            framework, other_project_enabled, project_type, packages, and
+            optionally dev_packages attributes.
+        include_dev: Whether to include a dev package count badge.
 
     Returns:
-        List of Flet Row controls for display in the tree preview.
+        List of Flet controls for display in a Row.
     """
-    controls: list[ft.Control] = []
+    badge_row: list[ft.Control] = []
 
-    def _tree_row(prefix: str, connector: str, name: str, is_folder: bool) -> ft.Row:
-        icon = ft.Icons.FOLDER if is_folder else ft.Icons.INSERT_DRIVE_FILE
-        icon_color = (
-            UIConfig.COLOR_FOLDER_ICON if is_folder else UIConfig.COLOR_FILE_ICON
+    if entry.ui_project_enabled and entry.framework:
+        badge_row.append(
+            ft.Container(
+                content=ft.Text(entry.framework, size=11, color=ft.Colors.WHITE),
+                bgcolor=ft.Colors.BLUE_700,
+                border_radius=4,
+                padding=ft.Padding.symmetric(horizontal=6, vertical=2),
+            )
         )
-        text_color = None if is_folder else UIConfig.COLOR_FILE_TEXT
-        display = f"{name}/" if is_folder else name
-
-        return ft.Row(
-            [
-                ft.Text(
-                    f"{prefix}{connector}",
-                    size=11,
-                    font_family="monospace",
-                    no_wrap=True,
-                    color=ft.Colors.GREY_600,
-                ),
-                ft.Icon(icon, size=12, color=icon_color),
-                ft.Text(
-                    display,
-                    size=11,
-                    font_family="monospace",
-                    no_wrap=True,
-                    color=text_color,
-                ),
-            ],
-            spacing=2,
-            tight=True,
+    if entry.other_project_enabled and entry.project_type:
+        badge_row.append(
+            ft.Container(
+                content=ft.Text(entry.project_type, size=11, color=ft.Colors.WHITE),
+                bgcolor=ft.Colors.BLUE_700,
+                border_radius=4,
+                padding=ft.Padding.symmetric(horizontal=6, vertical=2),
+            )
         )
 
-    # Root line
-    controls.append(
-        ft.Row(
-            [
-                ft.Icon(ft.Icons.FOLDER, size=12, color=UIConfig.COLOR_FOLDER_ICON),
-                ft.Text(
-                    f"{config.project_name}/",
-                    size=11,
-                    font_family="monospace",
-                    weight=ft.FontWeight.BOLD,
-                ),
-            ],
-            spacing=2,
-            tight=True,
+    if entry.packages:
+        pkg_count = len(entry.packages)
+        badge_row.append(
+            ft.Text(
+                f"{pkg_count} pkg{'s' if pkg_count != 1 else ''}",
+                size=11,
+                color=ft.Colors.GREY_500,
+                italic=True,
+            )
         )
-    )
 
-    # Separate root-level and app-level template folders
-    root_folders = []
-    app_folders = []
-    for folder in config.folders:
-        if isinstance(folder, dict) and folder.get("root_level", False):
-            root_folders.append(folder)
-        else:
-            app_folders.append(folder)
+    if include_dev and getattr(entry, "dev_packages", None):
+        dev_count = len(entry.dev_packages)
+        badge_row.append(
+            ft.Text(
+                f"{dev_count} dev",
+                size=11,
+                color=ft.Colors.AMBER_400,
+                italic=True,
+            )
+        )
 
-    # Root-level files
-    root_files = [".python-version", "README.md", "pyproject.toml"]
-    if config.git_enabled:
-        root_files.insert(0, ".gitignore")
-
-    root_entries: list[dict | str] = []
-    root_entries.extend(root_files)
-    root_entries.append("__app__")
-    root_entries.extend(root_folders)
-
-    def _add_entries(entries: list[dict | str], prefix: str) -> None:
-        for i, entry in enumerate(entries):
-            is_last = i == len(entries) - 1
-            connector = "└── " if is_last else "├── "
-            child_prefix = prefix + ("    " if is_last else "│   ")
-
-            if isinstance(entry, str):
-                if entry == "__app__":
-                    _add_app_dir(prefix, connector, child_prefix)
-                else:
-                    controls.append(_tree_row(prefix, connector, entry, False))
-            elif isinstance(entry, dict):
-                _add_folder(entry, prefix, connector, child_prefix)
-
-    def _add_subfolder(
-        name: str,
-        parent_create_init: bool,
-        prefix: str,
-        connector: str,
-        child_prefix: str,
-    ) -> None:
-        controls.append(_tree_row(prefix, connector, name, True))
-        if parent_create_init:
-            controls.append(_tree_row(child_prefix, "└── ", "__init__.py", False))
-
-    def _add_folder(
-        folder: dict, prefix: str, connector: str, child_prefix: str
-    ) -> None:
-        name = folder.get("name", "")
-        controls.append(_tree_row(prefix, connector, name, True))
-
-        create_init = folder.get("create_init", True)
-        file_children: list[str] = []
-        if create_init:
-            file_children.append("__init__.py")
-        file_children.extend(folder.get("files", []) or [])
-
-        subfolders = folder.get("subfolders", []) or []
-        total = len(file_children) + len(subfolders)
-        idx = 0
-
-        for file in file_children:
-            idx += 1
-            is_last = idx == total
-            conn = "└── " if is_last else "├── "
-            controls.append(_tree_row(child_prefix, conn, file, False))
-
-        for sf in subfolders:
-            idx += 1
-            is_last = idx == total
-            conn = "└── " if is_last else "├── "
-            sf_child_prefix = child_prefix + ("    " if is_last else "│   ")
-            if isinstance(sf, str):
-                _add_subfolder(sf, create_init, child_prefix, conn, sf_child_prefix)
-            elif isinstance(sf, dict):
-                _add_folder(sf, child_prefix, conn, sf_child_prefix)
-
-    def _add_app_dir(prefix: str, connector: str, child_prefix: str) -> None:
-        controls.append(_tree_row(prefix, connector, "app", True))
-        app_children: list[dict | str] = ["__init__.py", "main.py"]
-        app_children.extend(app_folders)
-        _add_entries(app_children, child_prefix)
-
-    _add_entries(root_entries, "")
-    return controls
+    return badge_row
 
 
 def _autofocus_selected_radio(controls: list[ft.Control], selected_value: str) -> None:
@@ -477,6 +333,111 @@ def _create_none_option_container(is_dark_mode: bool) -> list[ft.Control]:
             color=ft.Colors.GREY_300 if not is_dark_mode else ft.Colors.GREY_700,
         ),
     ]
+
+
+def _parse_log_location(location: str) -> tuple[str, int] | None:
+    """Extract module path and line number from a log location segment.
+
+    Args:
+        location: Location string like ``app.core.state:load:42``.
+
+    Returns:
+        Tuple of (dotted module path, line number) or None if unparseable.
+    """
+    parts = location.strip().split(":")
+    if len(parts) >= 3:
+        try:
+            return parts[0], int(parts[-1])
+        except ValueError:
+            return None
+    return None
+
+
+def _parse_log_line(
+    line: str,
+    is_dark_mode: bool,
+    on_location_click: collections.abc.Callable[[str, int], None] | None = None,
+) -> ft.Row:
+    """Parse a single log line into a colored Flet Row.
+
+    Expected format: ``{time} | {level} | {name}:{function}:{line} - {message}``
+
+    Args:
+        line: Raw log line string.
+        is_dark_mode: Whether dark mode is active.
+        on_location_click: Optional callback ``(module_path, line_number)`` invoked
+            when the location segment is clicked.
+
+    Returns:
+        A Row with coloured Text segments for each part of the log line.
+    """
+    level_colors = {
+        "DEBUG": ft.Colors.GREY_600,
+        "INFO": ft.Colors.GREY_400 if is_dark_mode else ft.Colors.GREY_700,
+        "SUCCESS": ft.Colors.GREEN_400,
+        "WARNING": ft.Colors.AMBER_400,
+        "ERROR": ft.Colors.RED_400,
+        "CRITICAL": ft.Colors.RED_300,
+    }
+
+    text_kwargs = {"font_family": "monospace", "size": 11, "no_wrap": True}
+
+    parts = line.split(" | ", 2)
+    if len(parts) != 3:
+        return ft.Row(
+            [ft.Text(line, color=ft.Colors.GREY_600, **text_kwargs)],
+            spacing=0,
+            tight=True,
+        )
+
+    timestamp, level_raw, rest = parts
+    level = level_raw.strip()
+    color = level_colors.get(level, ft.Colors.GREY_600)
+    weight = ft.FontWeight.BOLD if level == "CRITICAL" else None
+
+    loc_msg = rest.split(" - ", 1)
+    location = loc_msg[0] if len(loc_msg) == 2 else rest
+    message = loc_msg[1] if len(loc_msg) == 2 else ""
+
+    # Build the location control — clickable if a callback is provided
+    loc_parsed = _parse_log_location(location) if on_location_click else None
+    if loc_parsed and on_location_click:
+        module_path, line_no = loc_parsed
+
+        loc_text = ft.Text(location, color=ft.Colors.CYAN_400, **text_kwargs)
+
+        def _on_hover(e, txt=loc_text):
+            txt.text_decorations = (
+                ft.TextDecoration.UNDERLINE
+                if e.data == "true"
+                else ft.TextDecoration.NONE
+            )
+            txt.update()
+
+        def _on_click(_e, mp=module_path, ln=line_no):
+            on_location_click(mp, ln)
+
+        location_control = ft.GestureDetector(
+            content=loc_text,
+            on_hover=_on_hover,
+            on_tap=_on_click,
+            mouse_cursor=ft.MouseCursor.CLICK,
+        )
+    else:
+        location_control = ft.Text(location, color=ft.Colors.CYAN_400, **text_kwargs)
+
+    controls = [
+        ft.Text(timestamp, color=ft.Colors.GREY_600, **text_kwargs),
+        ft.Text(" | ", color=ft.Colors.GREY_700, **text_kwargs),
+        ft.Text(level_raw, color=color, weight=weight, **text_kwargs),
+        ft.Text(" | ", color=ft.Colors.GREY_700, **text_kwargs),
+        location_control,
+    ]
+    if message:
+        controls.append(ft.Text(" - ", color=ft.Colors.GREY_700, **text_kwargs))
+        controls.append(ft.Text(message, color=color, weight=weight, **text_kwargs))
+
+    return ft.Row(controls, spacing=0, tight=True)
 
 
 # ============================================================================
@@ -1546,7 +1507,7 @@ def create_build_summary_dialog(
         rows.append(_create_summary_row("License:", config.license_type))
 
     # Collapsible project tree preview
-    tree_controls = _build_project_tree_controls(config)
+    tree_controls = build_project_tree_controls(config)
     tree_container = ft.Container(
         content=ft.Column(
             tree_controls,
@@ -1770,111 +1731,6 @@ def create_build_summary_dialog(
     dialog.post_build_checkbox = post_build_checkbox
     dialog.post_build_command_field = post_build_command_field
     return dialog
-
-
-def _parse_log_location(location: str) -> tuple[str, int] | None:
-    """Extract module path and line number from a log location segment.
-
-    Args:
-        location: Location string like ``app.core.state:load:42``.
-
-    Returns:
-        Tuple of (dotted module path, line number) or None if unparseable.
-    """
-    parts = location.strip().split(":")
-    if len(parts) >= 3:
-        try:
-            return parts[0], int(parts[-1])
-        except ValueError:
-            return None
-    return None
-
-
-def _parse_log_line(
-    line: str,
-    is_dark_mode: bool,
-    on_location_click: collections.abc.Callable[[str, int], None] | None = None,
-) -> ft.Row:
-    """Parse a single log line into a colored Flet Row.
-
-    Expected format: ``{time} | {level} | {name}:{function}:{line} - {message}``
-
-    Args:
-        line: Raw log line string.
-        is_dark_mode: Whether dark mode is active.
-        on_location_click: Optional callback ``(module_path, line_number)`` invoked
-            when the location segment is clicked.
-
-    Returns:
-        A Row with coloured Text segments for each part of the log line.
-    """
-    level_colors = {
-        "DEBUG": ft.Colors.GREY_600,
-        "INFO": ft.Colors.GREY_400 if is_dark_mode else ft.Colors.GREY_700,
-        "SUCCESS": ft.Colors.GREEN_400,
-        "WARNING": ft.Colors.AMBER_400,
-        "ERROR": ft.Colors.RED_400,
-        "CRITICAL": ft.Colors.RED_300,
-    }
-
-    text_kwargs = {"font_family": "monospace", "size": 11, "no_wrap": True}
-
-    parts = line.split(" | ", 2)
-    if len(parts) != 3:
-        return ft.Row(
-            [ft.Text(line, color=ft.Colors.GREY_600, **text_kwargs)],
-            spacing=0,
-            tight=True,
-        )
-
-    timestamp, level_raw, rest = parts
-    level = level_raw.strip()
-    color = level_colors.get(level, ft.Colors.GREY_600)
-    weight = ft.FontWeight.BOLD if level == "CRITICAL" else None
-
-    loc_msg = rest.split(" - ", 1)
-    location = loc_msg[0] if len(loc_msg) == 2 else rest
-    message = loc_msg[1] if len(loc_msg) == 2 else ""
-
-    # Build the location control — clickable if a callback is provided
-    loc_parsed = _parse_log_location(location) if on_location_click else None
-    if loc_parsed and on_location_click:
-        module_path, line_no = loc_parsed
-
-        loc_text = ft.Text(location, color=ft.Colors.CYAN_400, **text_kwargs)
-
-        def _on_hover(e, txt=loc_text):
-            txt.text_decorations = (
-                ft.TextDecoration.UNDERLINE
-                if e.data == "true"
-                else ft.TextDecoration.NONE
-            )
-            txt.update()
-
-        def _on_click(_e, mp=module_path, ln=line_no):
-            on_location_click(mp, ln)
-
-        location_control = ft.GestureDetector(
-            content=loc_text,
-            on_hover=_on_hover,
-            on_tap=_on_click,
-            mouse_cursor=ft.MouseCursor.CLICK,
-        )
-    else:
-        location_control = ft.Text(location, color=ft.Colors.CYAN_400, **text_kwargs)
-
-    controls = [
-        ft.Text(timestamp, color=ft.Colors.GREY_600, **text_kwargs),
-        ft.Text(" | ", color=ft.Colors.GREY_700, **text_kwargs),
-        ft.Text(level_raw, color=color, weight=weight, **text_kwargs),
-        ft.Text(" | ", color=ft.Colors.GREY_700, **text_kwargs),
-        location_control,
-    ]
-    if message:
-        controls.append(ft.Text(" - ", color=ft.Colors.GREY_700, **text_kwargs))
-        controls.append(ft.Text(message, color=color, weight=weight, **text_kwargs))
-
-    return ft.Row(controls, spacing=0, tight=True)
 
 
 def create_log_viewer_dialog(
@@ -2478,32 +2334,7 @@ def create_history_dialog(
         )
     else:
         for i, entry in enumerate(entries):
-            # Build badge text
-            badges = []
-            if entry.ui_project_enabled and entry.framework:
-                badges.append(entry.framework)
-            if entry.other_project_enabled and entry.project_type:
-                badges.append(entry.project_type)
-
-            badge_row = []
-            for badge_text in badges:
-                badge_row.append(
-                    ft.Container(
-                        content=ft.Text(badge_text, size=11, color=ft.Colors.WHITE),
-                        bgcolor=ft.Colors.BLUE_700,
-                        border_radius=4,
-                        padding=ft.Padding.symmetric(horizontal=6, vertical=2),
-                    )
-                )
-            if entry.packages:
-                badge_row.append(
-                    ft.Text(
-                        f"{len(entry.packages)} pkg{'s' if len(entry.packages) != 1 else ''}",
-                        size=11,
-                        color=ft.Colors.GREY_500,
-                        italic=True,
-                    )
-                )
+            badge_row = _build_badge_row(entry)
 
             # Parse built_at for display
             try:
@@ -2808,42 +2639,7 @@ def create_presets_dialog(
         list_column.scroll = None
     else:
         for i, preset in enumerate(presets):
-            badges = []
-            if preset.ui_project_enabled and preset.framework:
-                badges.append(preset.framework)
-            if preset.other_project_enabled and preset.project_type:
-                badges.append(preset.project_type)
-
-            badge_row = []
-            for badge_text in badges:
-                badge_row.append(
-                    ft.Container(
-                        content=ft.Text(badge_text, size=11, color=ft.Colors.WHITE),
-                        bgcolor=ft.Colors.BLUE_700,
-                        border_radius=4,
-                        padding=ft.Padding.symmetric(horizontal=6, vertical=2),
-                    )
-                )
-            if preset.packages:
-                pkg_count = len(preset.packages)
-                badge_row.append(
-                    ft.Text(
-                        f"{pkg_count} pkg{'s' if pkg_count != 1 else ''}",
-                        size=11,
-                        color=ft.Colors.GREY_500,
-                        italic=True,
-                    )
-                )
-            if preset.dev_packages:
-                dev_count = len(preset.dev_packages)
-                badge_row.append(
-                    ft.Text(
-                        f"{dev_count} dev",
-                        size=11,
-                        color=ft.Colors.AMBER_400,
-                        italic=True,
-                    )
-                )
+            badge_row = _build_badge_row(preset, include_dev=True)
 
             # Parse saved_at for display
             try:
