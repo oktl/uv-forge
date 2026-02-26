@@ -17,10 +17,12 @@ from app.core.constants import (
 from app.core.history_manager import clear_history, load_history
 from app.core.preset_manager import delete_preset, load_presets
 from app.core.settings_manager import save_settings
-from app.ui.dialogs import (
+from app.ui.content_dialogs import (
     create_about_dialog,
     create_git_cheat_sheet_dialog,
     create_help_dialog,
+)
+from app.ui.dialogs import (
     create_history_dialog,
     create_log_viewer_dialog,
     create_metadata_dialog,

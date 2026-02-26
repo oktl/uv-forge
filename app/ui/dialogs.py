@@ -16,47 +16,43 @@ Pure data-transform logic (tree building) lives in tree_builder.py.
 Table of Contents
 =================
 
+Content/documentation dialogs have been extracted to content_dialogs.py:
+  create_dialog_text_field, create_help_dialog, create_git_cheat_sheet_dialog,
+  create_about_dialog, create_edit_file_dialog, create_preview_formatted_dialog
+
 Helpers (private)
 -----------------
-  create_tooltip .................. line ~77
-  _create_dialog_title ............ line ~99
-  _create_dialog_actions .......... line ~126
-  _create_summary_row ............. line ~191
-  _build_badge_row ................ line ~210
-  _autofocus_selected_radio ....... line ~274
-  _create_none_option_container ... line ~297
-  _parse_log_location ............. line ~338
-  _parse_log_line ................. line ~356
+  create_tooltip .................. line ~76
+  _create_dialog_title ............ line ~98
+  _create_dialog_actions .......... line ~125
+  _create_summary_row ............. line ~190
+  _build_badge_row ................ line ~209
+  _autofocus_selected_radio ....... line ~273
+  _create_none_option_container ... line ~296
+  _parse_log_location ............. line ~337
+  _parse_log_line ................. line ~355
 
 Public dialog functions
 -----------------------
-  create_confirm_dialog ........... line ~448
-  create_dialog_text_field ........ line ~534
-  _create_markdown_dialog ......... line ~559  (shared by help/about/git cheat sheet)
-  create_help_dialog .............. line ~619
-  create_git_cheat_sheet_dialog ... line ~648
-  create_about_dialog ............. line ~678
-  create_edit_file_dialog ......... line ~707
-  create_preview_formatted_dialog . line ~761
-  _create_categorized_radio_dialog  line ~810  (shared by project type/framework)
-  create_project_type_dialog ...... line ~942
-  create_framework_dialog ......... line ~974
-  create_add_item_dialog .......... line ~1006
-  create_build_error_dialog ....... line ~1166
-  create_add_packages_dialog ...... line ~1227
-  create_build_summary_dialog ..... line ~1458
-  create_log_viewer_dialog ........ line ~1736
-  create_metadata_dialog .......... line ~1808
-  create_settings_dialog .......... line ~1913
-  create_history_dialog ........... line ~2234
-  create_presets_dialog ........... line ~2434
+  create_confirm_dialog ........... line ~447
+  _create_categorized_radio_dialog  line ~533  (shared by project type/framework)
+  create_project_type_dialog ...... line ~665
+  create_framework_dialog ......... line ~697
+  create_add_item_dialog .......... line ~729
+  create_build_error_dialog ....... line ~889
+  create_add_packages_dialog ...... line ~950
+  create_build_summary_dialog ..... line ~1181
+  create_log_viewer_dialog ........ line ~1459
+  create_metadata_dialog .......... line ~1531
+  create_settings_dialog .......... line ~1636
+  create_history_dialog ........... line ~1957
+  create_presets_dialog ........... line ~2157
 """
 
 from __future__ import annotations
 
 import ast
 import collections.abc
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 import flet as ft
@@ -527,282 +523,6 @@ def create_confirm_dialog(
             padding=UIConfig.DIALOG_CONTENT_PADDING,
         ),
         actions=[confirm_btn, cancel_btn],
-        actions_alignment=ft.MainAxisAlignment.END,
-    )
-
-
-def create_dialog_text_field(content: str, is_dark_mode: bool) -> ft.TextField:
-    """Return an editable, preformatted text field.
-
-    Args:
-        content: Text content for the field
-        is_dark_mode: Whether dark mode is active
-
-    Returns:
-        Configured TextField with theme-aware styling
-    """
-    colors = get_theme_colors(is_dark_mode)
-    return ft.TextField(
-        value=content,
-        multiline=True,
-        min_lines=20,
-        max_lines=40,
-        border_color=colors["section_border"],
-        text_style=ft.TextStyle(
-            font_family="monospace",
-            size=13,
-        ),
-        expand=True,
-    )
-
-
-def _create_markdown_dialog(
-    title: str,
-    content: str,
-    on_close,
-    page: ft.Page,
-    is_dark_mode: bool,
-    width: int = UIConfig.DIALOG_WIDTH,
-    on_internal_link: collections.abc.Callable[[str], None] | None = None,
-) -> ft.AlertDialog:
-    """Create a theme-aware dialog with scrollable markdown content.
-
-    Args:
-        title: Dialog title text
-        content: Markdown content to display
-        on_close: Close button callback
-        page: The Flet page instance (needed to launch URLs)
-        is_dark_mode: Whether dark mode is active
-        width: Dialog content width in pixels
-        on_internal_link: Optional callback for app:// links
-
-    Returns:
-        Configured AlertDialog
-    """
-    colors = get_theme_colors(is_dark_mode)
-
-    async def handle_link_click(e):
-        url = e.data
-        if url.startswith("app://") and on_internal_link is not None:
-            on_internal_link(url[len("app://") :])
-        else:
-            await page.launch_url(url)
-
-    return ft.AlertDialog(
-        modal=True,
-        title=ft.Text(
-            title,
-            size=UIConfig.DIALOG_TITLE_SIZE,
-            color=colors["main_title"],
-        ),
-        content=ft.Container(
-            content=ft.Column(
-                controls=[
-                    ft.Markdown(
-                        content,
-                        selectable=True,
-                        extension_set=ft.MarkdownExtensionSet.GITHUB_WEB,
-                        on_tap_link=handle_link_click,
-                    )
-                ],
-                scroll=ft.ScrollMode.AUTO,
-            ),
-            width=width,
-            height=UIConfig.DIALOG_HEIGHT,
-            padding=UIConfig.DIALOG_CONTENT_PADDING,
-        ),
-        actions=[ft.TextButton("Close", on_click=on_close)],
-        actions_alignment=ft.MainAxisAlignment.END,
-    )
-
-
-def create_help_dialog(
-    content: str,
-    on_close,
-    page: ft.Page,
-    is_dark_mode: bool,
-    on_internal_link: collections.abc.Callable[[str], None] | None = None,
-) -> ft.AlertDialog:
-    """Create theme-aware help dialog with scrollable content.
-
-    Args:
-        content: Markdown help text to display.
-        on_close: Close button callback.
-        page: The Flet page instance (needed to launch URLs).
-        is_dark_mode: Whether dark mode is active.
-        on_internal_link: Optional callback for app:// links.
-
-    Returns:
-        Configured AlertDialog with scrollable markdown content.
-    """
-    return _create_markdown_dialog(
-        "Help & Documentation",
-        content,
-        on_close,
-        page,
-        is_dark_mode,
-        on_internal_link=on_internal_link,
-    )
-
-
-def create_git_cheat_sheet_dialog(
-    content: str,
-    on_close,
-    page: ft.Page,
-    is_dark_mode: bool,
-    on_internal_link: collections.abc.Callable[[str], None] | None = None,
-) -> ft.AlertDialog:
-    """Create theme-aware dialog displaying the Git cheat sheet.
-
-    Args:
-        content: Markdown cheat sheet text to display.
-        on_close: Close button callback.
-        page: The Flet page instance (needed to launch URLs).
-        is_dark_mode: Whether dark mode is active.
-        on_internal_link: Optional callback for app:// links.
-
-    Returns:
-        Configured AlertDialog with scrollable markdown content.
-    """
-    return _create_markdown_dialog(
-        "Git Cheat Sheet",
-        content,
-        on_close,
-        page,
-        is_dark_mode,
-        width=900,
-        on_internal_link=on_internal_link,
-    )
-
-
-def create_about_dialog(
-    content: str,
-    on_close,
-    page: ft.Page,
-    is_dark_mode: bool,
-    on_internal_link: collections.abc.Callable[[str], None] | None = None,
-) -> ft.AlertDialog:
-    """Create theme-aware About dialog with optional internal link navigation.
-
-    Args:
-        content: Markdown about text to display.
-        on_close: Close button callback.
-        page: The Flet page instance (needed to launch URLs).
-        is_dark_mode: Whether dark mode is active.
-        on_internal_link: Optional callback for app:// links.
-
-    Returns:
-        Configured AlertDialog with scrollable markdown content.
-    """
-    return _create_markdown_dialog(
-        "About",
-        content,
-        on_close,
-        page,
-        is_dark_mode,
-        on_internal_link=on_internal_link,
-    )
-
-
-def create_edit_file_dialog(
-    content: str, file_path: str, on_save, on_close, is_dark_mode: bool
-) -> ft.AlertDialog:
-    """Create theme-aware file editing dialog with save functionality.
-
-    Args:
-        content: File content to edit
-        file_path: Path to the file being edited
-        on_save: Save button callback (receives edited text and file_path)
-        on_close: Close button callback
-        is_dark_mode: Whether dark mode is active
-
-    Returns:
-        Configured AlertDialog with editable text field
-    """
-    colors = get_theme_colors(is_dark_mode)
-
-    # Extract filename from path for display - add safety check
-    _path_errors = (ValueError, TypeError)
-    try:
-        filename = Path(file_path).name
-    except _path_errors:
-        filename = str(file_path)
-
-    # Create editable text field
-    text_field = create_dialog_text_field(content, is_dark_mode)
-
-    def on_save_click(e):
-        """Handle save button click."""
-        on_save(text_field.value, file_path)
-
-    return ft.AlertDialog(
-        modal=True,
-        title=ft.Text(
-            f"Edit File: {filename}",
-            size=UIConfig.DIALOG_TITLE_SIZE,
-            color=colors["main_title"],
-        ),
-        content=ft.Container(
-            content=ft.Row(
-                controls=[text_field],
-                expand=True,
-            ),
-            width=UIConfig.DIALOG_WIDTH,
-            height=UIConfig.DIALOG_HEIGHT,
-        ),
-        actions=[
-            ft.TextButton("Save", on_click=on_save_click),
-            ft.TextButton("Cancel", on_click=on_close),
-        ],
-        actions_alignment=ft.MainAxisAlignment.END,
-    )
-
-
-def create_preview_formatted_dialog(
-    content: str,
-    provider_name: str,
-    on_save_to_file,
-    on_close,
-    is_dark_mode: bool,
-) -> ft.AlertDialog:
-    """Create theme-aware preview dialog for formatted transcript.
-
-    Args:
-        content: Formatted transcript text to preview
-        provider_name: Name of AI provider used for formatting
-        on_save_to_file: Save to File button callback (receives edited text)
-        on_close: Close button callback
-        is_dark_mode: Whether dark mode is active
-
-    Returns:
-        Configured AlertDialog with editable preview
-    """
-    colors = get_theme_colors(is_dark_mode)
-    text_field = create_dialog_text_field(content, is_dark_mode)
-
-    def on_save_click(e):
-        """Handle save button click."""
-        on_save_to_file(text_field.value)
-
-    return ft.AlertDialog(
-        modal=True,
-        title=ft.Text(
-            f"Preview Formatted Transcript ({provider_name.title()})",
-            size=UIConfig.DIALOG_TITLE_SIZE,
-            color=colors["main_title"],
-        ),
-        content=ft.Container(
-            content=ft.Row(
-                controls=[text_field],
-                expand=True,
-            ),
-            width=UIConfig.DIALOG_WIDTH,
-            height=UIConfig.DIALOG_HEIGHT,
-        ),
-        actions=[
-            ft.TextButton("Save to File", on_click=on_save_click),
-            ft.TextButton("Close", on_click=on_close),
-        ],
         actions_alignment=ft.MainAxisAlignment.END,
     )
 

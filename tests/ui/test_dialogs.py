@@ -8,10 +8,10 @@ import pytest
 
 from app.core.models import BuildSummaryConfig
 from app.core.state import AppState
+from app.ui.content_dialogs import create_about_dialog
 from app.ui.dialogs import (
     _parse_log_line,
     _parse_log_location,
-    create_about_dialog,
     create_add_packages_dialog,
     create_log_viewer_dialog,
     create_metadata_dialog,
