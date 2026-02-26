@@ -998,6 +998,24 @@ def create_add_packages_dialog(
         tooltip="Dev dependencies are installed with 'uv add --dev'\nand go into [dependency-groups] in pyproject.toml.",
     )
 
+    dev_row = ft.Row(
+        controls=[
+            dev_checkbox,
+            ft.Icon(
+                ft.Icons.INFO_OUTLINE,
+                size=12,
+                color=UIConfig.COLOR_INFO,
+                tooltip=(
+                    "Dev dependencies are installed with 'uv add --dev'\n"
+                    "and placed in [dependency-groups] in pyproject.toml.\n"
+                    "Examples: pytest, ruff, mypy — tools not needed at runtime."
+                ),
+            ),
+        ],
+        spacing=4,
+        vertical_alignment=ft.CrossAxisAlignment.CENTER,
+    )
+
     # Results area for PyPI verification — hidden until first verify click
     results_column = ft.Column(
         scroll=ft.ScrollMode.AUTO, height=120, visible=False, spacing=4
@@ -1146,7 +1164,7 @@ def create_add_packages_dialog(
                     ),
                     ft.Container(height=8),
                     packages_field,
-                    dev_checkbox,
+                    dev_row,
                     ft.Row([verify_button], spacing=8),
                     warning_text,
                     results_column,
@@ -1374,6 +1392,16 @@ def create_build_summary_dialog(
         [
             ft.Icon(ft.Icons.PLAY_ARROW, size=16, color=ft.Colors.GREY_400),
             post_build_checkbox,
+            ft.Icon(
+                ft.Icons.INFO_OUTLINE,
+                size=12,
+                color=UIConfig.COLOR_INFO,
+                tooltip=(
+                    "Runs a shell command after a successful build.\n"
+                    "Configure the default command in Settings.\n"
+                    "Required packages are auto-added to the install list."
+                ),
+            ),
         ],
         spacing=6,
         vertical_alignment=ft.CrossAxisAlignment.CENTER,
@@ -1914,7 +1942,23 @@ def create_settings_dialog(
             _section_header(
                 "Automation", "Runs automatically after a successful build"
             ),
-            post_build_enabled_checkbox,
+            ft.Row(
+                controls=[
+                    post_build_enabled_checkbox,
+                    ft.Icon(
+                        ft.Icons.INFO_OUTLINE,
+                        size=12,
+                        color=UIConfig.COLOR_INFO,
+                        tooltip=(
+                            "Runs automatically after each successful build.\n"
+                            "Required packages are merged into the install list.\n"
+                            "Command runs with shell=True, 30s timeout."
+                        ),
+                    ),
+                ],
+                spacing=4,
+                vertical_alignment=ft.CrossAxisAlignment.CENTER,
+            ),
             post_build_command_field,
             post_build_packages_field,
         ],

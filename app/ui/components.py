@@ -543,41 +543,46 @@ def create_sections(controls: Controls, state: AppState) -> None:
                                     # controls.create_git_checkbox,
                                     controls.ui_project_checkbox,
                                     controls.other_projects_checkbox,
-                                    ft.Row(
-                                        controls=[
-                                            ft.Icon(
-                                                ft.Icons.MERGE_TYPE,
-                                                size=12,
-                                                color=ft.Colors.GREY_500,
-                                            ),
-                                            ft.Text(
-                                                "Select both to merge templates",
-                                                size=11,
-                                                italic=True,
-                                                color=ft.Colors.GREY_500,
-                                            ),
-                                            ft.Icon(
-                                                ft.Icons.INFO_OUTLINE,
-                                                size=12,
-                                                color=UIConfig.COLOR_INFO,
-                                                tooltip=(
-                                                    "When both a UI Framework and a Project Type are selected, "
-                                                    "their folder structures are merged automatically.\n"
-                                                    "Matching folders are combined, unique folders from each are "
-                                                    "included, and file lists are unioned."
-                                                ),
-                                            ),
-                                        ],
-                                        spacing=4,
-                                    ),
                                 ],
                                 spacing=0,
                                 expand=True,
                             ),
                             ft.Column(
                                 controls=[
-                                    controls.create_git_checkbox,
-                                    controls.include_starter_files_checkbox,
+                                    ft.Row(
+                                        controls=[
+                                            controls.create_git_checkbox,
+                                            ft.Icon(
+                                                ft.Icons.INFO_OUTLINE,
+                                                size=12,
+                                                color=UIConfig.COLOR_INFO,
+                                                tooltip=(
+                                                    "Creates a local Git repo and a bare hub repository.\n"
+                                                    "The hub acts as a local remote origin you can push to.\n"
+                                                    "Hub location is configurable in Settings."
+                                                ),
+                                            ),
+                                        ],
+                                        spacing=4,
+                                        vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                                    ),
+                                    ft.Row(
+                                        controls=[
+                                            controls.include_starter_files_checkbox,
+                                            ft.Icon(
+                                                ft.Icons.INFO_OUTLINE,
+                                                size=12,
+                                                color=UIConfig.COLOR_INFO,
+                                                tooltip=(
+                                                    "Populates project files with working starter code\n"
+                                                    "instead of creating empty files.\n"
+                                                    "Available for Flet and other frameworks."
+                                                ),
+                                            ),
+                                        ],
+                                        spacing=4,
+                                        vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                                    ),
                                     ft.Row(
                                         controls=[
                                             controls.metadata_checkbox,
