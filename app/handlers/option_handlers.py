@@ -28,8 +28,17 @@ class OptionHandlersMixin:
     # --- Simple Toggle Handlers ---
 
     async def on_python_version_change(self, e: ft.ControlEvent) -> None:
-        """Handle Python version dropdown changes."""
+        """Handle Python version dropdown changes (standard ft.Dropdown)."""
         self.state.python_version = e.control.value or DEFAULT_PYTHON_VERSION
+        self._set_status(
+            f"Python version set to {self.state.python_version}",
+            "info",
+            update=True,
+        )
+
+    def on_python_version_select(self, value: str) -> None:
+        """Handle Python version selection from CustomDropdown."""
+        self.state.python_version = value or DEFAULT_PYTHON_VERSION
         self._set_status(
             f"Python version set to {self.state.python_version}",
             "info",

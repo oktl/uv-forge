@@ -85,9 +85,7 @@ def attach_handlers(page: ft.Page, state: AppState) -> None:
     controls.check_pypi_button.on_click = wrap_async(handlers.on_check_pypi)
 
     # --- Options Handlers ---
-    controls.python_version_dropdown.on_select = wrap_async(
-        handlers.on_python_version_change
-    )
+    controls.python_version_dropdown.on_select = handlers.on_python_version_select
     controls.create_git_checkbox.on_change = wrap_async(handlers.on_git_toggle)
     controls.include_starter_files_checkbox.on_change = wrap_async(
         handlers.on_boilerplate_toggle

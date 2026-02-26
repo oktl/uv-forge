@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING
 import flet as ft
 
 from app.core.constants import PYTHON_VERSIONS
+from app.ui.custom_dropdown import CustomDropdown
 from app.ui.theme_manager import get_theme_colors
 from app.ui.ui_config import UIConfig
 
@@ -293,12 +294,13 @@ def create_controls(state: AppState, colors: dict) -> Controls:
 
     # Python version controls
     controls.python_version_label = ft.Text("Python Version")
-    controls.python_version_dropdown = ft.Dropdown(
-        value=state.python_version,
-        options=[ft.dropdown.Option(v) for v in PYTHON_VERSIONS],
+    controls.python_version_dropdown = CustomDropdown(
+        default_value=state.python_version,
+        options=list(PYTHON_VERSIONS),
+        max_visible=len(PYTHON_VERSIONS),
+        width=120,
+        height=32,
         tooltip="Python version for this project (set default in Settings)",
-        expand=True,
-        border_color=UIConfig.COLOR_INFO,
     )
 
     # Checkbox controls
@@ -534,8 +536,14 @@ def create_sections(controls: Controls, state: AppState) -> None:
         [
             ft.Column(
                 controls=[
-                    controls.python_version_label,
-                    controls.python_version_dropdown,
+                    ft.Row(
+                        controls=[
+                            controls.python_version_label,
+                            controls.python_version_dropdown,
+                        ],
+                        spacing=10,
+                        vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                    ),
                     ft.Row(
                         controls=[
                             ft.Column(
