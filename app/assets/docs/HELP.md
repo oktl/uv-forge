@@ -296,4 +296,5 @@ You can select **both** a UI framework and a project type! The templates will be
 ## See Also
 
 - [About UV Forge](app://about) — App info, tech stack, and features
+- [App Cheat Sheet](app://app-cheat-sheet) — Quick reference for UV Forge features
 - [Git Cheat Sheet](app://git-cheat-sheet) — Quick reference for common Git commands

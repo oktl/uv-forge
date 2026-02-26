@@ -101,6 +101,7 @@ class Controls:
         self.about_menu_item: ft.PopupMenuItem
         self.help_menu_item: ft.PopupMenuItem
         self.git_cheat_sheet_menu_item: ft.PopupMenuItem
+        self.app_cheat_sheet_menu_item: ft.PopupMenuItem
         self.settings_menu_item: ft.PopupMenuItem
         self.history_menu_item: ft.PopupMenuItem
         self.presets_menu_item: ft.PopupMenuItem
@@ -197,6 +198,10 @@ def create_controls(state: AppState, colors: dict) -> Controls:
         icon=ft.Icons.MENU_BOOK,
         content=ft.Text("Git Cheat Sheet"),
     )
+    controls.app_cheat_sheet_menu_item = ft.PopupMenuItem(
+        icon=ft.Icons.ROCKET_LAUNCH,
+        content=ft.Text("App Cheat Sheet"),
+    )
     controls.log_viewer_menu_item = ft.PopupMenuItem(
         icon=ft.Icons.ARTICLE,
         content=ft.Text("View Logs"),
@@ -217,6 +222,7 @@ def create_controls(state: AppState, colors: dict) -> Controls:
             ft.PopupMenuItem(),  # Divider
             controls.help_menu_item,
             controls.git_cheat_sheet_menu_item,
+            controls.app_cheat_sheet_menu_item,
             controls.log_viewer_menu_item,
             ft.PopupMenuItem(),  # Divider
             controls.about_menu_item,

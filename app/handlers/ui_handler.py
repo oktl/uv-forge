@@ -119,6 +119,9 @@ def attach_handlers(page: ft.Page, state: AppState) -> None:
     controls.git_cheat_sheet_menu_item.on_click = wrap_async(
         handlers.on_git_cheat_sheet_click
     )
+    controls.app_cheat_sheet_menu_item.on_click = wrap_async(
+        handlers.on_app_cheat_sheet_click
+    )
     controls.history_menu_item.on_click = wrap_async(handlers.on_history_click)
     controls.presets_menu_item.on_click = wrap_async(handlers.on_presets_click)
     controls.log_viewer_menu_item.on_click = wrap_async(handlers.on_log_viewer_click)

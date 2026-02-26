@@ -41,6 +41,7 @@ A desktop application for creating Python projects with UV — the fast Python p
 ## More Information
 
 - [Help & Documentation](app://help) — Usage guide and keyboard shortcuts
+- [App Cheat Sheet](app://app-cheat-sheet) — Quick reference for UV Forge features
 - [Git Cheat Sheet](app://git-cheat-sheet) — Quick reference for common Git commands
 
 ---

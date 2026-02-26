@@ -9,6 +9,7 @@ import flet as ft
 
 from app.core.constants import (
     ABOUT_FILE,
+    APP_CHEAT_SHEET_FILE,
     GIT_CHEAT_SHEET_FILE,
     HELP_FILE,
     PROJECT_DIR,
@@ -19,6 +20,7 @@ from app.core.preset_manager import delete_preset, load_presets
 from app.core.settings_manager import save_settings
 from app.ui.content_dialogs import (
     create_about_dialog,
+    create_app_cheat_sheet_dialog,
     create_git_cheat_sheet_dialog,
     create_help_dialog,
 )
@@ -86,6 +88,8 @@ For more information, visit: https://docs.astral.sh/uv/
                 asyncio.create_task(self.on_about_click(None))
             elif path == "git-cheat-sheet":
                 asyncio.create_task(self.on_git_cheat_sheet_click(None))
+            elif path == "app-cheat-sheet":
+                asyncio.create_task(self.on_app_cheat_sheet_click(None))
 
         help_dialog = create_help_dialog(
             help_text,
@@ -121,6 +125,8 @@ For more information, visit: https://docs.astral.sh/uv/
                 asyncio.create_task(self.on_help_click(None))
             elif path == "about":
                 asyncio.create_task(self.on_about_click(None))
+            elif path == "app-cheat-sheet":
+                asyncio.create_task(self.on_app_cheat_sheet_click(None))
 
         cheat_sheet_dialog = create_git_cheat_sheet_dialog(
             content,
@@ -132,6 +138,43 @@ For more information, visit: https://docs.astral.sh/uv/
 
         self.page.overlay.append(cheat_sheet_dialog)
         cheat_sheet_dialog.open = True
+        self.state.active_dialog = close_dialog
+        self.page.update()
+
+    async def on_app_cheat_sheet_click(self, e: ft.ControlEvent) -> None:
+        """Handle App Cheat Sheet button click."""
+        try:
+            content = APP_CHEAT_SHEET_FILE.read_text(encoding="utf-8")
+        except (FileNotFoundError, OSError) as e:
+            content = "# App Cheat Sheet\n\nError: Could not load cheat sheet file."
+            self._set_status(
+                f"Warning: Cheat sheet file not found ({e})", "error", update=False
+            )
+
+        def close_dialog(_=None):
+            app_cheat_sheet_dialog.open = False
+            self.state.active_dialog = None
+            self.page.update()
+
+        def handle_internal_link(path: str) -> None:
+            close_dialog()
+            if path == "help":
+                asyncio.create_task(self.on_help_click(None))
+            elif path == "about":
+                asyncio.create_task(self.on_about_click(None))
+            elif path == "git-cheat-sheet":
+                asyncio.create_task(self.on_git_cheat_sheet_click(None))
+
+        app_cheat_sheet_dialog = create_app_cheat_sheet_dialog(
+            content,
+            close_dialog,
+            self.page,
+            self.state.is_dark_mode,
+            on_internal_link=handle_internal_link,
+        )
+
+        self.page.overlay.append(app_cheat_sheet_dialog)
+        app_cheat_sheet_dialog.open = True
         self.state.active_dialog = close_dialog
         self.page.update()
 
@@ -160,6 +203,8 @@ For more information, visit: https://docs.astral.sh/uv/
                 asyncio.create_task(self.on_help_click(None))
             elif path == "git-cheat-sheet":
                 asyncio.create_task(self.on_git_cheat_sheet_click(None))
+            elif path == "app-cheat-sheet":
+                asyncio.create_task(self.on_app_cheat_sheet_click(None))
 
         about_dialog = create_about_dialog(
             content,

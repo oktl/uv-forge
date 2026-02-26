@@ -10,6 +10,7 @@ Functions
   create_dialog_text_field ........ Editable monospace text field
   create_help_dialog .............. Scrollable markdown help viewer
   create_git_cheat_sheet_dialog ... Wide markdown cheat sheet viewer
+  create_app_cheat_sheet_dialog ... Wide markdown app cheat sheet viewer
   create_about_dialog ............. Scrollable markdown about viewer
   create_edit_file_dialog ......... File content editor with save
   create_preview_formatted_dialog . Formatted text preview with save
@@ -161,6 +162,36 @@ def create_git_cheat_sheet_dialog(
     """
     return _create_markdown_dialog(
         "Git Cheat Sheet",
+        content,
+        on_close,
+        page,
+        is_dark_mode,
+        width=900,
+        on_internal_link=on_internal_link,
+    )
+
+
+def create_app_cheat_sheet_dialog(
+    content: str,
+    on_close,
+    page: ft.Page,
+    is_dark_mode: bool,
+    on_internal_link: collections.abc.Callable[[str], None] | None = None,
+) -> ft.AlertDialog:
+    """Create theme-aware dialog displaying the App cheat sheet.
+
+    Args:
+        content: Markdown cheat sheet text to display.
+        on_close: Close button callback.
+        page: The Flet page instance (needed to launch URLs).
+        is_dark_mode: Whether dark mode is active.
+        on_internal_link: Optional callback for app:// links.
+
+    Returns:
+        Configured AlertDialog with scrollable markdown content.
+    """
+    return _create_markdown_dialog(
+        "App Cheat Sheet",
         content,
         on_close,
         page,

@@ -98,6 +98,7 @@ class MockControls:
         self.about_menu_item = MockControl()
         self.help_menu_item = MockControl()
         self.git_cheat_sheet_menu_item = MockControl()
+        self.app_cheat_sheet_menu_item = MockControl()
         self.settings_menu_item = MockControl()
         self.history_menu_item = MockControl()
         self.log_viewer_menu_item = MockControl()
@@ -1988,6 +1989,44 @@ async def test_git_cheat_sheet_close_clears_active_dialog(mock_handlers):
 
     state.active_dialog()
     assert state.active_dialog is None
+
+
+@pytest.mark.asyncio
+async def test_app_cheat_sheet_dialog_sets_active_dialog(mock_handlers):
+    """Test opening App Cheat Sheet dialog sets state.active_dialog."""
+    handlers, page, controls, state = mock_handlers
+
+    with patch("app.handlers.feature_handlers.APP_CHEAT_SHEET_FILE") as mock_file:
+        mock_file.read_text.return_value = "# App\nTest"
+        await handlers.on_app_cheat_sheet_click(None)
+
+    assert state.active_dialog is not None
+    assert callable(state.active_dialog)
+
+
+@pytest.mark.asyncio
+async def test_app_cheat_sheet_close_clears_active_dialog(mock_handlers):
+    """Test closing App Cheat Sheet dialog clears state.active_dialog."""
+    handlers, page, controls, state = mock_handlers
+
+    with patch("app.handlers.feature_handlers.APP_CHEAT_SHEET_FILE") as mock_file:
+        mock_file.read_text.return_value = "# App\nTest"
+        await handlers.on_app_cheat_sheet_click(None)
+
+    state.active_dialog()
+    assert state.active_dialog is None
+
+
+@pytest.mark.asyncio
+async def test_app_cheat_sheet_file_not_found(mock_handlers):
+    """Test App Cheat Sheet handles missing file gracefully."""
+    handlers, page, controls, state = mock_handlers
+
+    with patch("app.handlers.feature_handlers.APP_CHEAT_SHEET_FILE") as mock_file:
+        mock_file.read_text.side_effect = FileNotFoundError("not found")
+        await handlers.on_app_cheat_sheet_click(None)
+
+    assert state.active_dialog is not None
 
 
 @pytest.mark.asyncio

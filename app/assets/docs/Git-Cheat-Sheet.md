@@ -59,4 +59,5 @@ For more information, visit the official Git documentation at [Git Docs](https:/
 ## See Also
 
 - [Help & Documentation](app://help) — Usage guide and keyboard shortcuts
+- [App Cheat Sheet](app://app-cheat-sheet) — Quick reference for UV Forge features
 - [About UV Forge](app://about) — App info, tech stack, and features

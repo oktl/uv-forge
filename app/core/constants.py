@@ -128,6 +128,7 @@ BOILERPLATE_DIR = TEMPLATES_DIR / "boilerplate"
 DOCS_DIR = Path(__file__).parent.parent / "assets" / "docs"
 HELP_FILE = DOCS_DIR / "HELP.md"
 GIT_CHEAT_SHEET_FILE = DOCS_DIR / "Git-Cheat-Sheet.md"
+APP_CHEAT_SHEET_FILE = DOCS_DIR / "App-Cheat-Sheet.md"
 ABOUT_FILE = DOCS_DIR / "ABOUT.md"
 
 # Default paths

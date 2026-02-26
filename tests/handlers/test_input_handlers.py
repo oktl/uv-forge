@@ -86,6 +86,7 @@ class MockControls:
         self.about_menu_item = MockControl()
         self.help_menu_item = MockControl()
         self.git_cheat_sheet_menu_item = MockControl()
+        self.app_cheat_sheet_menu_item = MockControl()
         self.settings_menu_item = MockControl()
         self.history_menu_item = MockControl()
         self.log_viewer_menu_item = MockControl()
