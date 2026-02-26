@@ -361,11 +361,13 @@ For more information, visit: https://docs.astral.sh/uv/
 
         def on_save(name):
             self._save_current_as_preset(name)
+            self._refresh_preset_dropdown()
             close_dialog()
             self._show_snackbar(f"Preset saved: {name}")
 
         def on_delete(preset):
             delete_preset(preset.name)
+            self._refresh_preset_dropdown()
 
         presets_dialog = create_presets_dialog(
             presets=presets,

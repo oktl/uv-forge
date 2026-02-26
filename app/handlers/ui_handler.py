@@ -86,6 +86,7 @@ def attach_handlers(page: ft.Page, state: AppState) -> None:
 
     # --- Options Handlers ---
     controls.python_version_dropdown.on_select = handlers.on_python_version_select
+    controls.preset_dropdown.on_select = handlers.on_preset_quick_select
     controls.create_git_checkbox.on_change = wrap_async(handlers.on_git_toggle)
     controls.include_starter_files_checkbox.on_change = wrap_async(
         handlers.on_boilerplate_toggle

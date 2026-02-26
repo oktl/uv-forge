@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING
 import flet as ft
 
 from app.core.constants import PYTHON_VERSIONS
+from app.core.preset_manager import load_presets
 from app.ui.custom_dropdown import CustomDropdown
 from app.ui.theme_manager import get_theme_colors
 from app.ui.ui_config import UIConfig
@@ -303,6 +304,18 @@ def create_controls(state: AppState, colors: dict) -> Controls:
         tooltip="Python version for this project (set default in Settings)",
     )
 
+    # Preset quick-select
+    preset_names = [p.name for p in load_presets()]
+    controls.preset_label = ft.Text("Preset")
+    controls.preset_dropdown = CustomDropdown(
+        default_value="None",
+        options=preset_names,
+        max_visible=min(len(preset_names), 6),
+        width=200,
+        height=32,
+        tooltip="Apply a saved preset to populate all options",
+    )
+
     # Checkbox controls
     controls.create_git_checkbox = ft.Checkbox(
         label="Initialize Git Repository",
@@ -540,6 +553,14 @@ def create_sections(controls: Controls, state: AppState) -> None:
                         controls=[
                             controls.python_version_label,
                             controls.python_version_dropdown,
+                        ],
+                        spacing=10,
+                        vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                    ),
+                    ft.Row(
+                        controls=[
+                            controls.preset_label,
+                            controls.preset_dropdown,
                         ],
                         spacing=10,
                         vertical_alignment=ft.CrossAxisAlignment.CENTER,

@@ -15,7 +15,7 @@ from app.core.constants import (
 )
 from app.core.history_manager import add_to_history, make_history_entry
 from app.core.models import BuildSummaryConfig, ProjectConfig
-from app.core.preset_manager import add_preset, make_preset
+from app.core.preset_manager import add_preset, load_presets, make_preset
 from app.core.template_merger import normalize_folder
 from app.core.validator import validate_project_name
 from app.handlers.handler_base import wrap_async
@@ -396,6 +396,7 @@ class BuildHandlersMixin:
         self.state.license_type = getattr(preset, "license_type", "")
 
         # Update UI controls
+        self.controls.preset_dropdown.value = preset.name
         self.controls.python_version_dropdown.value = preset.python_version
         self.controls.create_git_checkbox.value = preset.git_enabled
         self.controls.include_starter_files_checkbox.value = (
@@ -448,6 +449,20 @@ class BuildHandlersMixin:
 
         self._show_snackbar(f"Preset applied: {preset.name}")
         self.page.update()
+
+    def on_preset_quick_select(self, value: str) -> None:
+        """Handle preset selection from the quick-select dropdown."""
+        if not value or value == "None":
+            return
+        presets = load_presets()
+        for preset in presets:
+            if preset.name == value:
+                self._apply_preset(preset)
+                return
+
+    def _refresh_preset_dropdown(self) -> None:
+        """Refresh the preset dropdown options from disk."""
+        self.controls.preset_dropdown.options = [p.name for p in load_presets()]
 
     def _save_current_as_preset(self, name: str) -> None:
         """Save the current state as a named preset.
@@ -552,6 +567,7 @@ class BuildHandlersMixin:
         self.controls.project_path_input.value = self.state.project_path
         self.controls.project_name_input.value = ""
         self.controls.python_version_dropdown.value = self.state.python_version
+        self.controls.preset_dropdown.value = "None"
         self.controls.create_git_checkbox.value = self.state.git_enabled
         self.controls.include_starter_files_checkbox.value = True
         self.controls.ui_project_checkbox.value = False

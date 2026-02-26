@@ -66,6 +66,7 @@ class MockControls:
         self.subfolders_container = Mock(content=Mock(controls=[]))
         self.metadata_checkbox = Mock(value=False, label_style=None)
         self.metadata_summary = Mock(value="")
+        self.preset_dropdown = Mock(value="None")
 
 
 def _sample_folders():

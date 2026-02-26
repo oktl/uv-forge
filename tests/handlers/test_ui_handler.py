@@ -110,6 +110,7 @@ class MockControls:
         self.metadata_button = MockControl()
         self.metadata_checkbox = MockControl(value=False)
         self.metadata_summary = MockText()
+        self.preset_dropdown = MockControl(value="None")
         self.section_titles = []
         self.section_containers = []
 
