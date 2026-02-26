@@ -16,6 +16,7 @@ from app.core.constants import (
 from app.core.history_manager import add_to_history, make_history_entry
 from app.core.models import BuildSummaryConfig, ProjectConfig
 from app.core.preset_manager import add_preset, make_preset
+from app.core.template_merger import normalize_folder
 from app.core.validator import validate_project_name
 from app.handlers.handler_base import wrap_async
 from app.handlers.project_builder import build_project
@@ -272,9 +273,19 @@ class BuildHandlersMixin:
         self.state.framework = entry.framework
         self.state.other_project_enabled = entry.other_project_enabled
         self.state.project_type = entry.project_type
-        self.state.folders = list(entry.folders)
+        self.state.folders = [normalize_folder(f) for f in entry.folders]
         self.state.packages = list(entry.packages)
         self.state.dev_packages = set(getattr(entry, "dev_packages", []))
+
+        # Merge post-build required packages from settings (e.g. pre-commit)
+        if self.state.settings.post_build_command_enabled:
+            extra = self.state.settings.post_build_packages
+            if extra:
+                existing = {p.lower() for p in self.state.packages}
+                for pkg in (p.strip() for p in extra.split(",")):
+                    if pkg and pkg.lower() not in existing:
+                        self.state.packages.append(pkg)
+        self.state.auto_packages = list(self.state.packages)
 
         # Update UI controls
         self.controls.project_name_input.value = entry.project_name
@@ -356,9 +367,19 @@ class BuildHandlersMixin:
         self.state.framework = preset.framework
         self.state.other_project_enabled = preset.other_project_enabled
         self.state.project_type = preset.project_type
-        self.state.folders = list(preset.folders)
+        self.state.folders = [normalize_folder(f) for f in preset.folders]
         self.state.packages = list(preset.packages)
         self.state.dev_packages = set(getattr(preset, "dev_packages", []))
+
+        # Merge post-build required packages from settings (e.g. pre-commit)
+        if self.state.settings.post_build_command_enabled:
+            extra = self.state.settings.post_build_packages
+            if extra:
+                existing = {p.lower() for p in self.state.packages}
+                for pkg in (p.strip() for p in extra.split(",")):
+                    if pkg and pkg.lower() not in existing:
+                        self.state.packages.append(pkg)
+        self.state.auto_packages = list(self.state.packages)
 
         # Metadata
         self.state.author_name = getattr(preset, "author_name", "")

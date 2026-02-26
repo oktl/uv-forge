@@ -246,7 +246,10 @@ def create_controls(state: AppState, colors: dict) -> Controls:
         opacity=0.4,
     )
 
-    controls.browse_button = ft.Button("Browse...")
+    controls.browse_button = ft.Button(
+        "Browse...",
+        tooltip="Browse for project location",
+    )
 
     controls.warning_banner = ft.Text(
         "",
@@ -291,7 +294,7 @@ def create_controls(state: AppState, colors: dict) -> Controls:
     controls.python_version_dropdown = ft.Dropdown(
         value=state.python_version,
         options=[ft.dropdown.Option(v) for v in PYTHON_VERSIONS],
-        tooltip="Choose a version, default is 3.14",
+        tooltip="Python version for this project (set default in Settings)",
         expand=True,
         border_color=UIConfig.COLOR_INFO,
     )
@@ -300,7 +303,7 @@ def create_controls(state: AppState, colors: dict) -> Controls:
     controls.create_git_checkbox = ft.Checkbox(
         label="Initialize Git Repository",
         value=state.git_enabled,
-        tooltip="Choose if you want a git repository\nDefault is yes",
+        tooltip="Create a local Git repo with a bare hub for easy pushing",
     )
 
     controls.include_starter_files_checkbox = ft.Checkbox(
@@ -309,17 +312,17 @@ def create_controls(state: AppState, colors: dict) -> Controls:
         label_style=ft.TextStyle(color=UIConfig.COLOR_CHECKBOX_ACTIVE)
         if state.include_starter_files
         else None,
-        tooltip="Create template files with boilerplate starter content.\nDefault is no – only folders and __init__.py are created.",
+        tooltip="Populate files with starter code instead of creating empty files",
     )
 
     controls.ui_project_checkbox = ft.Checkbox(
         label="Create UI Project",
         value=state.ui_project_enabled,
-        tooltip="Choose if you're creating a UI.\nDefault is no.\nOpens a scrolling dialog to choose options.\nCan be combined with Other Project Type",
+        tooltip="Select a UI framework (Flet, PyQt6, Streamlit, etc.)\nCan be combined with Project Type",
     )
     controls.other_projects_checkbox = ft.Checkbox(
         label="Create Other Project Type",
-        tooltip="Create other project types\nlike Django, data science, web scraping, etc...\nOpens a scrolling dialog to choose options.\nCan be combined with UI Project",
+        tooltip="Select a project template (Django, FastAPI, CLI, etc.)\nCan be combined with UI Framework",
     )
 
     # Folder management controls
@@ -349,14 +352,14 @@ def create_controls(state: AppState, colors: dict) -> Controls:
 
     controls.add_folder_button = ft.Button(
         "Add Folder/File",
-        tooltip="Add a folder or file to the template\nlist in the display.\n\n⌘F / Ctrl+F",
+        tooltip="Add a folder or file to the project structure\n⌘F / Ctrl+F",
         style=_split_btn_style,
         width=UIConfig.BUTTON_WIDTH_STRUCTURE,
     )
 
     controls.remove_folder_button = ft.Button(
         "Remove Folder/File",
-        tooltip="To remove folder or file from the displayed template\n click the folder or file in the display\nand then click this button.",
+        tooltip="Select an item in the list, then click to remove it",
         style=_split_btn_style,
         width=UIConfig.BUTTON_WIDTH_STRUCTURE,
     )
@@ -386,7 +389,7 @@ def create_controls(state: AppState, colors: dict) -> Controls:
 
     controls.remove_package_button = ft.Button(
         "Remove Package",
-        tooltip="Click a package in the list to select it,\nthen click Remove to delete it.",
+        tooltip="Select a package in the list, then click to remove it",
         style=_split_btn_style,
         width=UIConfig.BUTTON_WIDTH_STRUCTURE,
     )
@@ -409,7 +412,7 @@ def create_controls(state: AppState, colors: dict) -> Controls:
     controls.metadata_checkbox = ft.Checkbox(
         label="Set Project Metadata...",
         value=False,
-        tooltip="Set author, description, and license for pyproject.toml.\nOpens a dialog to configure metadata.",
+        tooltip="Set author, description, and license for pyproject.toml",
     )
     controls.metadata_summary = ft.Text(
         "",
@@ -424,7 +427,7 @@ def create_controls(state: AppState, colors: dict) -> Controls:
 
     controls.build_project_button = ft.Button(
         content="Build Project",
-        tooltip="Enter a valid path and project name to enable.\n\n⌘Enter / Ctrl+Enter",
+        tooltip="Create the project with all configured settings\n⌘Enter / Ctrl+Enter",
         bgcolor=UIConfig.COLOR_BTN_BUILD,
         color=ft.Colors.WHITE,
         width=UIConfig.BUTTON_WIDTH_BUILD,
@@ -435,7 +438,7 @@ def create_controls(state: AppState, colors: dict) -> Controls:
     controls.reset_button = ft.Button(
         content="Reset",
         icon=ft.Icons.REFRESH,
-        tooltip="Resets all controls and values\nto their original state.\n\n⌘R / Ctrl+R",
+        tooltip="Reset all fields to defaults\n⌘R / Ctrl+R",
         bgcolor=UIConfig.COLOR_BTN_RESET,
         color=ft.Colors.WHITE,
         width=UIConfig.BUTTON_WIDTH_ACTION,

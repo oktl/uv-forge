@@ -2223,7 +2223,8 @@ def create_presets_dialog(
             selected_index["value"] = idx
             _highlight(idx)
             apply_btn.disabled = False
-            delete_btn.disabled = False
+            # Disable delete for built-in presets
+            delete_btn.disabled = getattr(presets[idx], "builtin", False)
             for c in row_containers:
                 c.update()
             apply_btn.update()
@@ -2244,6 +2245,10 @@ def create_presets_dialog(
         """
         idx = selected_index["value"]
         if idx is None or idx >= len(presets):
+            return
+
+        # Built-in presets cannot be deleted
+        if getattr(presets[idx], "builtin", False):
             return
 
         # Persist deletion via the callback
@@ -2378,25 +2383,37 @@ def create_presets_dialog(
                 details.append("Starter files")
             details_text = " · ".join(details)
 
+            # Build name row with optional "Built-in" badge
+            name_row_controls: list[ft.Control] = [
+                ft.Text(
+                    preset.name,
+                    weight=ft.FontWeight.W_600,
+                    size=14,
+                    color=colors["main_title"],
+                    expand=True,
+                ),
+            ]
+            if getattr(preset, "builtin", False):
+                name_row_controls.append(
+                    ft.Container(
+                        content=ft.Text("Built-in", size=10, color=ft.Colors.WHITE),
+                        bgcolor=ft.Colors.TEAL_700,
+                        border_radius=4,
+                        padding=ft.Padding.symmetric(horizontal=6, vertical=2),
+                    )
+                )
+            name_row_controls.append(
+                ft.Text(
+                    time_str,
+                    size=11,
+                    color=ft.Colors.GREY_500,
+                ),
+            )
+
             row = ft.Container(
                 content=ft.Column(
                     [
-                        ft.Row(
-                            [
-                                ft.Text(
-                                    preset.name,
-                                    weight=ft.FontWeight.W_600,
-                                    size=14,
-                                    color=colors["main_title"],
-                                    expand=True,
-                                ),
-                                ft.Text(
-                                    time_str,
-                                    size=11,
-                                    color=ft.Colors.GREY_500,
-                                ),
-                            ],
-                        ),
+                        ft.Row(name_row_controls),
                         ft.Text(
                             details_text,
                             size=12,

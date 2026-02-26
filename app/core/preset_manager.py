@@ -55,6 +55,206 @@ class ProjectPreset:
     description: str = ""
     license_type: str = ""
     saved_at: str = ""
+    builtin: bool = False
+
+
+# ── Built-in starter presets ────────────────────────────────────────────────
+
+BUILTIN_PRESETS: list[ProjectPreset] = [
+    ProjectPreset(
+        name="Flet Desktop App",
+        python_version="3.13",
+        git_enabled=True,
+        include_starter_files=True,
+        ui_project_enabled=True,
+        framework="Flet",
+        other_project_enabled=False,
+        project_type=None,
+        folders=[
+            {
+                "name": ".dev",
+                "create_init": False,
+                "root_level": True,
+                "subfolders": ["experiments", "notes", "screens"],
+            },
+            {
+                "name": "assets",
+                "create_init": False,
+                "subfolders": ["icons", "images", "themes", "docs"],
+            },
+            {
+                "name": "core",
+                "files": [
+                    "async_executor.py",
+                    "constants.py",
+                    "logging_config.py",
+                    "state.py",
+                ],
+            },
+            {"name": "handlers", "files": ["handler_base", "ui_handler.py"]},
+            {
+                "name": "ui",
+                "files": [
+                    "components.py",
+                    "dialogs.py",
+                    "theme_manager.py",
+                    "ui_config.py",
+                ],
+            },
+            {
+                "name": "tests",
+                "root_level": True,
+                "subfolders": ["core", "handlers", "ui"],
+                "files": ["conftest.py", "test_app.py"],
+            },
+        ],
+        packages=["flet", "pytest", "pytest-cov", "ruff"],
+        dev_packages=["pytest", "pytest-cov", "ruff"],
+        license_type="MIT",
+        saved_at="",
+        builtin=True,
+    ),
+    ProjectPreset(
+        name="FastAPI Backend",
+        python_version="3.13",
+        git_enabled=True,
+        include_starter_files=True,
+        ui_project_enabled=False,
+        framework=None,
+        other_project_enabled=True,
+        project_type="FastAPI",
+        folders=[
+            {
+                "name": "api",
+                "create_init": True,
+                "subfolders": [
+                    {
+                        "name": "v1",
+                        "create_init": True,
+                        "subfolders": ["endpoints"],
+                    }
+                ],
+                "files": ["dependencies.py"],
+            },
+            {
+                "name": "core",
+                "create_init": True,
+                "files": ["config.py", "security.py"],
+            },
+            {"name": "models", "create_init": True, "files": ["base.py"]},
+            {"name": "schemas", "create_init": True, "files": []},
+            {"name": "services", "create_init": True, "files": []},
+            {
+                "name": "db",
+                "create_init": True,
+                "files": ["database.py", "session.py"],
+            },
+            {
+                "name": "tests",
+                "create_init": True,
+                "root_level": True,
+                "files": ["conftest.py", "test_app.py"],
+                "subfolders": ["api", "unit"],
+            },
+        ],
+        packages=["fastapi", "uvicorn", "pytest", "pytest-cov", "ruff", "httpx"],
+        dev_packages=["pytest", "pytest-cov", "ruff", "httpx"],
+        license_type="MIT",
+        saved_at="",
+        builtin=True,
+    ),
+    ProjectPreset(
+        name="Data Science Starter",
+        python_version="3.13",
+        git_enabled=True,
+        include_starter_files=True,
+        ui_project_enabled=False,
+        framework=None,
+        other_project_enabled=True,
+        project_type="Data Analysis",
+        folders=[
+            {
+                "name": "data",
+                "create_init": False,
+                "root_level": True,
+                "subfolders": ["raw", "processed", "external"],
+            },
+            {
+                "name": "notebooks",
+                "create_init": False,
+                "root_level": True,
+                "subfolders": ["exploratory", "reports"],
+            },
+            {
+                "name": "src",
+                "create_init": True,
+                "root_level": True,
+                "subfolders": [
+                    {"name": "data", "files": ["make_dataset.py"]},
+                    {"name": "features", "files": ["build_features.py"]},
+                    {"name": "visualization", "files": ["visualize.py"]},
+                ],
+            },
+            {
+                "name": "reports",
+                "create_init": False,
+                "root_level": True,
+                "subfolders": ["figures"],
+            },
+            {
+                "name": "models",
+                "create_init": False,
+                "root_level": True,
+                "subfolders": [],
+            },
+        ],
+        packages=["pandas", "numpy", "matplotlib", "jupyter"],
+        dev_packages=[],
+        license_type="MIT",
+        saved_at="",
+        builtin=True,
+    ),
+    ProjectPreset(
+        name="CLI Tool (Typer)",
+        python_version="3.13",
+        git_enabled=True,
+        include_starter_files=True,
+        ui_project_enabled=False,
+        framework=None,
+        other_project_enabled=True,
+        project_type="CLI (Typer)",
+        folders=[
+            {
+                "name": "cli",
+                "create_init": True,
+                "files": ["main.py", "config.py", "utils.py"],
+                "subfolders": [{"name": "commands", "files": []}],
+            },
+            {
+                "name": "core",
+                "create_init": True,
+                "files": ["models.py", "validators.py"],
+            },
+            {
+                "name": "utils",
+                "create_init": True,
+                "files": ["formatting.py", "helpers.py"],
+            },
+            {
+                "name": "tests",
+                "create_init": True,
+                "root_level": True,
+                "files": ["conftest.py", "test_app.py"],
+                "subfolders": ["commands", "unit"],
+            },
+        ],
+        packages=["typer[all]", "pytest", "pytest-cov", "ruff"],
+        dev_packages=["pytest", "pytest-cov", "ruff"],
+        license_type="MIT",
+        saved_at="",
+        builtin=True,
+    ),
+]
 
 
 def load_presets() -> list[ProjectPreset]:
@@ -64,27 +264,31 @@ def load_presets() -> list[ProjectPreset]:
         List of ProjectPreset, newest first. Empty list if file
         is missing or corrupted.
     """
-    if not PRESETS_FILE.exists():
-        return []
+    presets: list[ProjectPreset] = []
 
-    try:
-        data = json.loads(PRESETS_FILE.read_text(encoding="utf-8"))
-    except (json.JSONDecodeError, OSError):
-        return []
-
-    if not isinstance(data, list):
-        return []
-
-    valid_keys = {f.name for f in fields(ProjectPreset)}
-    presets = []
-    for item in data:
-        if not isinstance(item, dict):
-            continue
-        filtered = {k: v for k, v in item.items() if k in valid_keys}
+    if PRESETS_FILE.exists():
         try:
-            presets.append(ProjectPreset(**filtered))
-        except TypeError:
-            continue
+            data = json.loads(PRESETS_FILE.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            data = None
+
+        if isinstance(data, list):
+            valid_keys = {f.name for f in fields(ProjectPreset)}
+            for item in data:
+                if not isinstance(item, dict):
+                    continue
+                filtered = {k: v for k, v in item.items() if k in valid_keys}
+                try:
+                    presets.append(ProjectPreset(**filtered))
+                except TypeError:
+                    continue
+
+    # Append built-in presets that aren't shadowed by user presets of the same name
+    user_names = {p.name for p in presets}
+    for bp in BUILTIN_PRESETS:
+        if bp.name not in user_names:
+            presets.append(bp)
+
     return presets
 
 
@@ -115,18 +319,25 @@ def add_preset(preset: ProjectPreset) -> None:
     presets = load_presets()
     presets = [p for p in presets if p.name != preset.name]
     presets.insert(0, preset)
-    save_presets(presets)
+    save_presets([p for p in presets if not p.builtin])
 
 
 def delete_preset(name: str) -> None:
     """Remove a preset by name.
 
+    Built-in presets cannot be deleted.
+
     Args:
         name: The name of the preset to delete.
     """
+    # Refuse to delete built-in presets
+    builtin_names = {bp.name for bp in BUILTIN_PRESETS}
+    if name in builtin_names:
+        return
+
     presets = load_presets()
     presets = [p for p in presets if p.name != name]
-    save_presets(presets)
+    save_presets([p for p in presets if not p.builtin])
 
 
 def make_preset(
