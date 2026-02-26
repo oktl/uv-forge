@@ -79,6 +79,8 @@ class MockControls:
         self.remove_package_button = MockControl()
         self.clear_packages_button = MockControl()
         self.progress_ring = MockControl()
+        self.progress_bar = MockControl()
+        self.progress_step_text = MockControl()
         self.build_project_button = MockControl()
         self.reset_button = MockControl()
         self.exit_button = MockControl()

@@ -35,6 +35,7 @@ A desktop application for creating Python projects with UV — the fast Python p
 - **Recent Projects** — Restore settings from your last 5 builds with one click
 - **Log Viewer** — Colour-coded log display with clickable source locations that open in your IDE
 - **Theme Support** — Toggle between dark and light mode
+- **Build Progress** — Determinate progress bar with step counter during builds
 - **Error Handling** — Rollback and cleanup on build failure
 
 ---

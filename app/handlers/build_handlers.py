@@ -172,6 +172,10 @@ class BuildHandlersMixin:
             post_build_command: Optional shell command to run in the project directory.
         """
         self.controls.progress_ring.visible = True
+        self.controls.progress_bar.visible = True
+        self.controls.progress_bar.value = 0
+        self.controls.progress_step_text.visible = True
+        self.controls.progress_step_text.value = ""
         self.controls.build_project_button.disabled = True
         self._set_status("Building project...", "info", update=True)
 
@@ -197,12 +201,16 @@ class BuildHandlersMixin:
             license_type=self.state.license_type,
         )
 
-        def _on_build_progress(msg: str) -> None:
+        def _on_build_progress(msg: str, step: int, total: int) -> None:
+            self.controls.progress_bar.value = step / total
+            self.controls.progress_step_text.value = f"{step}/{total}"
             self._set_status(msg, "info", update=True)
 
         result = await AsyncExecutor.run(build_project, config, _on_build_progress)
 
         self.controls.progress_ring.visible = False
+        self.controls.progress_bar.visible = False
+        self.controls.progress_step_text.visible = False
         self._update_build_button_state()
 
         if result.success:
@@ -566,6 +574,8 @@ class BuildHandlersMixin:
         self.controls.check_pypi_button.disabled = True
         self.controls.path_preview_text.value = "\u00a0"
         self.controls.progress_ring.visible = False
+        self.controls.progress_bar.visible = False
+        self.controls.progress_step_text.visible = False
         self.page.title = "UV Forge"
 
         self._set_validation_icon(self.controls.project_path_input, True)

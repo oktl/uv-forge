@@ -125,6 +125,8 @@ def _create_project_scaffold(
         resolver=resolver,
         skip_files=not config.include_starter_files,
     )
+
+    _progress("Configuring project metadata...")
     configure_pyproject(
         project_path,
         config.project_name,
@@ -167,7 +169,7 @@ def _install_dependencies(
 
 def build_project(
     config: ProjectConfig,
-    on_progress: Callable[[str], None] | None = None,
+    on_progress: Callable[[str, int, int], None] | None = None,
 ) -> BuildResult:
     """Build a new UV project with all configured settings.
 
@@ -180,7 +182,8 @@ def build_project(
 
     Args:
         config: ProjectConfig containing all project settings.
-        on_progress: Optional callback invoked with a status string before each step.
+        on_progress: Optional callback invoked with (message, current_step, total_steps)
+            before each pipeline step.
 
     Returns:
         BuildResult indicating success or failure with message.
@@ -188,6 +191,21 @@ def build_project(
     is_valid, error_msg = validate_project_name(config.project_name)
     if not is_valid:
         return BuildResult(success=False, message=error_msg)
+
+    # Compute dynamic total based on config
+    total_steps = 5  # UV init, folders, pyproject, venv, (success implicit)
+    if config.git_enabled:
+        total_steps += 2  # git init + finalize
+    runtime_pkgs, dev_pkgs = _collect_packages_to_install(config)
+    if runtime_pkgs or dev_pkgs:
+        total_steps += 1  # install packages
+
+    counter = [0]
+
+    def _stepped_progress(msg: str) -> None:
+        counter[0] += 1
+        if on_progress:
+            on_progress(msg, counter[0], total_steps)
 
     project_path = config.full_path
     bare_repo_path = (
@@ -209,12 +227,12 @@ def build_project(
 
     try:
         project_path.mkdir(parents=True)
-        _create_project_scaffold(config, project_path, on_progress)
-        _install_dependencies(config, project_path, on_progress)
+        _create_project_scaffold(config, project_path, _stepped_progress)
+        _install_dependencies(config, project_path, _stepped_progress)
 
         # Finalize git after all files and packages are installed
-        if config.git_enabled and on_progress:
-            on_progress("Finalizing Git...")
+        if config.git_enabled:
+            _stepped_progress("Finalizing Git...")
         finalize_git_setup(project_path, config.git_enabled)
 
         return BuildResult(

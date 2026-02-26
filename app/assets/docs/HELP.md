@@ -138,7 +138,7 @@ You can customize the structure by:
 
 ### 8. **Build Project**
 
-Click "Build Project" to create your project with all configured settings. The builder will:
+Click "Build Project" to create your project with all configured settings. A **progress bar** with step counter (e.g., "3/7") tracks each stage of the pipeline in real time. The builder will:
 
 1. Create the project directory
 2. Initialize UV with `uv init`
@@ -150,6 +150,8 @@ Click "Build Project" to create your project with all configured settings. The b
 8. Install selected UI framework (if any)
 9. Install selected project type packages (if any)
 10. Finalize Git Phase 2 (if enabled): Stage, commit, and push to hub
+
+The total number of steps adjusts dynamically based on your configuration (git, packages). After the build completes, the progress bar hides and the normal status message returns.
 
 A **confirmation dialog** will appear showing a summary of your project settings, including a collapsible **Structure** preview showing the complete project tree with all folders and files that will be created. Click the Structure tile to expand the tree. Before confirming, you can choose post-build actions:
 
@@ -267,6 +269,7 @@ Log files are stored in the `logs/` directory and rotate daily. The viewer alway
 - **Overflow Menu** (⋮) - Access Help, Settings, Recent Projects, Presets, Git Cheat Sheet, View Logs, and About from the app bar menu
 - **Real-time Validation** - The app shows validation status with ✓ (valid) and ✗ (invalid) icons
 - **Warning Banner** - Any issues are displayed below the project name field
+- **Build Progress** - A determinate progress bar with step counter shows pipeline progress during builds
 - **Status Messages** - See what's happening in the status bar during build
 
 ## Combining UI Framework + Project Type

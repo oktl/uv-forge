@@ -98,6 +98,8 @@ class Controls:
         self.reset_button: ft.Button
         self.exit_button: ft.Button
         self.progress_ring: ft.ProgressRing
+        self.progress_bar: ft.ProgressBar
+        self.progress_step_text: ft.Text
         self.about_menu_item: ft.PopupMenuItem
         self.help_menu_item: ft.PopupMenuItem
         self.git_cheat_sheet_menu_item: ft.PopupMenuItem
@@ -460,6 +462,17 @@ def create_controls(state: AppState, colors: dict) -> Controls:
         stroke_width=UIConfig.PROGRESS_RING_STROKE_WIDTH,
     )
 
+    controls.progress_bar = ft.ProgressBar(
+        visible=False,
+        width=UIConfig.PROGRESS_BAR_WIDTH,
+        value=0,
+    )
+    controls.progress_step_text = ft.Text(
+        visible=False,
+        size=UIConfig.TEXT_SIZE_SMALL,
+        color=UIConfig.COLOR_INFO,
+    )
+
     # Title and container lists
     controls.main_title = ft.Text(
         "UV Forge",
@@ -734,14 +747,28 @@ def create_layout(controls: Controls) -> ft.Column:
                 vertical_alignment=ft.CrossAxisAlignment.START,
             ),
             ft.Container(
-                content=ft.Row(
-                    controls=[
-                        controls.progress_ring,
-                        controls.status_icon,
-                        controls.status_text,
+                content=ft.Column(
+                    [
+                        ft.Row(
+                            [
+                                controls.progress_bar,
+                                controls.progress_step_text,
+                            ],
+                            alignment=ft.MainAxisAlignment.CENTER,
+                            spacing=8,
+                        ),
+                        ft.Row(
+                            [
+                                controls.progress_ring,
+                                controls.status_icon,
+                                controls.status_text,
+                            ],
+                            alignment=ft.MainAxisAlignment.CENTER,
+                            spacing=8,
+                        ),
                     ],
-                    alignment=ft.MainAxisAlignment.CENTER,
-                    spacing=8,
+                    spacing=4,
+                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                 )
             ),
             ft.Row(

@@ -15,9 +15,10 @@ class UIConfig:
     are defined here for easy modification and consistency.
     """
 
-    # Progress Ring
+    # Progress Ring / Bar
     PROGRESS_RING_SIZE = 18
     PROGRESS_RING_STROKE_WIDTH = 2
+    PROGRESS_BAR_WIDTH = 300
 
     # Icon Sizes
     ICON_SIZE_DEFAULT = 18

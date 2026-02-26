@@ -58,6 +58,8 @@ class MockControls:
         self.check_pypi_button = Mock(disabled=True)
         self.path_preview_text = Mock(value="\u00a0")
         self.progress_ring = Mock(visible=False)
+        self.progress_bar = Mock(visible=False, value=0)
+        self.progress_step_text = Mock(visible=False, value="")
         self.app_subfolders_label = Mock(value="App Subfolders:")
         self.packages_label = Mock(value="Packages: 0")
         self.packages_container = Mock(content=Mock(controls=[]))

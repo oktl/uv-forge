@@ -27,18 +27,18 @@ On Windows/Linux, replace ⌘ with Ctrl.
 
 ## Build Pipeline
 
-| Step | What happens                                       |
-| ---- | -------------------------------------------------- |
-| 1    | Create project directory                           |
-| 2    | `uv init` — scaffolds pyproject.toml               |
-| 3    | Git Phase 1 — local repo + bare hub + origin       |
-| 4    | Create folder structure from templates             |
-| 5    | Populate files with boilerplate starter content    |
-| 6    | Configure pyproject.toml (metadata, authors, etc.) |
-| 7    | `uv venv` — create virtual environment             |
-| 8    | `uv add` — install packages (+ `--dev` for dev)    |
-| 9    | Git Phase 2 — stage, commit, push to hub           |
-| 10   | Run post-build command (if enabled)                |
+A **progress bar** with step counter (e.g., "3/7") tracks each stage. Steps are conditional — git-disabled builds skip git steps, no-packages builds skip install. Total varies from 5 to 7 steps.
+
+| Step | What happens                                       | Condition          |
+| ---- | -------------------------------------------------- | ------------------ |
+| 1    | `uv init` — scaffolds pyproject.toml               | always             |
+| 2    | Git Phase 1 — local repo + bare hub + origin       | git enabled        |
+| 3    | Create folder structure from templates              | always             |
+| 4    | Configure pyproject.toml (metadata, authors, etc.) | always             |
+| 5    | `uv venv` — create virtual environment             | always             |
+| 6    | `uv add` — install packages (+ `--dev` for dev)    | packages > 0       |
+| 7    | Git Phase 2 — stage, commit, push to hub           | git enabled        |
+| —    | Run post-build command (if enabled)                | after build        |
 
 ---
 
