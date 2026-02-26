@@ -1554,7 +1554,7 @@ def create_build_summary_dialog(
             spacing=1,
             tight=True,
         ),
-        width=460,
+        width=400,
         height=200,
         padding=ft.Padding(left=8, top=4, right=4, bottom=4),
     )
@@ -1616,6 +1616,7 @@ def create_build_summary_dialog(
     open_folder_checkbox = ft.Checkbox(
         label="Open project folder after build",
         value=open_folder_default,
+        label_style=green if open_folder_default else None,
         on_change=on_checkbox_change,
     )
 
@@ -1647,6 +1648,7 @@ def create_build_summary_dialog(
     open_terminal_checkbox = ft.Checkbox(
         label="Open terminal at project root",
         value=open_terminal_default,
+        label_style=green if open_terminal_default else None,
         on_change=on_checkbox_change,
     )
 
@@ -1662,7 +1664,7 @@ def create_build_summary_dialog(
     post_build_command_field = ft.TextField(
         value=config.post_build_command,
         hint_text="e.g. uv run pre-commit install",
-        width=390,
+        width=400,
         text_size=13,
         content_padding=ft.padding.symmetric(horizontal=10, vertical=8),
         disabled=not config.post_build_command_enabled,
@@ -1706,31 +1708,49 @@ def create_build_summary_dialog(
         vertical_alignment=ft.CrossAxisAlignment.CENTER,
     )
 
+    left_column = ft.Column(
+        rows,
+        tight=True,
+        spacing=8,
+        scroll=ft.ScrollMode.AUTO,
+        width=450,
+    )
+
+    right_column = ft.Column(
+        [
+            ft.Text(
+                "After Build",
+                size=13,
+                weight=ft.FontWeight.BOLD,
+                color=colors["section_title"],
+            ),
+            open_folder_row,
+            open_vscode_row,
+            open_terminal_row,
+            ft.Divider(height=8, thickness=1),
+            post_build_row,
+            post_build_command_row,
+        ],
+        tight=True,
+        spacing=8,
+        width=450,
+    )
+
     dialog = ft.AlertDialog(
         modal=True,
         title=_create_dialog_title("Confirm Build", colors, ft.Icons.BUILD_CIRCLE),
         content=ft.Container(
-            content=ft.Column(
-                rows
-                + [
-                    ft.Divider(height=16, thickness=1),
-                    ft.Text(
-                        "After Build",
-                        size=13,
-                        weight=ft.FontWeight.BOLD,
-                        color=colors["section_title"],
-                    ),
-                    open_folder_row,
-                    open_vscode_row,
-                    open_terminal_row,
-                    post_build_row,
-                    post_build_command_row,
+            content=ft.Row(
+                [
+                    left_column,
+                    ft.VerticalDivider(width=20, thickness=1),
+                    right_column,
                 ],
-                tight=True,
-                spacing=8,
+                vertical_alignment=ft.CrossAxisAlignment.START,
+                spacing=0,
             ),
-            width=500,
-            padding=20,
+            width=960,
+            padding=ft.Padding(left=20, top=20, right=40, bottom=20),
         ),
         actions=_create_dialog_actions(
             "Build",
