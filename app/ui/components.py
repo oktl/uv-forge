@@ -299,7 +299,7 @@ def create_controls(state: AppState, colors: dict) -> Controls:
         default_value=state.python_version,
         options=list(PYTHON_VERSIONS),
         max_visible=len(PYTHON_VERSIONS),
-        width=120,
+        width=140,
         height=32,
         tooltip="Python version for this project (set default in Settings)",
     )
