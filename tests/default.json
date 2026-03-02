@@ -1,0 +1,34 @@
+{
+  "folders": [
+    "core",
+    "handlers",
+    "utils",
+    {
+      "name": "assets",
+      "create_init": false,
+      "subfolders": [
+        "css",
+        "images"
+      ]
+    },
+    {
+      "name": ".dev",
+      "create_init": false,
+      "root_level": true,
+      "subfolders": [
+        "experiments",
+        "notes",
+        "scratch",
+        "screens"
+      ]
+    },
+    {
+      "name": "tests",
+      "root_level": true,
+      "files": [
+        "conftest.py",
+        "test_app.py"
+      ]
+    }
+  ]
+}
