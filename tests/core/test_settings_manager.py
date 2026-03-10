@@ -6,7 +6,7 @@ from unittest.mock import patch
 
 import pytest
 
-from app.core.settings_manager import (
+from uv_forge.core.settings_manager import (
     SETTINGS_DIR,
     SETTINGS_FILE,
     AppSettings,
@@ -54,8 +54,8 @@ class TestLoadSettings:
     def test_returns_defaults_when_no_file(self, tmp_path):
         fake_file = tmp_path / "settings.json"
         with (
-            patch("app.core.settings_manager.SETTINGS_FILE", fake_file),
-            patch("app.core.settings_manager.SETTINGS_DIR", tmp_path),
+            patch("uv_forge.core.settings_manager.SETTINGS_FILE", fake_file),
+            patch("uv_forge.core.settings_manager.SETTINGS_DIR", tmp_path),
         ):
             settings = load_settings()
             assert settings.default_python_version == "3.14"
@@ -66,8 +66,8 @@ class TestLoadSettings:
     def test_writes_defaults_on_first_run(self, tmp_path):
         fake_file = tmp_path / "settings.json"
         with (
-            patch("app.core.settings_manager.SETTINGS_FILE", fake_file),
-            patch("app.core.settings_manager.SETTINGS_DIR", tmp_path),
+            patch("uv_forge.core.settings_manager.SETTINGS_FILE", fake_file),
+            patch("uv_forge.core.settings_manager.SETTINGS_DIR", tmp_path),
         ):
             load_settings()
             data = json.loads(fake_file.read_text())
@@ -88,7 +88,7 @@ class TestLoadSettings:
                 }
             )
         )
-        with patch("app.core.settings_manager.SETTINGS_FILE", fake_file):
+        with patch("uv_forge.core.settings_manager.SETTINGS_FILE", fake_file):
             settings = load_settings()
             assert settings.default_project_path == "/my/projects"
             assert settings.default_python_version == "3.13"
@@ -106,7 +106,7 @@ class TestLoadSettings:
                 }
             )
         )
-        with patch("app.core.settings_manager.SETTINGS_FILE", fake_file):
+        with patch("uv_forge.core.settings_manager.SETTINGS_FILE", fake_file):
             settings = load_settings()
             assert settings.preferred_ide == "Zed"
             # Other fields get defaults
@@ -115,7 +115,7 @@ class TestLoadSettings:
     def test_missing_keys_get_defaults(self, tmp_path):
         fake_file = tmp_path / "settings.json"
         fake_file.write_text(json.dumps({"preferred_ide": "Cursor"}))
-        with patch("app.core.settings_manager.SETTINGS_FILE", fake_file):
+        with patch("uv_forge.core.settings_manager.SETTINGS_FILE", fake_file):
             settings = load_settings()
             assert settings.preferred_ide == "Cursor"
             assert settings.default_python_version == "3.14"
@@ -124,14 +124,14 @@ class TestLoadSettings:
     def test_corrupt_json_returns_defaults(self, tmp_path):
         fake_file = tmp_path / "settings.json"
         fake_file.write_text("not valid json {{{")
-        with patch("app.core.settings_manager.SETTINGS_FILE", fake_file):
+        with patch("uv_forge.core.settings_manager.SETTINGS_FILE", fake_file):
             settings = load_settings()
             assert settings.preferred_ide == "VS Code"
 
     def test_empty_file_returns_defaults(self, tmp_path):
         fake_file = tmp_path / "settings.json"
         fake_file.write_text("")
-        with patch("app.core.settings_manager.SETTINGS_FILE", fake_file):
+        with patch("uv_forge.core.settings_manager.SETTINGS_FILE", fake_file):
             settings = load_settings()
             assert settings.preferred_ide == "VS Code"
 
@@ -142,8 +142,8 @@ class TestSaveSettings:
     def test_saves_to_json(self, tmp_path):
         fake_file = tmp_path / "settings.json"
         with (
-            patch("app.core.settings_manager.SETTINGS_FILE", fake_file),
-            patch("app.core.settings_manager.SETTINGS_DIR", tmp_path),
+            patch("uv_forge.core.settings_manager.SETTINGS_FILE", fake_file),
+            patch("uv_forge.core.settings_manager.SETTINGS_DIR", tmp_path),
         ):
             settings = AppSettings(preferred_ide="Cursor", git_enabled_default=False)
             save_settings(settings)
@@ -155,8 +155,8 @@ class TestSaveSettings:
         nested_dir = tmp_path / "sub" / "dir"
         fake_file = nested_dir / "settings.json"
         with (
-            patch("app.core.settings_manager.SETTINGS_FILE", fake_file),
-            patch("app.core.settings_manager.SETTINGS_DIR", nested_dir),
+            patch("uv_forge.core.settings_manager.SETTINGS_FILE", fake_file),
+            patch("uv_forge.core.settings_manager.SETTINGS_DIR", nested_dir),
         ):
             save_settings(AppSettings())
             assert fake_file.exists()
@@ -164,8 +164,8 @@ class TestSaveSettings:
     def test_roundtrip(self, tmp_path):
         fake_file = tmp_path / "settings.json"
         with (
-            patch("app.core.settings_manager.SETTINGS_FILE", fake_file),
-            patch("app.core.settings_manager.SETTINGS_DIR", tmp_path),
+            patch("uv_forge.core.settings_manager.SETTINGS_FILE", fake_file),
+            patch("uv_forge.core.settings_manager.SETTINGS_DIR", tmp_path),
         ):
             original = AppSettings(
                 default_project_path="/test/path",
@@ -185,8 +185,8 @@ class TestSaveSettings:
     def test_post_build_command_roundtrip(self, tmp_path):
         fake_file = tmp_path / "settings.json"
         with (
-            patch("app.core.settings_manager.SETTINGS_FILE", fake_file),
-            patch("app.core.settings_manager.SETTINGS_DIR", tmp_path),
+            patch("uv_forge.core.settings_manager.SETTINGS_FILE", fake_file),
+            patch("uv_forge.core.settings_manager.SETTINGS_DIR", tmp_path),
         ):
             original = AppSettings(post_build_command="uv run pytest")
             save_settings(original)
@@ -196,7 +196,7 @@ class TestSaveSettings:
     def test_missing_post_build_command_defaults_empty(self, tmp_path):
         fake_file = tmp_path / "settings.json"
         fake_file.write_text(json.dumps({"preferred_ide": "VS Code"}))
-        with patch("app.core.settings_manager.SETTINGS_FILE", fake_file):
+        with patch("uv_forge.core.settings_manager.SETTINGS_FILE", fake_file):
             settings = load_settings()
             assert settings.post_build_command == ""
 

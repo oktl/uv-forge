@@ -7,7 +7,7 @@ from unittest.mock import patch
 
 import pytest
 
-from app.handlers.git_handler import finalize_git_setup, handle_git_init
+from uv_forge.handlers.git_handler import finalize_git_setup, handle_git_init
 
 
 @pytest.fixture
@@ -31,7 +31,7 @@ def _isolate_hub(tmp_path):
     ~/Projects/git-repos/ with leftover tmp*.git directories."""
     hub_dir = tmp_path / "git-repos"
     hub_dir.mkdir()
-    with patch("app.handlers.git_handler.DEFAULT_GIT_HUB_ROOT", hub_dir):
+    with patch("uv_forge.handlers.git_handler.DEFAULT_GIT_HUB_ROOT", hub_dir):
         yield
 
 

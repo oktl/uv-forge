@@ -4,7 +4,7 @@ import json
 
 import pytest
 
-from app.core.preset_manager import (
+from uv_forge.core.preset_manager import (
     BUILTIN_PRESETS,
     PRESETS_FILE,
     ProjectPreset,
@@ -42,8 +42,8 @@ def _make_preset(name: str = "My Stack", **kwargs):
 def _use_tmp_presets(tmp_path, monkeypatch):
     """Redirect PRESETS_FILE to a temp directory for every test."""
     tmp_file = tmp_path / "presets.json"
-    monkeypatch.setattr("app.core.preset_manager.PRESETS_FILE", tmp_file)
-    monkeypatch.setattr("app.core.preset_manager.SETTINGS_DIR", tmp_path)
+    monkeypatch.setattr("uv_forge.core.preset_manager.PRESETS_FILE", tmp_file)
+    monkeypatch.setattr("uv_forge.core.preset_manager.SETTINGS_DIR", tmp_path)
 
 
 def test_load_empty():
@@ -113,7 +113,7 @@ def test_no_cap_on_count():
 def test_corrupt_file_returns_only_builtins(tmp_path, monkeypatch):
     """Corrupt JSON returns only built-in presets."""
     tmp_file = tmp_path / "presets.json"
-    monkeypatch.setattr("app.core.preset_manager.PRESETS_FILE", tmp_file)
+    monkeypatch.setattr("uv_forge.core.preset_manager.PRESETS_FILE", tmp_file)
     tmp_file.write_text("not json at all", encoding="utf-8")
     presets = load_presets()
     assert len(presets) == _N_BUILTIN
@@ -123,7 +123,7 @@ def test_corrupt_file_returns_only_builtins(tmp_path, monkeypatch):
 def test_non_list_json_returns_only_builtins(tmp_path, monkeypatch):
     """JSON that is not a list returns only built-in presets."""
     tmp_file = tmp_path / "presets.json"
-    monkeypatch.setattr("app.core.preset_manager.PRESETS_FILE", tmp_file)
+    monkeypatch.setattr("uv_forge.core.preset_manager.PRESETS_FILE", tmp_file)
     tmp_file.write_text('{"name": "oops"}', encoding="utf-8")
     presets = load_presets()
     assert len(presets) == _N_BUILTIN
@@ -133,7 +133,7 @@ def test_non_list_json_returns_only_builtins(tmp_path, monkeypatch):
 def test_unknown_keys_ignored(tmp_path, monkeypatch):
     """Future keys in JSON are silently dropped."""
     tmp_file = tmp_path / "presets.json"
-    monkeypatch.setattr("app.core.preset_manager.PRESETS_FILE", tmp_file)
+    monkeypatch.setattr("uv_forge.core.preset_manager.PRESETS_FILE", tmp_file)
     data = [
         {
             "name": "test",
@@ -159,7 +159,7 @@ def test_unknown_keys_ignored(tmp_path, monkeypatch):
 def test_invalid_entry_skipped(tmp_path, monkeypatch):
     """Entries missing required fields are skipped, built-ins still appear."""
     tmp_file = tmp_path / "presets.json"
-    monkeypatch.setattr("app.core.preset_manager.PRESETS_FILE", tmp_file)
+    monkeypatch.setattr("uv_forge.core.preset_manager.PRESETS_FILE", tmp_file)
     data = [{"name": "incomplete"}, "not a dict"]
     tmp_file.write_text(json.dumps(data), encoding="utf-8")
     presets = load_presets()
@@ -285,7 +285,7 @@ class TestBuiltinPresets:
 
     def test_builtin_not_persisted_to_disk(self, tmp_path):
         """Built-in presets are not written to disk."""
-        import app.core.preset_manager as pm
+        import uv_forge.core.preset_manager as pm
 
         user = _make_preset(name="Mine")
         add_preset(user)

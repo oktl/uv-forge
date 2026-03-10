@@ -6,7 +6,7 @@ Pick a UI framework or project type, (or both), configure your options, and UV F
 
 ---
 
-![](app/assets/images/lookslikethis.png)
+![](uv_forge/assets/images/lookslikethis.png)
 
 ## ✨ Key Features
 
@@ -60,7 +60,7 @@ uv-forge
 git clone https://github.com/oktl/uv-forge.git
 cd uv-forge
 uv run uv-forge        # Via entry point
-python app/main.py     # Direct execution
+python uv_forge/main.py     # Direct execution
 ```
 
 ---
@@ -97,7 +97,6 @@ All secondary actions live in the app bar overflow menu:
 - **Presets** — Save, apply, and delete named configurations
 - **Settings** — Configure defaults and post-build behaviour
 - **Help** — Usage guide and keyboard shortcuts
-- **Git Cheat Sheet** — Quick reference for common Git commands
 - **View Logs** — Colour-coded log viewer with clickable source locations
 - **About** — App info and tech stack
 
@@ -105,10 +104,10 @@ All secondary actions live in the app bar overflow menu:
 
 ## Template System
 
-Templates are JSON files in `app/config/templates/` defining folder structures:
+Templates are JSON files in `uv_forge/config/templates/` defining folder structures:
 
 ```plaintext
-app/config/templates/
+uv_forge/config/templates/
 ├── ui_frameworks/     # flet.json, pyqt6.json, default.json, etc.
 ├── project_types/     # django.json, fastapi.json, etc.
 └── boilerplate/       # Starter file content
@@ -133,11 +132,11 @@ app/config/templates/
 
 ### Adding a New Framework or Project Type
 
-1. Add to `UI_FRAMEWORKS` or `PROJECT_TYPE_PACKAGE_MAP` in `app/core/constants.py`
+1. Add to `UI_FRAMEWORKS` or `PROJECT_TYPE_PACKAGE_MAP` in `uv_forge/core/constants.py`
 2. Add package mapping to `FRAMEWORK_PACKAGE_MAP` (for UI frameworks)
-3. Add display entry to `UI_FRAMEWORK_CATEGORIES` or `PROJECT_TYPE_CATEGORIES` in `app/ui/dialog_data.py`
+3. Add display entry to `UI_FRAMEWORK_CATEGORIES` or `PROJECT_TYPE_CATEGORIES` in `uv_forge/ui/dialog_data.py`
 4. Create a template JSON in the appropriate subdirectory
-5. (Optional) Drop boilerplate files into `app/config/templates/boilerplate/` — no code changes needed
+5. (Optional) Drop boilerplate files into `uv_forge/config/templates/boilerplate/` — no code changes needed
 
 ---
 
@@ -171,7 +170,7 @@ Settings are stored in the platform-appropriate user data directory (e.g. `~/Lib
 | `recent_projects.json` | Last 5 successful builds (name, path, config, timestamp)                                |
 | `presets.json`         | Named project configuration presets (no limit)                                          |
 
-Log files rotate daily and are stored in the `logs/` directory inside the project root.
+Log files rotate daily and are stored in the `logs/` subdirectory alongside settings.
 
 ---
 
@@ -179,17 +178,17 @@ Log files rotate daily and are stored in the `logs/` directory inside the projec
 
 ```bash
 uv run pytest              # Run 619+ tests (coverage automatic)
-uv run ruff check app      # Lint (runs automatically on commit)
-uv run ruff format app     # Auto-format
+uv run ruff check uv_forge      # Lint (runs automatically on commit)
+uv run ruff format uv_forge     # Auto-format
 ```
 
-**Running tests:** Uses `pytest-asyncio` in auto mode. All tests are in `tests/` mirroring the `app/` structure.
+**Running tests:** Uses `pytest-asyncio` in auto mode. All tests are in `tests/` mirroring the `uv_forge/` structure.
 
-**Linting:** Ruff enforces `E`, `F`, `I`, `W`, `UP`, `B`, `SIM` rules. A pre-commit hook lints and format-checks `app/` automatically.
+**Linting:** Ruff enforces `E`, `F`, `I`, `W`, `UP`, `B`, `SIM` rules. A pre-commit hook lints and format-checks `uv_forge/` automatically.
 
 **Key patterns:**
 
-- All imports use absolute `app.*` paths
+- All imports use absolute `uv_forge.*` paths
 - `AppState` is the single mutable state object — never duplicated
 - Async handlers wrapped via `wrap_async()` to keep Flet's sync callback system happy
 - `Dropdown.on_select` (not `on_change`) — Flet 0.80+ requirement

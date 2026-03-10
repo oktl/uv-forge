@@ -6,7 +6,7 @@ with dots for extensions.
 
 import pytest
 
-from app.core.validator import validate_folder_name
+from uv_forge.core.validator import validate_folder_name
 
 
 class TestValidateFolderName:

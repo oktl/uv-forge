@@ -3,7 +3,7 @@
 
 from pathlib import Path
 
-from app.core.models import BuildResult, BuildSummaryConfig, FolderSpec, ProjectConfig
+from uv_forge.core.models import BuildResult, BuildSummaryConfig, FolderSpec, ProjectConfig
 
 # FolderSpec Tests
 

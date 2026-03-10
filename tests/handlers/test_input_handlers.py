@@ -4,9 +4,9 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-from app.core.state import AppState
-from app.handlers.ui_handler import Handlers
-from app.ui.ui_config import UIConfig
+from uv_forge.core.state import AppState
+from uv_forge.handlers.ui_handler import Handlers
+from uv_forge.ui.ui_config import UIConfig
 
 
 class MockControl:
@@ -87,7 +87,6 @@ class MockControls:
         self.theme_toggle_button = Mock(icon=None)
         self.about_menu_item = MockControl()
         self.help_menu_item = MockControl()
-        self.git_cheat_sheet_menu_item = MockControl()
         self.app_cheat_sheet_menu_item = MockControl()
         self.settings_menu_item = MockControl()
         self.history_menu_item = MockControl()
@@ -118,7 +117,7 @@ class TestOnCheckPypi:
     async def test_available_shows_success_message(self, mock_handlers):
         handlers, page, controls, state = mock_handlers
         with patch(
-            "app.handlers.input_handlers.check_pypi_availability",
+            "uv_forge.handlers.input_handlers.check_pypi_availability",
             new_callable=AsyncMock,
             return_value=True,
         ):
@@ -130,7 +129,7 @@ class TestOnCheckPypi:
     async def test_taken_shows_error_message(self, mock_handlers):
         handlers, page, controls, state = mock_handlers
         with patch(
-            "app.handlers.input_handlers.check_pypi_availability",
+            "uv_forge.handlers.input_handlers.check_pypi_availability",
             new_callable=AsyncMock,
             return_value=False,
         ):
@@ -142,7 +141,7 @@ class TestOnCheckPypi:
     async def test_network_error_shows_warning(self, mock_handlers):
         handlers, page, controls, state = mock_handlers
         with patch(
-            "app.handlers.input_handlers.check_pypi_availability",
+            "uv_forge.handlers.input_handlers.check_pypi_availability",
             new_callable=AsyncMock,
             return_value=None,
         ):
@@ -159,7 +158,7 @@ class TestOnCheckPypi:
             return True
 
         with patch(
-            "app.handlers.input_handlers.check_pypi_availability",
+            "uv_forge.handlers.input_handlers.check_pypi_availability",
             side_effect=capture_state,
         ):
             await handlers.on_check_pypi(Mock())
@@ -174,7 +173,7 @@ class TestOnCheckPypi:
         state.name_valid = False
 
         with patch(
-            "app.handlers.input_handlers.check_pypi_availability",
+            "uv_forge.handlers.input_handlers.check_pypi_availability",
             new_callable=AsyncMock,
         ) as mock_check:
             await handlers.on_check_pypi(Mock())
@@ -187,7 +186,7 @@ class TestOnCheckPypi:
         state.name_valid = True
 
         with patch(
-            "app.handlers.input_handlers.check_pypi_availability",
+            "uv_forge.handlers.input_handlers.check_pypi_availability",
             new_callable=AsyncMock,
         ) as mock_check:
             await handlers.on_check_pypi(Mock())
@@ -200,7 +199,7 @@ class TestOnCheckPypi:
         state.project_name = "my_app"
 
         with patch(
-            "app.handlers.input_handlers.check_pypi_availability",
+            "uv_forge.handlers.input_handlers.check_pypi_availability",
             new_callable=AsyncMock,
             return_value=True,
         ):

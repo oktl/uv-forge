@@ -3,7 +3,7 @@
 import tempfile
 from pathlib import Path
 
-from app.handlers.filesystem_handler import (
+from uv_forge.handlers.filesystem_handler import (
     create_folders,
     setup_app_structure,
 )
@@ -211,7 +211,7 @@ class TestCreateFoldersWithResolver:
 
     def _make_resolver(self, tmpdir, files=None):
         """Create a BoilerplateResolver with common boilerplate files."""
-        from app.core.boilerplate_resolver import BoilerplateResolver
+        from uv_forge.core.boilerplate_resolver import BoilerplateResolver
 
         bp = Path(tmpdir) / "bp" / "common"
         bp.mkdir(parents=True)

@@ -4,8 +4,8 @@ from unittest.mock import Mock
 
 import pytest
 
-from app.core.state import AppState
-from app.handlers.ui_handler import Handlers
+from uv_forge.core.state import AppState
+from uv_forge.handlers.ui_handler import Handlers
 
 
 class MockControl:
@@ -82,7 +82,6 @@ class MockControls:
         self.theme_toggle_button = Mock(icon=None)
         self.about_menu_item = MockControl()
         self.help_menu_item = MockControl()
-        self.git_cheat_sheet_menu_item = MockControl()
         self.app_cheat_sheet_menu_item = MockControl()
         self.settings_menu_item = MockControl()
         self.history_menu_item = MockControl()
