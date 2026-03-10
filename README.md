@@ -6,7 +6,7 @@ Pick a UI framework or project type, (or both), configure your options, and UV F
 
 ---
 
-![](uv_forge/assets/images/lookslikethis.png)
+![UV Forge main window](uv_forge/assets/images/main-window.png)
 
 ## ✨ Key Features
 
@@ -99,6 +99,12 @@ All secondary actions live in the app bar overflow menu:
 - **Help** — Usage guide and keyboard shortcuts
 - **View Logs** — Colour-coded log viewer with clickable source locations
 - **About** — App info and tech stack
+
+---
+
+## Documentation
+
+Full documentation is available at **[oktl.github.io/uv-forge](https://oktl.github.io/uv-forge/)** — including a user guide, template system reference, and troubleshooting.
 
 ---
 
@@ -216,4 +222,4 @@ Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines
 
 ## License
 
-[PolyForm Noncommercial 1.0.0](LICENSE) — free for personal, educational, and noncommercial use. Commercial use is not permitted.
+[MIT License](LICENSE)

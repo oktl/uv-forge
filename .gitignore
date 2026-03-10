@@ -34,6 +34,9 @@ Thumbs.db
 .claude/
 CLAUDE.md
 
+# MkDocs build output
+site/
+
 # uv-forge files
 .dev
 
