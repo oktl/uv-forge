@@ -32,7 +32,9 @@ dependencies = [
 [project.urls]
 Homepage = "https://github.com/oktl/uv-forge"
 Repository = "https://github.com/oktl/uv-forge"
+Documentation = "https://github.com/oktl/uv-forge#readme"
 Issues = "https://github.com/oktl/uv-forge/issues"
+Changelog = "https://github.com/oktl/uv-forge/blob/main/CHANGELOG.md"
 
 [tool.hatch.build.targets.wheel]
 packages = ["uv_forge"]
