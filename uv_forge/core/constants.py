@@ -45,6 +45,9 @@ FRAMEWORK_PACKAGE_MAP = {
 
 # Project type package mappings (for uv add)
 # Maps project type to list of required packages
+# Packages that should always be marked as dev dependencies
+ALWAYS_DEV_PACKAGES = {"pre-commit", "pytest", "pytest-cov", "pytest-mock", "ruff"}
+
 PROJECT_TYPE_PACKAGE_MAP = {
     # Web Frameworks
     "django": ["django"],

@@ -2,6 +2,7 @@
 
 import flet as ft
 
+from uv_forge.core.constants import ALWAYS_DEV_PACKAGES
 from uv_forge.ui.dialogs import create_add_packages_dialog, create_confirm_dialog
 from uv_forge.ui.ui_config import UIConfig
 
@@ -65,6 +66,8 @@ class PackageHandlersMixin:
 
     def _update_package_display(self) -> None:
         """Update the packages container with the current package list."""
+        # Catch-all: ensure always-dev packages are marked regardless of entry path
+        self.state.dev_packages |= ALWAYS_DEV_PACKAGES & set(self.state.packages)
         if self.state.packages:
             package_controls = [
                 self._create_package_item(pkg, idx)
@@ -108,6 +111,8 @@ class PackageHandlersMixin:
             existing.update(added)
             if dev:
                 self.state.dev_packages.update(added)
+            # Auto-mark always-dev packages
+            self.state.dev_packages |= ALWAYS_DEV_PACKAGES & set(added)
             dialog.open = False
             self.state.active_dialog = None
             self._update_package_display()
@@ -148,6 +153,11 @@ class PackageHandlersMixin:
         idx = self.state.selected_package_idx
         if 0 <= idx < len(self.state.packages):
             pkg = self.state.packages[idx]
+            if pkg in ALWAYS_DEV_PACKAGES:
+                self._set_status(
+                    f"'{pkg}' is always a dev dependency.", "info", update=True
+                )
+                return
             if pkg in self.state.dev_packages:
                 self.state.dev_packages.discard(pkg)
                 self._set_status(f"'{pkg}' moved to runtime.", "info", update=False)

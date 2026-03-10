@@ -3,6 +3,7 @@
 import flet as ft
 
 from uv_forge.core.constants import (
+    ALWAYS_DEV_PACKAGES,
     DEFAULT_FOLDERS,
     DEFAULT_PYTHON_VERSION,
     FRAMEWORK_PACKAGE_MAP,
@@ -283,6 +284,8 @@ class OptionHandlersMixin:
         self.state.auto_packages = new_auto
         # Prune dev_packages to only include packages still in the list
         self.state.dev_packages &= set(self.state.packages)
+        # Auto-mark always-dev packages
+        self.state.dev_packages |= ALWAYS_DEV_PACKAGES & set(self.state.packages)
 
         self._update_folder_display()
         self._update_package_display()

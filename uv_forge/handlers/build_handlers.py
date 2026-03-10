@@ -9,6 +9,7 @@ from loguru import logger
 
 from uv_forge.core.async_executor import AsyncExecutor
 from uv_forge.core.constants import (
+    ALWAYS_DEV_PACKAGES,
     DEFAULT_FOLDERS,
     IDE_MACOS_APP_NAMES,
     SUPPORTED_IDES,
@@ -294,6 +295,8 @@ class BuildHandlersMixin:
                     if pkg and pkg.lower() not in existing:
                         self.state.packages.append(pkg)
         self.state.auto_packages = list(self.state.packages)
+        # Auto-mark always-dev packages
+        self.state.dev_packages |= ALWAYS_DEV_PACKAGES & set(self.state.packages)
 
         # Update UI controls
         self.controls.project_name_input.value = entry.project_name
@@ -388,6 +391,8 @@ class BuildHandlersMixin:
                     if pkg and pkg.lower() not in existing:
                         self.state.packages.append(pkg)
         self.state.auto_packages = list(self.state.packages)
+        # Auto-mark always-dev packages
+        self.state.dev_packages |= ALWAYS_DEV_PACKAGES & set(self.state.packages)
 
         # Metadata
         self.state.author_name = getattr(preset, "author_name", "")
