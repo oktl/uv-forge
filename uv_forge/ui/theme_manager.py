@@ -67,13 +67,6 @@ class ThemeManager:
             "bottom_bar": ft.Colors.BLUE_GREY_100,
         }
 
-    def clear_cache(self) -> None:
-        """Clear the color cache.
-
-        Useful if theme definitions need to be reloaded at runtime.
-        """
-        self._colors_cache.clear()
-
 
 # Create singleton instance for convenience
 theme_manager = ThemeManager()

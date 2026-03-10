@@ -11,14 +11,11 @@ Functions
   create_help_dialog .............. Scrollable markdown help viewer
   create_app_cheat_sheet_dialog ... Wide markdown app cheat sheet viewer
   create_about_dialog ............. Scrollable markdown about viewer
-  create_edit_file_dialog ......... File content editor with save
-  create_preview_formatted_dialog . Formatted text preview with save
 """
 
 from __future__ import annotations
 
 import collections.abc
-from pathlib import Path
 
 import flet as ft
 
@@ -196,107 +193,4 @@ def create_about_dialog(
         page,
         is_dark_mode,
         on_internal_link=on_internal_link,
-    )
-
-
-def create_edit_file_dialog(
-    content: str, file_path: str, on_save, on_close, is_dark_mode: bool
-) -> ft.AlertDialog:
-    """Create theme-aware file editing dialog with save functionality.
-
-    Args:
-        content: File content to edit
-        file_path: Path to the file being edited
-        on_save: Save button callback (receives edited text and file_path)
-        on_close: Close button callback
-        is_dark_mode: Whether dark mode is active
-
-    Returns:
-        Configured AlertDialog with editable text field
-    """
-    colors = get_theme_colors(is_dark_mode)
-
-    # Extract filename from path for display - add safety check
-    _path_errors = (ValueError, TypeError)
-    try:
-        filename = Path(file_path).name
-    except _path_errors:
-        filename = str(file_path)
-
-    # Create editable text field
-    text_field = create_dialog_text_field(content, is_dark_mode)
-
-    def on_save_click(e):
-        """Handle save button click."""
-        on_save(text_field.value, file_path)
-
-    return ft.AlertDialog(
-        modal=True,
-        title=ft.Text(
-            f"Edit File: {filename}",
-            size=UIConfig.DIALOG_TITLE_SIZE,
-            color=colors["main_title"],
-        ),
-        content=ft.Container(
-            content=ft.Row(
-                controls=[text_field],
-                expand=True,
-            ),
-            width=UIConfig.DIALOG_WIDTH,
-            height=UIConfig.DIALOG_HEIGHT,
-        ),
-        actions=[
-            ft.TextButton("Save", on_click=on_save_click),
-            ft.TextButton("Cancel", on_click=on_close),
-        ],
-        actions_alignment=ft.MainAxisAlignment.END,
-    )
-
-
-def create_preview_formatted_dialog(
-    content: str,
-    provider_name: str,
-    on_save_to_file,
-    on_close,
-    is_dark_mode: bool,
-) -> ft.AlertDialog:
-    """Create theme-aware preview dialog for formatted transcript.
-
-    Args:
-        content: Formatted transcript text to preview
-        provider_name: Name of AI provider used for formatting
-        on_save_to_file: Save to File button callback (receives edited text)
-        on_close: Close button callback
-        is_dark_mode: Whether dark mode is active
-
-    Returns:
-        Configured AlertDialog with editable preview
-    """
-    colors = get_theme_colors(is_dark_mode)
-    text_field = create_dialog_text_field(content, is_dark_mode)
-
-    def on_save_click(e):
-        """Handle save button click."""
-        on_save_to_file(text_field.value)
-
-    return ft.AlertDialog(
-        modal=True,
-        title=ft.Text(
-            f"Preview Formatted Transcript ({provider_name.title()})",
-            size=UIConfig.DIALOG_TITLE_SIZE,
-            color=colors["main_title"],
-        ),
-        content=ft.Container(
-            content=ft.Row(
-                controls=[text_field],
-                expand=True,
-            ),
-            width=UIConfig.DIALOG_WIDTH,
-            height=UIConfig.DIALOG_HEIGHT,
-        ),
-        actions=[
-            ft.TextButton("Save to File", on_click=on_save_click),
-            ft.TextButton("Close", on_click=on_close),
-        ],
-        actions_alignment=ft.MainAxisAlignment.END,
     )

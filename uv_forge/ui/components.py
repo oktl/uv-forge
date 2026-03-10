@@ -562,7 +562,6 @@ def create_sections(controls: Controls, state: AppState) -> None:
                         controls=[
                             ft.Column(
                                 controls=[
-                                    # controls.create_git_checkbox,
                                     controls.ui_project_checkbox,
                                     controls.other_projects_checkbox,
                                 ],

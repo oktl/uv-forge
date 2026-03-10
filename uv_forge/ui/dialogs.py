@@ -18,7 +18,7 @@ Table of Contents
 
 Content/documentation dialogs have been extracted to content_dialogs.py:
   create_dialog_text_field, create_help_dialog, create_app_cheat_sheet_dialog,
-  create_about_dialog, create_edit_file_dialog, create_preview_formatted_dialog
+  create_about_dialog
 
 Helpers (private)
 -----------------
