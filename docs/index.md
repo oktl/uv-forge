@@ -17,7 +17,7 @@ Setting up a new Python project means repeating the same steps every time: creat
 - **Template merging** — Select both a UI framework *and* a project type; their folder structures merge intelligently
 - **Smart scaffolding** — Key files come pre-populated with starter code, not empty
 - **PyPI name checker** — Verify your package name is available before you build
-- **Git integration** — Two-phase setup creates a local repo + bare hub, commits and pushes automatically
+- **Git integration** — Two-phase setup with local hub, GitHub, or no-remote options; commits and pushes automatically
 - **Presets** — Save full configurations for one-click reuse; ships with 4 built-in starters
 - **Post-build automation** — Run shell commands (e.g., `uv run pre-commit install`) after every build
 - **Rollback on failure** — If a build fails partway through, partial files are cleaned up automatically

@@ -49,6 +49,9 @@ class AppSettings:
     post_build_command: str = ""
     post_build_command_enabled: bool = False
     post_build_packages: str = ""
+    git_remote_mode: str = "local"
+    github_username: str = ""
+    github_repo_private: bool = True
 
 
 def load_settings() -> AppSettings:

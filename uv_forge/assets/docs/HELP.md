@@ -35,21 +35,22 @@ Select the Python version for your project:
 
 ### 4. **Git Repository** (Optional)
 
-Check this option to initialize a Git repository in your project with automatic hub-based setup. This uses a two-phase approach:
+Check this option to initialize a Git repository in your project. UV Forge uses a two-phase approach, with behaviour that varies by **Git Remote Mode** (configurable in Settings, overridable per-build in the Confirm dialog):
 
 **Phase 1 (During Project Creation):**
 
 - Creates a local Git repository in your project directory
-- Creates a bare "hub" repository at your configured GitHub root path (default: `~/Projects/git-repos/<project_name>.git`, configurable via Settings)
-- Connects the local repo to the hub as the `origin` remote
+- **Local Bare Repo** (default): Also creates a bare "hub" repository at your configured GitHub Root path (default: `~/Projects/git-repos/<project_name>.git`) and connects it as the `origin` remote
+- **GitHub** / **None**: Only the local repo is created
 
 **Phase 2 (After Build Completion):**
 
-- Automatically stages all generated project files (`git add .`)
-- Creates an initial commit with message "Initial commit: Full project structure"
-- Pushes to the hub with upstream tracking (`git push -u origin HEAD`)
+- Stages all generated project files (`git add .`) and creates an initial commit
+- **Local Bare Repo**: Pushes to the hub with upstream tracking (`git push -u origin HEAD`)
+- **GitHub**: Creates a GitHub repository via `gh repo create` (private or public, with optional username/org prefix) and pushes
+- **None**: Commit only — no remote, no push
 
-**Result:** Your project is git-ready immediately—no manual first push needed! The hub acts as a central repository for your projects stored locally on your machine.
+**Result:** Your project is git-ready immediately. In Local Bare Repo and GitHub modes, the remote is set up automatically — no manual first push needed.
 
 ### 5. **UI Project** (Optional)
 
@@ -171,6 +172,9 @@ Open from the **⋮** overflow menu in the app bar → **Settings**. Settings ar
 - **Python Version** — Default Python version for new projects
 - **Preferred IDE** — IDE used for "Open in IDE" after build (VS Code, PyCharm, Zed, Cursor, etc.)
 - **Git Default** — Whether the Git checkbox is checked by default for new projects
+- **Git Remote Mode** — How the remote is set up: Local Bare Repo (default), GitHub, or None (local only)
+- **GitHub Username / Org** — Username or organisation prefix for GitHub repo creation (leave blank for your default account)
+- **Create Private Repos** — Whether GitHub repos are created as private (default) or public
 - **Post-build Command** — A shell command to run automatically after each successful build (e.g., `uv run pre-commit install`). Toggle it on/off with the "Enable post-build command" checkbox. You can also specify required packages (comma-separated) that will be automatically added to every project when the post-build command is enabled.
 
 Settings are stored in `~/Library/Application Support/UV Forge/settings.json` on macOS (platform-appropriate location on other OSes via `platformdirs`).
@@ -301,6 +305,16 @@ You can select **both** a UI framework and a project type! The templates will be
 **"Git command not found"**
 
 - Install Git: [Git](https://git-scm.com/)
+
+**"gh CLI not installed"**
+
+- Install the GitHub CLI: [cli.github.com](https://cli.github.com/)
+- This is only required when Git Remote Mode is set to "GitHub"
+
+**"gh not authenticated"**
+
+- Run `gh auth login` in your terminal to authenticate
+- You can check status with `gh auth status`
 
 **Build fails mid-way**
 

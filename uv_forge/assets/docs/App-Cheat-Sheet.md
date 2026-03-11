@@ -32,12 +32,12 @@ A **progress bar** with step counter (e.g., "3/7") tracks each stage. Steps are 
 | Step | What happens                                       | Condition          |
 | ---- | -------------------------------------------------- | ------------------ |
 | 1    | `uv init` — scaffolds pyproject.toml               | always             |
-| 2    | Git Phase 1 — local repo + bare hub + origin       | git enabled        |
+| 2    | Git Phase 1 — local repo (+ bare hub if Local mode) | git enabled        |
 | 3    | Create folder structure from templates              | always             |
 | 4    | Configure pyproject.toml (metadata, authors, etc.) | always             |
 | 5    | `uv venv` — create virtual environment             | always             |
 | 6    | `uv add` — install packages (+ `--dev` for dev)    | packages > 0       |
-| 7    | Git Phase 2 — stage, commit, push to hub           | git enabled        |
+| 7    | Git Phase 2 — stage, commit, push (mode-dependent) | git enabled        |
 | —    | Run post-build command (if enabled)                | after build        |
 
 ---
@@ -105,8 +105,11 @@ Dev packages install with `uv add --dev` → `[dependency-groups]` in pyproject.
 | Preferred IDE        | IDE for "Open in IDE" post-build action      |
 | Git Default          | Whether Git checkbox is pre-checked          |
 | Author Name/Email    | Default project metadata                     |
-| Post-build Command   | Shell command run after successful builds    |
-| Post-build Packages  | Packages auto-installed when command enabled |
+| Git Remote Mode      | Local Bare Repo / GitHub / None (local only) |
+| GitHub Username      | Username or org for GitHub repo creation      |
+| Private Repos        | Whether GitHub repos are created as private   |
+| Post-build Command   | Shell command run after successful builds     |
+| Post-build Packages  | Packages auto-installed when command enabled  |
 
 Settings stored in `~/Library/Application Support/UV Forge/settings.json` (macOS), `%LOCALAPPDATA%\UV Forge\settings.json` (Windows), or `~/.local/share/UV Forge/settings.json` (Linux).
 
@@ -142,12 +145,15 @@ Example: `uv run pre-commit install && uv run pytest`
 
 ## Git Two-Phase Setup
 
-| Phase | When            | What                                         |
-| ----- | --------------- | -------------------------------------------- |
-| 1     | During build    | `git init` + bare hub + `remote add origin`  |
-| 2     | After all files | `git add .` + commit + `push -u origin HEAD` |
+Behaviour depends on the **Git Remote Mode** setting:
 
-Hub path configurable in Settings → GitHub Root.
+| Mode              | Phase 1                                      | Phase 2                                          |
+| ----------------- | -------------------------------------------- | ------------------------------------------------ |
+| Local Bare Repo   | `git init` + bare hub + `remote add origin`  | `git add .` + commit + `push -u origin HEAD`     |
+| GitHub            | `git init` only                              | `git add .` + commit + `gh repo create` + push   |
+| None (local only) | `git init` only                              | `git add .` + commit (no push)                   |
+
+Hub path configurable in Settings → GitHub Root. GitHub mode requires the `gh` CLI.
 
 ---
 

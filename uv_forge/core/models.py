@@ -97,6 +97,9 @@ class ProjectConfig:
     packages: list[str] = field(default_factory=list)
     dev_packages: list[str] = field(default_factory=list)
     github_root: Path | None = None
+    git_remote_mode: str = "local"
+    github_username: str = ""
+    github_repo_private: bool = True
     author_name: str = ""
     author_email: str = ""
     description: str = ""
@@ -198,6 +201,9 @@ class BuildSummaryConfig:
     license_type: str = ""
     post_build_command: str = ""
     post_build_command_enabled: bool = False
+    git_remote_mode: str = "local"
+    github_username: str = ""
+    github_repo_private: bool = True
 
     @classmethod
     def from_project_config(
@@ -237,4 +243,7 @@ class BuildSummaryConfig:
             author_email=config.author_email,
             description=config.description,
             license_type=config.license_type,
+            git_remote_mode=config.git_remote_mode,
+            github_username=config.github_username,
+            github_repo_private=config.github_repo_private,
         )

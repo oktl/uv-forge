@@ -1223,6 +1223,21 @@ def create_build_summary_dialog(
         _create_summary_row("Location:", config.project_path),
         _create_summary_row("Python Version:", config.python_version),
         _create_summary_row("Git Init:", "Yes" if config.git_enabled else "No"),
+    ]
+
+    if config.git_enabled:
+        from uv_forge.core.constants import GIT_REMOTE_MODE_LABELS
+
+        mode_label = GIT_REMOTE_MODE_LABELS.get(
+            config.git_remote_mode, config.git_remote_mode
+        )
+        rows.append(_create_summary_row("Git Remote:", mode_label))
+        if config.git_remote_mode == "github":
+            gh_info = config.github_username or "(default account)"
+            visibility = "private" if config.github_repo_private else "public"
+            rows.append(_create_summary_row("GitHub:", f"{gh_info} ({visibility})"))
+
+    rows += [
         _create_summary_row("Starter Files:", "Yes" if config.starter_files else "No"),
     ]
 
@@ -1417,6 +1432,33 @@ def create_build_summary_dialog(
         vertical_alignment=ft.CrossAxisAlignment.CENTER,
     )
 
+    # --- Git remote mode override ---
+    git_remote_controls: list[ft.Control] = []
+    if config.git_enabled:
+        from uv_forge.core.constants import GIT_REMOTE_MODE_LABELS
+
+        git_remote_dropdown = ft.Dropdown(
+            label="Git Remote",
+            value=config.git_remote_mode,
+            options=[
+                ft.dropdown.Option(key=key, text=label)
+                for key, label in GIT_REMOTE_MODE_LABELS.items()
+            ],
+            width=250,
+            text_size=13,
+        )
+
+        git_remote_controls = [
+            ft.Divider(height=8, thickness=1),
+            ft.Text(
+                "Git Remote",
+                size=13,
+                weight=ft.FontWeight.BOLD,
+                color=colors["section_title"],
+            ),
+            git_remote_dropdown,
+        ]
+
     left_column = ft.Column(
         rows,
         tight=True,
@@ -1439,6 +1481,7 @@ def create_build_summary_dialog(
             ft.Divider(height=8, thickness=1),
             post_build_row,
             post_build_command_row,
+            *git_remote_controls,
         ],
         tight=True,
         spacing=8,
@@ -1478,6 +1521,17 @@ def create_build_summary_dialog(
     dialog.open_terminal_checkbox = open_terminal_checkbox
     dialog.post_build_checkbox = post_build_checkbox
     dialog.post_build_command_field = post_build_command_field
+    if config.git_enabled:
+        dialog.git_remote_dropdown = git_remote_dropdown
+        # Property-like access for the build handler
+        dialog.git_remote_mode_value = git_remote_dropdown.value
+
+        def _update_remote_mode(e):
+            dialog.git_remote_mode_value = git_remote_dropdown.value
+
+        git_remote_dropdown.on_change = _update_remote_mode
+    else:
+        dialog.git_remote_mode_value = None
     return dialog
 
 
@@ -1675,7 +1729,12 @@ def create_settings_dialog(
     Returns:
         Configured AlertDialog for editing settings.
     """
-    from uv_forge.core.constants import LICENSE_TYPES, PYTHON_VERSIONS, SUPPORTED_IDES
+    from uv_forge.core.constants import (
+        GIT_REMOTE_MODE_LABELS,
+        LICENSE_TYPES,
+        PYTHON_VERSIONS,
+        SUPPORTED_IDES,
+    )
 
     colors = get_theme_colors(is_dark_mode)
 
@@ -1688,6 +1747,8 @@ def create_settings_dialog(
         value=settings.default_project_path,
         expand=True,
         label_style=label_style,
+        dense=True,
+        text_size=13,
     )
 
     async def browse_project_path(_):
@@ -1717,6 +1778,8 @@ def create_settings_dialog(
         value=settings.default_github_root,
         expand=True,
         label_style=label_style,
+        dense=True,
+        text_size=13,
     )
 
     async def browse_github_root(_):
@@ -1747,6 +1810,8 @@ def create_settings_dialog(
         options=[ft.dropdown.Option(v) for v in PYTHON_VERSIONS],
         expand=True,
         label_style=label_style,
+        dense=True,
+        text_size=13,
     )
 
     # --- Preferred IDE ---
@@ -1759,6 +1824,8 @@ def create_settings_dialog(
         options=[ft.dropdown.Option(name) for name in ide_names],
         expand=True,
         label_style=label_style,
+        dense=True,
+        text_size=13,
     )
 
     custom_ide_field = ft.TextField(
@@ -1768,6 +1835,8 @@ def create_settings_dialog(
         expand=True,
         label_style=label_style,
         hint_text="/usr/local/bin/my-editor",
+        dense=True,
+        text_size=13,
     )
 
     def on_ide_change(e):
@@ -1788,12 +1857,92 @@ def create_settings_dialog(
         value=settings.starter_files_default,
     )
 
+    # --- Git remote mode ---
+    git_remote_dropdown = ft.Dropdown(
+        label="Git Remote Mode",
+        value=settings.git_remote_mode,
+        options=[
+            ft.dropdown.Option(key=key, text=label)
+            for key, label in GIT_REMOTE_MODE_LABELS.items()
+        ],
+        expand=True,
+        label_style=label_style,
+        dense=True,
+        text_size=13,
+    )
+
+    github_username_field = ft.TextField(
+        label="GitHub Username / Org",
+        value=settings.github_username,
+        expand=True,
+        label_style=label_style,
+        hint_text="(empty = your default account)",
+        visible=settings.git_remote_mode == "github",
+        dense=True,
+        text_size=13,
+    )
+
+    github_private_checkbox = ft.Checkbox(
+        label="Create private repos by default",
+        value=settings.github_repo_private,
+        visible=settings.git_remote_mode == "github",
+    )
+
+    gh_status_text = ft.Text("", size=12, visible=False)
+
+    async def on_check_gh_status(_):
+        from uv_forge.handlers.git_handler import (
+            check_gh_authenticated,
+            check_gh_available,
+        )
+
+        gh_status_text.visible = True
+        if not check_gh_available():
+            gh_status_text.value = "✗ gh CLI not installed"
+            gh_status_text.color = ft.Colors.RED_400
+        elif not check_gh_authenticated():
+            gh_status_text.value = "✗ gh not authenticated — run 'gh auth login'"
+            gh_status_text.color = ft.Colors.RED_400
+        else:
+            gh_status_text.value = "✓ gh authenticated"
+            gh_status_text.color = ft.Colors.GREEN_400
+        gh_status_text.update()
+
+    gh_check_button = ft.TextButton(
+        "Check gh status",
+        icon=ft.Icons.VERIFIED_USER,
+        on_click=on_check_gh_status,
+        visible=settings.git_remote_mode == "github",
+    )
+
+    def on_remote_mode_change(e):
+        mode = git_remote_dropdown.value
+        is_local = mode == "local"
+        is_github = mode == "github"
+        github_root_row.visible = is_local
+        github_username_field.visible = is_github
+        github_private_checkbox.visible = is_github
+        gh_check_button.visible = is_github
+        gh_status_text.visible = False
+        github_root_row.update()
+        github_username_field.update()
+        github_private_checkbox.update()
+        gh_check_button.update()
+        gh_status_text.update()
+
+    git_remote_dropdown.on_change = on_remote_mode_change
+
+    # Only show GitHub root row when mode is "local"
+    github_root_row.visible = settings.git_remote_mode == "local"
+
     # --- Author defaults ---
     author_name_field = ft.TextField(
         label="Default Author Name",
         value=settings.default_author_name,
         expand=True,
         label_style=label_style,
+        dense=True,
+        text_size=13,
     )
 
     author_email_field = ft.TextField(
@@ -1801,6 +1950,8 @@ def create_settings_dialog(
         value=settings.default_author_email,
         expand=True,
         label_style=label_style,
+        dense=True,
+        text_size=13,
     )
 
     # --- Default license ---
@@ -1813,6 +1964,8 @@ def create_settings_dialog(
         options=license_options,
         expand=True,
         label_style=label_style,
+        dense=True,
+        text_size=13,
     )
 
     # --- After-build actions ---
@@ -1838,6 +1991,8 @@ def create_settings_dialog(
         hint_text="uv run pre-commit install && uv run pytest",
         expand=True,
         label_style=label_style,
+        dense=True,
+        text_size=13,
     )
 
     post_build_packages_field = ft.TextField(
@@ -1846,6 +2001,8 @@ def create_settings_dialog(
         hint_text="pre-commit, ruff",
         expand=True,
         label_style=label_style,
+        dense=True,
+        text_size=13,
     )
 
     # --- Save handler ---
@@ -1870,6 +2027,9 @@ def create_settings_dialog(
             post_build_command=post_build_command_field.value or "",
             post_build_command_enabled=post_build_enabled_checkbox.value,
             post_build_packages=post_build_packages_field.value or "",
+            git_remote_mode=git_remote_dropdown.value or "local",
+            github_username=github_username_field.value or "",
+            github_repo_private=github_private_checkbox.value,
         )
         on_save_callback(updated)
 
@@ -1912,22 +2072,32 @@ def create_settings_dialog(
     left_col = ft.Column(
         [
             _col_label("Pre-Build"),
-            _section_header("Paths", "Where new projects and git repos are created"),
+            _section_header("Paths", "Where new projects are created"),
             project_path_row,
-            github_root_row,
-            ft.Divider(height=8, color=colors.get("section_border")),
+            ft.Divider(height=4, color=colors.get("section_border")),
             _section_header("Defaults", "Pre-selected options for each new project"),
             python_version_dropdown,
             git_checkbox,
             starter_files_checkbox,
-            ft.Divider(height=8, color=colors.get("section_border")),
+            ft.Divider(height=4, color=colors.get("section_border")),
+            _section_header("Git Remote", "How new projects connect to a remote"),
+            git_remote_dropdown,
+            github_root_row,
+            github_username_field,
+            github_private_checkbox,
+            ft.Row(
+                [gh_check_button, gh_status_text],
+                spacing=8,
+                vertical_alignment=ft.CrossAxisAlignment.CENTER,
+            ),
+            ft.Divider(height=4, color=colors.get("section_border")),
             _section_header("Author", "Pre-filled in the Project Metadata dialog"),
             author_name_field,
             author_email_field,
             license_dropdown,
         ],
         tight=True,
-        spacing=8,
+        spacing=6,
     )
 
     right_col = ft.Column(
@@ -1938,7 +2108,7 @@ def create_settings_dialog(
             custom_ide_field,
             open_folder_checkbox,
             open_terminal_checkbox,
-            ft.Divider(height=8, color=colors.get("section_border")),
+            ft.Divider(height=4, color=colors.get("section_border")),
             _section_header(
                 "Automation", "Runs automatically after a successful build"
             ),
@@ -1963,7 +2133,7 @@ def create_settings_dialog(
             post_build_packages_field,
         ],
         tight=True,
-        spacing=8,
+        spacing=6,
     )
 
     dialog = ft.AlertDialog(

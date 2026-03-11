@@ -19,6 +19,7 @@ from uv_forge.core.models import BuildSummaryConfig, ProjectConfig
 from uv_forge.core.preset_manager import add_preset, load_presets, make_preset
 from uv_forge.core.template_merger import normalize_folder
 from uv_forge.core.validator import validate_project_name
+from uv_forge.handlers.git_handler import check_gh_authenticated, check_gh_available
 from uv_forge.handlers.handler_base import wrap_async
 from uv_forge.handlers.project_builder import build_project
 from uv_forge.ui.dialog_data import (
@@ -163,6 +164,7 @@ class BuildHandlersMixin:
         open_ide: bool = False,
         open_terminal: bool = False,
         post_build_command: str = "",
+        git_remote_mode: str | None = None,
     ) -> None:
         """Execute the project build after confirmation.
 
@@ -171,6 +173,7 @@ class BuildHandlersMixin:
             open_ide: Whether to open the project in the preferred IDE after build.
             open_terminal: Whether to open a terminal at the project root after build.
             post_build_command: Optional shell command to run in the project directory.
+            git_remote_mode: Override for git remote mode (None = use settings default).
         """
         self.controls.progress_ring.visible = True
         self.controls.progress_bar.visible = True
@@ -196,6 +199,9 @@ class BuildHandlersMixin:
             packages=list(self.state.packages),
             dev_packages=list(self.state.dev_packages),
             github_root=Path(self.state.settings.default_github_root),
+            git_remote_mode=git_remote_mode or self.state.settings.git_remote_mode,
+            github_username=self.state.settings.github_username,
+            github_repo_private=self.state.settings.github_repo_private,
             author_name=self.state.author_name,
             author_email=self.state.author_email,
             description=self.state.description,
@@ -502,6 +508,21 @@ class BuildHandlersMixin:
         if not self._validate_inputs():
             return
 
+        # Pre-flight check for GitHub remote mode
+        if self.state.git_enabled and self.state.settings.git_remote_mode == "github":
+            if not await AsyncExecutor.run(check_gh_available):
+                self._show_snackbar(
+                    "GitHub CLI (gh) not installed — install from https://cli.github.com",
+                    is_error=True,
+                )
+                return
+            if not await AsyncExecutor.run(check_gh_authenticated):
+                self._show_snackbar(
+                    "GitHub CLI not authenticated — run 'gh auth login' first",
+                    is_error=True,
+                )
+                return
+
         folder_count, file_count = self._count_folders_and_files(self.state.folders)
 
         async def on_confirm(_):
@@ -510,6 +531,7 @@ class BuildHandlersMixin:
             open_terminal = dialog.open_terminal_checkbox.value
             post_build_enabled = dialog.post_build_checkbox.value
             post_build_cmd = dialog.post_build_command_field.value
+            remote_mode = getattr(dialog, "git_remote_mode_value", None)
             dialog.open = False
             self.state.active_dialog = None
             self.page.update()
@@ -518,6 +540,7 @@ class BuildHandlersMixin:
                 open_ide=open_ide,
                 open_terminal=open_terminal,
                 post_build_command=post_build_cmd if post_build_enabled else "",
+                git_remote_mode=remote_mode,
             )
 
         def on_cancel(_=None):
@@ -548,6 +571,9 @@ class BuildHandlersMixin:
             license_type=self.state.license_type,
             post_build_command=self.state.settings.post_build_command,
             post_build_command_enabled=self.state.settings.post_build_command_enabled,
+            git_remote_mode=self.state.settings.git_remote_mode,
+            github_username=self.state.settings.github_username,
+            github_repo_private=self.state.settings.github_repo_private,
         )
 
         dialog = create_build_summary_dialog(

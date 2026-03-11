@@ -156,6 +156,14 @@ IDE_MACOS_APP_NAMES: dict[str, str] = {
     "PyCharm": "PyCharm",
 }
 
+# Git remote modes
+GIT_REMOTE_MODES = ("local", "github", "none")
+GIT_REMOTE_MODE_LABELS = {
+    "local": "Local Bare Repo",
+    "github": "GitHub",
+    "none": "None (local only)",
+}
+
 # License types for project metadata (SPDX identifiers)
 LICENSE_TYPES = [
     "MIT",
