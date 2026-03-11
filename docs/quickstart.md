@@ -25,10 +25,14 @@ Check **Git Repository** to get a fully initialized git repo with an automatic f
 
 ## 5. Optional: Select a UI framework and/or project type
 
+- Check **UI Project** to pick from 10 UI frameworks
+
 ![UI Framework selection dialog](assets/images/ui-framework-dialog.png)
 
-- Check **UI Project** to pick from 10 UI frameworks
 - Check **Project Type** to pick from 21 project types
+
+![Project Type selection dialog](assets/images/project-type-dialog.png)
+
 - You can select **both** — their templates are [merged intelligently](guide/templates.md#template-merging)
 
 Each selection auto-loads a folder structure and package list. You can customize both before building.
