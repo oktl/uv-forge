@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-03-11
+
+### Added
+
+- Configurable git remote mode: Local Bare Repo (default), GitHub (via `gh repo create`), or None (local only)
+- GitHub CLI pre-flight checks (`gh` installed and authenticated) before GitHub-mode builds
+- Settings for git remote mode, GitHub username/org, and private/public repo visibility
+- Per-build git remote mode override in the Confirm Build dialog
+- "Check gh status" button in Settings dialog
+- GitHub Actions workflow for automatic docs deployment to GitHub Pages
+
+### Changed
+
+- Git integration documentation rewritten across README, HELP, Cheat Sheet, and mkdocs guide pages
+
 ## [0.1.0] - 2026-03-10
 
 ### Added
@@ -27,4 +42,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Colour-coded log viewer with clickable source locations
 - Dark and light theme toggle
 
+[0.2.0]: https://github.com/oktl/uv-forge/releases/tag/v0.2.0
 [0.1.0]: https://github.com/oktl/uv-forge/releases/tag/v0.1.0
