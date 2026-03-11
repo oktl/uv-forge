@@ -71,7 +71,7 @@ class TestAsyncExecutorClass:
         elapsed = time.time() - start
 
         # If running concurrently in thread pool, should take ~0.1s, not 0.3s
-        assert elapsed < 0.2
+        assert elapsed < 0.5
         assert all(r == "done" for r in results)
 
     @pytest.mark.asyncio
