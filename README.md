@@ -1,5 +1,12 @@
 # 🛠️ UV Forge
 
+[![PyPI version](https://img.shields.io/pypi/v/uv-forge)](https://pypi.org/project/uv-forge/)
+[![Python 3.12+](https://img.shields.io/pypi/pyversions/uv-forge)](https://pypi.org/project/uv-forge/)
+[![License: MIT](https://img.shields.io/github/license/oktl/uv-forge)](https://github.com/oktl/uv-forge/blob/main/LICENSE)
+[![CI](https://img.shields.io/github/actions/workflow/status/oktl/uv-forge/ci.yml?label=CI)](https://github.com/oktl/uv-forge/actions)
+[![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
+[![Built with Flet](https://img.shields.io/badge/built%20with-Flet-0553B1?logo=flet)](https://flet.dev)
+
 UV Forge is a high-performance [Flet](https://flet.dev) desktop application designed to "forge" new Python projects using the [uv](https://docs.astral.sh/uv/) package manager. It bridges the gap between powerful command-line tooling and a visual, intuitive workflow, allowing developers to scaffold production-ready environments in seconds.  
 
 Pick a UI framework or project type, (or both), configure your options, and UV Forge generates a fully wired project: folder structure, boilerplate files, package installation, virtual environment, git repo, and pyproject.toml, and optionally does an initial commit  — all in one click.
