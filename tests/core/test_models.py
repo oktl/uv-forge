@@ -243,7 +243,7 @@ def test_build_summary_config_from_project_config():
         folders=["core", "utils"],
     )
     assert summary.project_name == "my_app"
-    assert summary.project_path == "/home/user/projects"
+    assert summary.project_path == str(Path("/home/user/projects"))
     assert summary.python_version == "3.14"
     assert summary.git_enabled is True
     assert summary.framework == "flet"  # effective_framework since ui enabled

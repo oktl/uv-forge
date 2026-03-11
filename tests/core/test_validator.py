@@ -2,6 +2,7 @@
 """Pytest tests for validator.py functions"""
 
 import os
+import sys
 import tempfile
 from pathlib import Path
 
@@ -82,12 +83,12 @@ def test_validate_path_file_not_directory():
     """Test that a file path (not directory) is rejected"""
     with tempfile.NamedTemporaryFile(delete=False) as tmp:
         tmp_file = Path(tmp.name)
-        try:
-            is_valid, error_msg = validate_path(tmp_file)
-            assert not is_valid, "File path should be rejected"
-            assert "not a" in error_msg.lower() and "directory" in error_msg.lower()
-        finally:
-            tmp_file.unlink()
+    try:
+        is_valid, error_msg = validate_path(tmp_file)
+        assert not is_valid, "File path should be rejected"
+        assert "not a" in error_msg.lower() and "directory" in error_msg.lower()
+    finally:
+        tmp_file.unlink()
 
 
 def test_validate_path_nonexistent_nested_path():
@@ -98,6 +99,7 @@ def test_validate_path_nonexistent_nested_path():
         assert is_valid, f"Nested path under writable parent should pass: {error_msg}"
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="chmod not enforced on Windows")
 def test_validate_path_unwritable_parent():
     """Test that a path under a read-only directory is rejected."""
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -113,6 +115,7 @@ def test_validate_path_unwritable_parent():
             os.chmod(readonly_dir, 0o755)
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="chmod not enforced on Windows")
 def test_validate_path_existing_unwritable_directory():
     """Test that an existing read-only directory is rejected."""
     with tempfile.TemporaryDirectory() as tmpdir:
