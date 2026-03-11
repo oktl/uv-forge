@@ -21,7 +21,7 @@ Select from Python 3.10 through 3.14 using the dropdown. The version is written 
 
 ## 4. Optional: Enable Git
 
-Check **Git Repository** to get a fully initialized git repo with an automatic first commit. See [Git Integration](guide/git-integration.md) for details on the two-phase setup.
+Check **Git Repository** to get a fully initialized git repo with an automatic first commit. You can choose the remote mode — local bare hub (default), GitHub, or no remote — in [Settings](guide/settings.md). See [Git Integration](guide/git-integration.md) for details on the two-phase setup and each mode.
 
 ## 5. Optional: Select a UI framework and/or project type
 

@@ -13,6 +13,9 @@ Open Settings from the overflow menu (**...**) in the app bar. All settings are 
 | **Python Version**       | Default Python version for new projects                          | `3.14`                     |
 | **Preferred IDE**        | IDE used for "Open in IDE" after build                           | VS Code                   |
 | **Git Default**          | Whether the Git checkbox is checked by default                   | Off                        |
+| **Git Remote Mode**      | How the remote is set up: Local Bare Repo, GitHub, or None       | Local Bare Repo            |
+| **GitHub Username / Org** | Username or organisation for GitHub repo creation               | —                          |
+| **Create Private Repos** | Whether GitHub repos are created as private or public            | On (private)               |
 | **Default Author Name**  | Pre-filled in the Project Metadata dialog                       | —                          |
 | **Default Author Email** | Pre-filled in the Project Metadata dialog                       | —                          |
 | **Post-build Command**   | Shell command to run after each successful build                 | —                          |

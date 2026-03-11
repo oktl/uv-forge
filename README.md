@@ -25,7 +25,7 @@ Pick a UI framework or project type, (or both), configure your options, and UV F
 - **10 UI Frameworks** — Flet, PyQt6, PySide6, tkinter, customtkinter, Kivy, Pygame, NiceGUI, Streamlit, Gradio.
 - **21 Project Types** — Django, FastAPI, Flask, data science, ML (PyTorch/TensorFlow/scikit-learn), CLI tools (Click/Typer/Rich), REST/GraphQL/gRPC APIs, web scraping, browser automation, async apps, and more.
 - **PyPI Guardrails** — Verify your package name is available on PyPI before building (PEP 503 normalization, async). Real-time validation checks project names against PyPI to prevent naming conflicts before you even start coding.
-- **Git Integration** — Two-phase setup: creates a local repo + bare hub repository, then stages, commits, and pushes automatically after build
+- **Git Integration** — Two-phase setup with three remote modes: local bare hub (default), GitHub via `gh`, or local-only with no remote
 - **Dev Dependencies** — Mark packages as dev dependencies; they're installed with `uv add --dev` and shown with an amber badge
 - **Project Metadata** — Configure author, email, description, and license (SPDX); written directly into `pyproject.toml`
 - **Post-Build Automation** — Optionally run a configurable shell command after each successful build (e.g. `uv run pre-commit install`)
@@ -45,6 +45,7 @@ Pick a UI framework or project type, (or both), configure your options, and UV F
 - **Python 3.12+**
 - **UV** — [install UV](https://docs.astral.sh/uv/getting-started/installation/)
 - **Git** (optional, for repository initialization)
+- **GitHub CLI (`gh`)** (optional, for GitHub remote mode) — [install gh](https://cli.github.com/)
 
 ---
 
@@ -155,21 +156,22 @@ uv_forge/config/templates/
 
 ## Git Integration
 
-When **Git Repository** is checked, UV Forge uses a two-phase setup:
+When **Git Repository** is checked, UV Forge uses a two-phase setup. The behaviour varies by **Git Remote Mode** (configurable in Settings, overridable per-build in the Confirm dialog):
 
-**Phase 1 (during project creation):**
+### Local Bare Repo (default)
 
-- Initializes a local git repo in the project directory
-- Creates a bare hub repo at your configured GitHub Root (default: `~/Projects/git-repos/<name>.git`)
-- Connects the local repo to the hub as `origin`
+- **Phase 1:** Initializes a local repo, creates a bare hub at your GitHub Root (default: `~/Projects/git-repos/<name>.git`), and connects it as `origin`
+- **Phase 2:** Stages all files, commits, and pushes to hub with upstream tracking
 
-**Phase 2 (after all files are created):**
+### GitHub
 
-- Stages all files (`git add .`)
-- Creates an initial commit
-- Pushes to hub with upstream tracking (`git push -u origin HEAD`)
+- **Phase 1:** Initializes a local repo only
+- **Phase 2:** Stages all files, commits, then runs `gh repo create` to create a GitHub repository and pushes. Supports username/org prefix and private/public visibility. Requires the [GitHub CLI (`gh`)](https://cli.github.com/) to be installed and authenticated.
 
-Your project is git-ready immediately — no manual first push needed.
+### None (local only)
+
+- **Phase 1:** Initializes a local repo only
+- **Phase 2:** Stages all files and commits — no remote, no push
 
 ---
 
@@ -179,7 +181,7 @@ Settings are stored in the platform-appropriate user data directory (e.g. `~/Lib
 
 | File                   | Contents                                                                                |
 | ---------------------- | --------------------------------------------------------------------------------------- |
-| `settings.json`        | Default path, GitHub root, Python version, IDE, git default, author, post-build command |
+| `settings.json`        | Default path, GitHub root, Python version, IDE, git default, git remote mode, GitHub username, private repos, author, post-build command |
 | `recent_projects.json` | Last 5 successful builds (name, path, config, timestamp)                                |
 | `presets.json`         | Named project configuration presets (no limit)                                          |
 

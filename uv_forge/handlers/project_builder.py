@@ -106,7 +106,12 @@ def _create_project_scaffold(
 
     if config.git_enabled:
         _progress("Setting up Git repository...")
-    handle_git_init(project_path, config.git_enabled, github_root=config.github_root)
+    handle_git_init(
+        project_path,
+        config.git_enabled,
+        github_root=config.github_root,
+        git_remote_mode=config.git_remote_mode,
+    )
 
     resolver = (
         BoilerplateResolver(
@@ -210,7 +215,7 @@ def build_project(
     project_path = config.full_path
     bare_repo_path = (
         get_bare_repo_path(project_path, github_root=config.github_root)
-        if config.git_enabled
+        if config.git_enabled and config.git_remote_mode == "local"
         else None
     )
 
@@ -233,7 +238,13 @@ def build_project(
         # Finalize git after all files and packages are installed
         if config.git_enabled:
             _stepped_progress("Finalizing Git...")
-        finalize_git_setup(project_path, config.git_enabled)
+        finalize_git_setup(
+            project_path,
+            config.git_enabled,
+            git_remote_mode=config.git_remote_mode,
+            github_username=config.github_username,
+            github_repo_private=config.github_repo_private,
+        )
 
         return BuildResult(
             success=True,
