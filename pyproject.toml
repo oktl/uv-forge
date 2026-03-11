@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "uv-forge"
+name = "uv-forger"
 version = "0.1.0"
 description = "A desktop app for forging Python projects with UV — templates, frameworks, and smart scaffolding"
 readme = "README.md"
@@ -51,7 +51,7 @@ dev = [
 ]
 
 [project.scripts]
-uv-forge = "uv_forge.main:run"
+uv-forger = "uv_forge.main:run"
 
 [tool.pytest.ini_options]
 python_files = "test_*.py"

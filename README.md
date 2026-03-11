@@ -1,7 +1,7 @@
 # 🛠️ UV Forge
 
-[![PyPI version](https://img.shields.io/pypi/v/uv-forge)](https://pypi.org/project/uv-forge/)
-[![Python 3.12+](https://img.shields.io/pypi/pyversions/uv-forge)](https://pypi.org/project/uv-forge/)
+[![PyPI version](https://img.shields.io/pypi/v/uv-forger)](https://pypi.org/project/uv-forger/)
+[![Python 3.12+](https://img.shields.io/pypi/pyversions/uv-forger)](https://pypi.org/project/uv-forger/)
 [![License: MIT](https://img.shields.io/github/license/oktl/uv-forge)](https://github.com/oktl/uv-forge/blob/main/LICENSE)
 [![CI](https://img.shields.io/github/actions/workflow/status/oktl/uv-forge/ci.yml?label=CI)](https://github.com/oktl/uv-forge/actions)
 [![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
@@ -52,11 +52,11 @@ Pick a UI framework or project type, (or both), configure your options, and UV F
 
 ```bash
 # Run directly without installing
-uvx uv-forge
+uvx uv-forger
 
 # Or install into a project / global environment
-uv tool install uv-forge
-uv-forge
+uv tool install uv-forger
+uv-forger
 ```
 
 ---
@@ -66,7 +66,7 @@ uv-forge
 ```bash
 git clone https://github.com/oktl/uv-forge.git
 cd uv-forge
-uv run uv-forge        # Via entry point
+uv run uv-forger       # Via entry point
 python uv_forge/main.py     # Direct execution
 ```
 

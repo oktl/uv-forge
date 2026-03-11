@@ -22,7 +22,7 @@ You'll need Python 3.12+, `uv`, and Git.
 ```bash
 git clone https://github.com/oktl/uv-forge.git
 cd uv-forge
-uv run uv-forge        # Run the app
+uv run uv-forger        # Run the app
 uv run pytest          # Run the test suite (625 tests)
 uv run ruff check uv_forge  # Lint
 uv run ruff format uv_forge # Format

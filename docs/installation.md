@@ -12,14 +12,14 @@ The simplest way to run UV Forge:
 
 ```bash
 # Run directly without installing (recommended)
-uvx uv-forge
+uvx uv-forger
 ```
 
 Or install it as a persistent tool:
 
 ```bash
-uv tool install uv-forge
-uv-forge
+uv tool install uv-forger
+uv-forger
 ```
 
 ## Run from source
@@ -27,7 +27,7 @@ uv-forge
 ```bash
 git clone https://github.com/oktl/uv-forge.git
 cd uv-forge
-uv run uv-forge
+uv run uv-forger
 ```
 
 !!! tip
