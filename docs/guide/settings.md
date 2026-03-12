@@ -2,7 +2,7 @@
 
 Open Settings from the overflow menu (**...**) in the app bar. All settings are saved automatically and persist across sessions.
 
-![Settings dialog](../assets/images/settings-dialog.png)
+![Settings dialog](../assets/images/settings-dialog.png){ .img-lg }
 
 ## Options
 
@@ -46,7 +46,7 @@ Log files rotate daily in a `logs/` subdirectory alongside these files.
 
 The log viewer (accessible from the overflow menu) shows colour-coded log entries with clickable source locations that open directly in your IDE.
 
-![Log viewer](../assets/images/log-viewer.png)
+![Log viewer](../assets/images/log-viewer.png){ .img-lg }
 
 ## Project metadata
 

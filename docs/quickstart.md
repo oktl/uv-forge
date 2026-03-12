@@ -27,11 +27,11 @@ Check **Git Repository** to get a fully initialized git repo with an automatic f
 
 - Check **UI Project** to pick from 10 UI frameworks
 
-![UI Framework selection dialog](assets/images/ui-framework-dialog.png)
+![UI Framework selection dialog](assets/images/ui-framework-dialog.png){ .img-sm }
 
 - Check **Project Type** to pick from 21 project types
 
-![Project Type selection dialog](assets/images/project-type-dialog.png)
+![Project Type selection dialog](assets/images/project-type-dialog.png){ .img-sm }
 
 - You can select **both** — their templates are [merged intelligently](guide/templates.md#template-merging)
 
@@ -45,13 +45,13 @@ The **Folders & Files** section shows what will be created. You can:
 - **Remove** items you don't need
 - Packages are listed separately and can be added, removed, or marked as dev dependencies
 
-![Add Packages dialog](assets/images/add-packages-dialog.png)
+![Add Packages dialog](assets/images/add-packages-dialog.png){ .img-sm }
 
 ## 7. Build
 
 Click **Build Project** (or press ++cmd+enter++ / ++ctrl+enter++). A confirmation dialog shows a summary of your project, including a collapsible tree preview.
 
-![Build confirmation dialog](assets/images/build-summary.png)
+![Build confirmation dialog](assets/images/build-summary.png){ .img-lg }
 
 Choose your post-build actions:
 

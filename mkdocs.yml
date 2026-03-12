@@ -31,6 +31,12 @@ theme:
   icon:
     repo: fontawesome/brands/github
 
+extra_css:
+  - stylesheets/extra.css
+
+plugins:
+  - glightbox
+
 markdown_extensions:
   - admonition
   - pymdownx.details

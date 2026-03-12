@@ -13,7 +13,7 @@
 
 All secondary actions are in the app bar overflow menu (**...**):
 
-![Overflow menu](../assets/images/overflow-menu.png)
+![Overflow menu](../assets/images/overflow-menu.png){ .img-sm }
 
 | Action              | Description                                         |
 | ------------------- | --------------------------------------------------- |

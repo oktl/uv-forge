@@ -2,7 +2,7 @@
 
 Presets let you save a full project configuration as a named template for one-click reuse. Open Presets from the overflow menu (**...**) in the app bar, or use the quick-select dropdown in the main window.
 
-![Presets dialog](../assets/images/presets-dialog.png)
+![Presets dialog](../assets/images/presets-dialog.png){ .img-sm }
 
 ## Built-in presets
 

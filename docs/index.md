@@ -4,7 +4,7 @@
 
 UV Forge is a desktop app that scaffolds production-ready Python projects using the [uv](https://docs.astral.sh/uv/) package manager. Pick a UI framework, project type, or both — UV Forge generates the folder structure, boilerplate files, packages, virtual environment, git repo, and `pyproject.toml` in one click.
 
-![UV Forge main window](assets/images/main-window.png)
+![UV Forge main window](assets/images/main-window.png){ .img-lg }
 
 ---
 
