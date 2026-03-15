@@ -59,12 +59,45 @@ A **progress bar** with step counter (e.g., "3/7") tracks each stage. Steps are 
 
 Files get starter content instead of being empty. Fallback chain:
 
-1. `boilerplate/ui_frameworks/{framework}/{file}` — framework-specific
-2. `boilerplate/project_types/{type}/{file}` — project-type-specific
-3. `boilerplate/common/{file}` — shared utilities
-4. Empty file — if no boilerplate found
+1. **User templates** — persistent custom content (saved via editor)
+2. `boilerplate/ui_frameworks/{framework}/{file}` — framework-specific
+3. `boilerplate/project_types/{type}/{file}` — project-type-specific
+4. `boilerplate/common/{file}` — shared utilities
+5. Empty file — if no boilerplate found
 
 `{{project_name}}` in templates → replaced with title case (e.g., `my_app` → `My App`).
+
+---
+
+## File Content Editing
+
+Right-click a file in the folder tree for a context menu:
+
+| Action | What it does |
+| --- | --- |
+| Preview Content | Read-only view of boilerplate or custom content |
+| Edit Content... | Full-screen code editor (fce-enhanced) |
+| Import from File... | Load content from a file on disk |
+| Reset to Default | Remove overrides, revert to boilerplate |
+
+Files with custom content show a **✎** pencil indicator.
+
+**Editor shortcuts:**
+
+| Shortcut | Action |
+| --- | --- |
+| `⌘F` | Search |
+| `⌘⌥F` | Search & Replace |
+| `⌘S` | Save to user templates |
+| `⌘⇧S` | Save As |
+| `⌘D` | Toggle diff pane |
+| `⌘G` | Go to line |
+| `⌘L` | Toggle read-only |
+| `⌘⇧P` | Command palette |
+| `⌘±` | Zoom font size |
+| `Esc` | Close search / close editor |
+
+On Windows/Linux, replace ⌘ with Ctrl and ⌥ with Alt.
 
 ---
 
@@ -108,6 +141,7 @@ Dev packages install with `uv add --dev` → `[dependency-groups]` in pyproject.
 | Git Remote Mode      | Local Bare Repo / GitHub / None (local only) |
 | GitHub Username      | Username or org for GitHub repo creation      |
 | Private Repos        | Whether GitHub repos are created as private   |
+| Custom Templates Path| Directory for user-level boilerplate templates|
 | Post-build Command   | Shell command run after successful builds     |
 | Post-build Packages  | Packages auto-installed when command enabled  |
 

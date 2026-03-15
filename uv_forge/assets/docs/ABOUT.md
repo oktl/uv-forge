@@ -1,6 +1,6 @@
 # UV Forge
 
-**Version 0.1.0**
+**Version 0.2.0**
 
 A desktop application for creating Python projects with UV — the fast Python package manager. Provides template-based folder structures, framework/package installation, git initialization, and Python version selection.
 
@@ -31,6 +31,8 @@ A desktop application for creating Python projects with UV — the fast Python p
 - **User Settings** — Configurable defaults for project path, Python version, IDE preference, and git; persisted to disk
 - **Git Integration** — Two-phase setup with local repo and bare hub (path configurable via Settings)
 - **Async Operations** — UV and git commands run off the UI thread for a responsive experience
+- **File Editor** — Preview, edit, and import file content before building with full IDE-like editing via fce-enhanced
+- **User Templates** — Persistent custom boilerplate that overrides built-in templates across sessions
 - **Presets** — Save and apply named configurations; ships with 4 built-in starter presets
 - **Recent Projects** — Restore settings from your last 5 builds with one click
 - **Log Viewer** — Colour-coded log display with clickable source locations that open in your IDE

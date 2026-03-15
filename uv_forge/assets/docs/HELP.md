@@ -137,7 +137,54 @@ You can customize the structure by:
 - **Clear Packages** - Removes all packages (shows confirmation first); framework/project type packages are restored on the next template reload
 - **Auto-save Folder Changes** - Optionally save your custom structure back to the template
 
-### 8. **Build Project**
+### 8. **File Content Editing**
+
+Right-click any file in the folder tree to open a context menu with these actions:
+
+- **Preview Content** — Read-only view of the file's boilerplate or custom content
+- **Edit Content...** — Opens a full-screen code editor powered by fce-enhanced
+- **Import from File...** — Load content from an existing file on disk
+- **Reset to Default** — Remove custom overrides and revert to boilerplate content
+
+You can also select a file and click the **Edit File** button (pencil icon) in the Folders section toolbar.
+
+Files with custom content show a **✎** pencil indicator in the folder tree. Custom content overrides take priority over boilerplate during the build and survive template reloads.
+
+**Editor Features:**
+
+The full-screen editor includes IDE-like capabilities:
+
+| Shortcut | Action |
+| --- | --- |
+| `⌘F` | Search |
+| `⌘⌥F` | Search & Replace |
+| `⌘S` | Save to user templates |
+| `⌘⇧S` | Save As |
+| `⌘D` | Toggle diff pane |
+| `⌘G` | Go to line |
+| `⌘L` | Toggle read-only |
+| `⌘⇧P` | Command palette |
+| `⌘+` / `⌘-` | Zoom font size |
+| `F1` | Help |
+| `Esc` | Close search bar or editor |
+
+On Windows/Linux, replace ⌘ with Ctrl and ⌥ with Alt.
+
+Additional features: syntax highlighting (Python, JSON, YAML, HTML, CSS, JS, and more), line numbers, code folding, and monospace font.
+
+**User Templates:**
+
+When you save from the editor (`⌘S`), content is persisted to a user templates directory (default: `~/.config/UV Forge/templates/boilerplate/` or platform equivalent). These user templates are loaded with highest priority in the boilerplate fallback chain:
+
+1. User templates (persistent custom content)
+2. Framework-specific boilerplate
+3. Project-type-specific boilerplate
+4. Common utilities
+5. Empty file
+
+You can set a custom templates path in Settings.
+
+### 9. **Build Project**
 
 Click "Build Project" to create your project with all configured settings. A **progress bar** with step counter (e.g., "3/7") tracks each stage of the pipeline in real time. The builder will:
 
@@ -175,6 +222,7 @@ Open from the **⋮** overflow menu in the app bar → **Settings**. Settings ar
 - **Git Remote Mode** — How the remote is set up: Local Bare Repo (default), GitHub, or None (local only)
 - **GitHub Username / Org** — Username or organisation prefix for GitHub repo creation (leave blank for your default account)
 - **Create Private Repos** — Whether GitHub repos are created as private (default) or public
+- **Custom Templates Path** — Path to a directory for user-level boilerplate templates. Templates saved from the file editor are stored here and take priority over built-in boilerplate. Leave blank to use the default platform location.
 - **Post-build Command** — A shell command to run automatically after each successful build (e.g., `uv run pre-commit install`). Toggle it on/off with the "Enable post-build command" checkbox. You can also specify required packages (comma-separated) that will be automatically added to every project when the post-build command is enabled.
 
 Settings are stored in `~/Library/Application Support/UV Forge/settings.json` on macOS (platform-appropriate location on other OSes via `platformdirs`).
