@@ -5,10 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.3.0] - 2026-03-14
+## [0.3.0] - 2026-03-15
 
 ### Added
 
+- Browse button in Add File dialog — import existing files from disk when adding to the folder tree (name auto-fills, content stored for build)
+- FCE-enhanced file editor integration with syntax highlighting, search & replace, diff pane, and user templates
 - File content editing via right-click context menu on files in the folder tree (Preview, Edit, Import from File, Reset to Default)
 - Full-screen code editor powered by fce-enhanced with syntax highlighting, search & replace, diff pane, command palette, and font zoom
 - User templates system — save custom boilerplate that persists across sessions and overrides built-in content
@@ -21,6 +23,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Boilerplate fallback chain updated to check user templates first
 - In-app docs (Help, About, Cheat Sheet) updated to cover file editor features
+
+### Fixed
+
+- FilePicker API corrected from broken `get_file_path()` to `pick_files()` (Flet 0.80+ compatible)
 
 ## [0.2.0] - 2026-03-11
 

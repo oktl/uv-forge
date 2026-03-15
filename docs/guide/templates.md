@@ -104,6 +104,10 @@ Right-click any file in the folder tree to open a context menu with four actions
 
 You can also select a file and click the **Edit File** button (pencil icon) in the Folders section toolbar.
 
+### Browse button (Add File dialog)
+
+When adding a new file via the Add Folder/File dialog, switch the type to "File" to reveal a **Browse...** button. Clicking it opens a file picker — the selected file's name auto-fills the name field (editable) and its content is stored in the project's file overrides. This lets you import an existing file from disk in a single step, instead of adding a blank file and then right-clicking to import.
+
 <!-- TODO: screenshot of full-screen editor -->
 <!-- ![File editor](../assets/images/file-editor.png){ .img-lg } -->
 

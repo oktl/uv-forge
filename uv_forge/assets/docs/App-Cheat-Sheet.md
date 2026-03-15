@@ -78,6 +78,7 @@ Right-click a file in the folder tree for a context menu:
 | Preview Content | Read-only view of boilerplate or custom content |
 | Edit Content... | Full-screen code editor (fce-enhanced) |
 | Import from File... | Load content from a file on disk |
+| Browse... (Add File dialog) | Import existing file content when adding a new file |
 | Reset to Default | Remove overrides, revert to boilerplate |
 
 Files with custom content show a **✎** pencil indicator.

@@ -132,7 +132,7 @@ Files are populated from boilerplate in this priority order:
 
 You can customize the structure by:
 
-- **Add Folder/File** - Add custom folders or files at any level
+- **Add Folder/File** - Add custom folders or files at any level. When adding a file, a **Browse...** button lets you pick an existing file from disk — the name auto-fills (but is editable) and the file's content is stored so it will be included in the built project
 - **Remove Folder/File** - Select an item and click Remove to delete it
 - **Clear Packages** - Removes all packages (shows confirmation first); framework/project type packages are restored on the next template reload
 - **Auto-save Folder Changes** - Optionally save your custom structure back to the template
@@ -147,6 +147,11 @@ Right-click any file in the folder tree to open a context menu with these action
 - **Reset to Default** — Remove custom overrides and revert to boilerplate content
 
 You can also select a file and click the **Edit File** button (pencil icon) in the Folders section toolbar.
+
+There are two ways to import content from disk:
+
+1. **Browse in Add dialog** — When adding a new file, click "Browse..." to select a file and import its content in one step
+2. **Right-click → Import from File...** — For files already in the tree, load content from disk via the context menu
 
 Files with custom content show a **✎** pencil indicator in the folder tree. Custom content overrides take priority over boilerplate during the build and survive template reloads.
 

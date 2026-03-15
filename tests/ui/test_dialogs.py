@@ -12,6 +12,7 @@ from uv_forge.ui.content_dialogs import create_about_dialog
 from uv_forge.ui.dialogs import (
     _parse_log_line,
     _parse_log_location,
+    create_add_item_dialog,
     create_add_packages_dialog,
     create_log_viewer_dialog,
     create_metadata_dialog,
@@ -740,3 +741,100 @@ def test_create_metadata_dialog_pre_populated():
 
     # Dialog should be created (values are inside the content controls)
     assert isinstance(dialog, ft.AlertDialog)
+
+
+# ========== Add Item Dialog Tests ==========
+
+
+def test_create_add_item_dialog_basic():
+    """Test add item dialog creates a valid AlertDialog."""
+    dialog = create_add_item_dialog(
+        on_add_callback=lambda n, t, p, c: None,
+        on_close_callback=lambda _: None,
+        parent_folders=[],
+        is_dark_mode=True,
+    )
+    assert isinstance(dialog, ft.AlertDialog)
+    assert dialog.modal is True
+    assert len(dialog.actions) == 2  # Add and Cancel
+    assert hasattr(dialog, "warning_text")
+
+
+def test_create_add_item_dialog_with_parent_folders():
+    """Test add item dialog populates parent dropdown options."""
+    parents = [
+        {"label": "core/", "path": [0]},
+        {"label": "core/utils/", "path": [0, "subfolders", 0]},
+    ]
+    dialog = create_add_item_dialog(
+        on_add_callback=lambda n, t, p, c: None,
+        on_close_callback=lambda _: None,
+        parent_folders=parents,
+        is_dark_mode=True,
+    )
+    # Content has a Column; find the Dropdown inside
+    column = dialog.content.content
+    dropdowns = [c for c in column.controls if isinstance(c, ft.Dropdown)]
+    assert len(dropdowns) == 1
+    # root + 2 parent folders = 3 options
+    assert len(dropdowns[0].options) == 3
+
+
+def test_create_add_item_dialog_browse_hidden_without_callback():
+    """Test browse row is hidden when no on_browse_callback is provided."""
+    dialog = create_add_item_dialog(
+        on_add_callback=lambda n, t, p, c: None,
+        on_close_callback=lambda _: None,
+        parent_folders=[],
+        is_dark_mode=True,
+    )
+    column = dialog.content.content
+    rows = [c for c in column.controls if isinstance(c, ft.Row)]
+    # Browse row exists but is not visible
+    assert len(rows) == 1  # the browse_row
+    assert rows[0].visible is False
+
+
+def test_create_add_item_dialog_browse_row_with_callback():
+    """Test browse row exists when on_browse_callback is provided."""
+    dialog = create_add_item_dialog(
+        on_add_callback=lambda n, t, p, c: None,
+        on_close_callback=lambda _: None,
+        parent_folders=[],
+        is_dark_mode=True,
+        on_browse_callback=AsyncMock(),
+    )
+    column = dialog.content.content
+    rows = [c for c in column.controls if isinstance(c, ft.Row)]
+    # Browse row exists but starts hidden (type defaults to "folder")
+    assert len(rows) == 1
+    assert rows[0].visible is False
+
+
+def test_create_add_item_dialog_callback_receives_content_none():
+    """Test that on_add_callback receives None content for normal adds."""
+    received = {}
+
+    def capture(name, item_type, parent_path, content):
+        received.update(name=name, item_type=item_type, content=content)
+
+    dialog = create_add_item_dialog(
+        on_add_callback=capture,
+        on_close_callback=lambda _: None,
+        parent_folders=[],
+        is_dark_mode=True,
+    )
+    # Simulate: set name, keep type as "folder", click Add
+    column = dialog.content.content
+    text_fields = [c for c in column.controls if isinstance(c, ft.TextField)]
+    text_fields[0].value = "test_folder"
+
+    # Find and click Add button
+    add_button = dialog.actions[0]
+    mock_event = Mock()
+    mock_event.page = Mock()
+    add_button.on_click(mock_event)
+
+    assert received["name"] == "test_folder"
+    assert received["item_type"] == "folder"
+    assert received["content"] is None

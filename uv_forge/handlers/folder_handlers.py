@@ -303,7 +303,12 @@ class FolderHandlersMixin:
         Opens dialog to add a folder or file at a selected location.
         """
 
-        async def add_item(name: str, item_type: str, parent_path: list | None):
+        async def add_item(
+            name: str,
+            item_type: str,
+            parent_path: list | None,
+            content: str | None = None,
+        ):
             """Add folder or file to state."""
             valid, error = validate_folder_name(name)
             if not valid:
@@ -347,6 +352,14 @@ class FolderHandlersMixin:
                     return
                 parent_container.append(name)
 
+                # Store imported content in file_overrides if provided
+                if content is not None:
+                    file_idx = len(parent_container) - 1
+                    file_path = parent_path + ["files", file_idx]
+                    canonical = get_canonical_file_path(self.state.folders, file_path)
+                    if canonical:
+                        self.state.file_overrides[canonical] = content
+
             self._update_folder_display()
 
             dialog.warning_text.value = ""
@@ -354,9 +367,49 @@ class FolderHandlersMixin:
             dialog.open = False
             self.state.active_dialog = None
 
-            self._set_status(
-                f"{item_type.title()} '{name}' added.", "success", update=True
+            status = f"{item_type.title()} '{name}' added."
+            if content is not None:
+                status = f"File '{name}' added with imported content."
+            self._set_status(status, "success", update=True)
+
+        async def browse_file(name_field, imported_content, browse_feedback):
+            """Open file picker and populate dialog fields with selected file."""
+            files = await ft.FilePicker().pick_files(
+                dialog_title="Select file to import",
+                file_type=ft.FilePickerFileType.CUSTOM,
+                allowed_extensions=[
+                    "py",
+                    "txt",
+                    "md",
+                    "json",
+                    "yaml",
+                    "yml",
+                    "toml",
+                    "cfg",
+                    "ini",
+                    "html",
+                    "css",
+                    "js",
+                    "ts",
+                ],
+                allow_multiple=False,
             )
+            if files:
+                picked = files[0]
+                try:
+                    picked_path = Path(picked.path)
+                    content = picked_path.read_text(encoding="utf-8")
+                    imported_content[0] = content
+                    # Auto-fill name field with picked filename
+                    name_field.value = picked.name
+                    browse_feedback.value = picked.name
+                    browse_feedback.visible = True
+                    self.page.update()
+                except (OSError, UnicodeDecodeError) as exc:
+                    imported_content[0] = None
+                    browse_feedback.value = f"Error: {exc}"
+                    browse_feedback.visible = True
+                    self.page.update()
 
         def close_dialog(_=None):
             dialog.open = False
@@ -366,10 +419,11 @@ class FolderHandlersMixin:
         parent_folders = self._get_folder_hierarchy()
 
         dialog = create_add_item_dialog(
-            lambda n, t, p: asyncio.create_task(add_item(n, t, p)),
+            lambda n, t, p, c: asyncio.create_task(add_item(n, t, p, c)),
             close_dialog,
             parent_folders,
             self.state.is_dark_mode,
+            on_browse_callback=browse_file,
         )
 
         self._set_warning("", update=False)
@@ -678,8 +732,9 @@ class FolderHandlersMixin:
         if not canonical:
             return
 
-        result = await ft.FilePicker().get_file_path(
+        files = await ft.FilePicker().pick_files(
             dialog_title=f"Import content for {filename}",
+            file_type=ft.FilePickerFileType.CUSTOM,
             allowed_extensions=[
                 "py",
                 "txt",
@@ -695,12 +750,11 @@ class FolderHandlersMixin:
                 "js",
                 "ts",
             ],
+            allow_multiple=False,
         )
-        if result:
+        if files:
             try:
-                from pathlib import Path
-
-                content = Path(result).read_text(encoding="utf-8")
+                content = Path(files[0].path).read_text(encoding="utf-8")
                 self.state.file_overrides[canonical] = content
                 self._update_folder_display()
                 self._set_status(

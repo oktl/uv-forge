@@ -52,6 +52,7 @@ Public dialog functions
 from __future__ import annotations
 
 import ast
+import asyncio
 import collections.abc
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -729,14 +730,16 @@ def create_add_item_dialog(
     on_close_callback,
     parent_folders: list[dict],
     is_dark_mode: bool,
+    on_browse_callback=None,
 ) -> ft.AlertDialog:
     """Create dialog for adding a folder or file.
 
     Args:
-        on_add_callback: Callback function(name, item_type, parent_path) when Add is clicked
+        on_add_callback: Callback function(name, item_type, parent_path, content) when Add is clicked
         on_close_callback: Callback function when Cancel is clicked
         parent_folders: List of parent folder options [{"label": "core/", "path": [0]}, ...]
         is_dark_mode: Whether dark mode is active
+        on_browse_callback: Optional async callback for browsing files from disk
 
     Returns:
         Configured AlertDialog for adding items
@@ -744,6 +747,9 @@ def create_add_item_dialog(
     from uv_forge.core.validator import validate_folder_name
 
     colors = get_theme_colors(is_dark_mode)
+
+    # Mutable container for imported file content
+    imported_content: list[str | None] = [None]
 
     # Warning banner for validation errors (defined first so it can be referenced)
     warning_text = ft.Text(
@@ -785,7 +791,46 @@ def create_add_item_dialog(
         on_change=on_name_change,
     )
 
+    # Browse button and feedback text (visible only when type == "file")
+    browse_feedback = ft.Text(
+        value="No file selected",
+        size=12,
+        color=colors["status_default"],
+        italic=True,
+        visible=False,
+    )
+
+    def _on_browse_click(e):
+        """Handle Browse button click — delegates to handler callback."""
+        if on_browse_callback:
+            asyncio.create_task(
+                on_browse_callback(name_field, imported_content, browse_feedback)
+            )
+
+    browse_button = ft.TextButton(
+        content=ft.Text("Browse..."),
+        icon=ft.Icons.FOLDER_OPEN,
+        on_click=_on_browse_click,
+    )
+
+    browse_row = ft.Row(
+        [browse_button, browse_feedback],
+        visible=False,
+        spacing=10,
+    )
+
     # Type selection
+    def on_type_change(e):
+        """Toggle browse row visibility based on type selection."""
+        is_file = type_radio.value == "file"
+        browse_row.visible = is_file and on_browse_callback is not None
+        # Clear imported content when switching to folder
+        if not is_file:
+            imported_content[0] = None
+            browse_feedback.value = "No file selected"
+            browse_feedback.visible = False
+        e.page.update()
+
     type_radio = ft.RadioGroup(
         content=ft.Row(
             [
@@ -794,6 +839,7 @@ def create_add_item_dialog(
             ]
         ),
         value="folder",
+        on_change=on_type_change,
     )
 
     # Parent folder dropdown
@@ -846,7 +892,9 @@ def create_add_item_dialog(
             except _parse_errors:
                 parent_path = None
 
-        on_add_callback(name, item_type, parent_path)
+        # Pass imported content for files (None if not imported)
+        content = imported_content[0] if item_type == "file" else None
+        on_add_callback(name, item_type, parent_path, content)
 
     name_field.on_submit = on_add_click
 
@@ -860,6 +908,7 @@ def create_add_item_dialog(
                 [
                     name_field,
                     warning_text,
+                    browse_row,
                     ft.Container(height=10),
                     ft.Text("Type:", size=14),
                     type_radio,

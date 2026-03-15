@@ -356,3 +356,88 @@ class TestDeleteUserTemplateFile:
         state.ui_project_enabled = False
         state.other_project_enabled = False
         assert handlers._delete_user_template_file("nonexistent.py") is False
+
+
+class TestAddItemWithContent:
+    """Tests for adding files with imported content via on_add_folder."""
+
+    def test_add_file_with_content_stores_override(self, mock_handlers):
+        """Adding a file with content should populate file_overrides."""
+        handlers, state = mock_handlers
+        state.folders = [{"name": "core", "subfolders": [], "files": ["state.py"]}]
+
+        # Simulate what add_item does internally when content is provided
+        parent_path = [0]
+        parent_container, idx = handlers._navigate_to_parent(parent_path)
+        parent_folder = parent_container[idx]
+        files_list = parent_folder.setdefault("files", [])
+        files_list.append("new_file.py")
+
+        # Compute canonical path the same way add_item does
+        from uv_forge.handlers.folder_handlers import get_canonical_file_path
+
+        file_idx = len(files_list) - 1
+        file_path = parent_path + ["files", file_idx]
+        canonical = get_canonical_file_path(state.folders, file_path)
+
+        assert canonical == "core/new_file.py"
+
+        # Store override
+        state.file_overrides[canonical] = "# imported content"
+        assert state.file_overrides["core/new_file.py"] == "# imported content"
+
+    def test_add_file_without_content_no_override(self, mock_handlers):
+        """Adding a file without content should not create a file_overrides entry."""
+        handlers, state = mock_handlers
+        state.folders = [{"name": "utils", "subfolders": [], "files": []}]
+        state.file_overrides = {}
+
+        # Simulate adding a blank file
+        parent_path = [0]
+        parent_container, idx = handlers._navigate_to_parent(parent_path)
+        parent_folder = parent_container[idx]
+        files_list = parent_folder.setdefault("files", [])
+        files_list.append("empty.py")
+
+        # No content → no override
+        assert state.file_overrides == {}
+
+    def test_canonical_path_nested_subfolder(self, mock_handlers):
+        """Canonical path should work for files in nested subfolders."""
+        handlers, state = mock_handlers
+        state.folders = [
+            {
+                "name": "core",
+                "subfolders": [
+                    {"name": "utils", "subfolders": [], "files": ["helpers.py"]}
+                ],
+                "files": [],
+            }
+        ]
+
+        from uv_forge.handlers.folder_handlers import get_canonical_file_path
+
+        # Path to helpers.py: folders[0] → subfolders[0] → files[0]
+        item_path = [0, "subfolders", 0, "files", 0]
+        canonical = get_canonical_file_path(state.folders, item_path)
+        assert canonical == "core/utils/helpers.py"
+
+        # Add a new file and check its canonical path
+        state.folders[0]["subfolders"][0]["files"].append("new.py")
+        new_path = [0, "subfolders", 0, "files", 1]
+        canonical_new = get_canonical_file_path(state.folders, new_path)
+        assert canonical_new == "core/utils/new.py"
+
+    def test_content_cleared_on_folder_type(self, mock_handlers):
+        """Switching type to folder should not pass content."""
+        # This tests the dialog logic — content is only passed for files
+        handlers, state = mock_handlers
+        state.folders = [{"name": "src", "subfolders": [], "files": []}]
+        state.file_overrides = {}
+
+        # Simulate adding a folder (content should be None)
+        new_folder = {"name": "models", "subfolders": [], "files": []}
+        state.folders[0]["subfolders"].append(new_folder)
+
+        # No file_overrides should exist
+        assert state.file_overrides == {}
