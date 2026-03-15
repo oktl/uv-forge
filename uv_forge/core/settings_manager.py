@@ -52,6 +52,24 @@ class AppSettings:
     git_remote_mode: str = "local"
     github_username: str = ""
     github_repo_private: bool = True
+    custom_templates_path: str = ""
+
+
+def get_user_templates_dir(settings: AppSettings | None = None) -> Path:
+    """Return the effective user templates directory.
+
+    Uses custom_templates_path if set, otherwise SETTINGS_DIR / "templates".
+    Does NOT create the directory — that happens only on save.
+
+    Args:
+        settings: Optional AppSettings to read custom_templates_path from.
+
+    Returns:
+        Path to the user templates directory.
+    """
+    if settings and settings.custom_templates_path:
+        return Path(settings.custom_templates_path)
+    return SETTINGS_DIR / "templates"
 
 
 def load_settings() -> AppSettings:

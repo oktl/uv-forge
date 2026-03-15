@@ -167,6 +167,72 @@ def create_app_cheat_sheet_dialog(
     )
 
 
+def create_file_preview_dialog(
+    filename: str,
+    content: str,
+    source_label: str,
+    on_close,
+    is_dark_mode: bool,
+) -> ft.AlertDialog:
+    """Create a read-only preview dialog showing file content.
+
+    Args:
+        filename: Name of the file (e.g., "main.py").
+        content: Content to display.
+        source_label: Label indicating content source (e.g., "From boilerplate").
+        on_close: Close button callback.
+        is_dark_mode: Whether dark mode is active.
+
+    Returns:
+        Configured AlertDialog with read-only content preview.
+    """
+    colors = get_theme_colors(is_dark_mode)
+
+    return ft.AlertDialog(
+        modal=True,
+        title=ft.Text(
+            f"Preview: {filename}",
+            size=UIConfig.DIALOG_TITLE_SIZE,
+            color=colors["main_title"],
+        ),
+        content=ft.Container(
+            content=ft.Column(
+                controls=[
+                    ft.Text(
+                        source_label,
+                        size=11,
+                        italic=True,
+                        color=ft.Colors.GREY_500,
+                    ),
+                    ft.Container(
+                        content=ft.Text(
+                            content if content else "(empty file)",
+                            font_family="monospace",
+                            size=12,
+                            selectable=True,
+                            color=colors.get("text"),
+                        ),
+                        bgcolor=colors.get(
+                            "input_bg",
+                            ft.Colors.GREY_900 if is_dark_mode else ft.Colors.GREY_100,
+                        ),
+                        border_radius=4,
+                        padding=12,
+                        expand=True,
+                    ),
+                ],
+                scroll=ft.ScrollMode.AUTO,
+                spacing=8,
+            ),
+            width=700,
+            height=450,
+            padding=UIConfig.DIALOG_CONTENT_PADDING,
+        ),
+        actions=[ft.TextButton("Close", on_click=on_close)],
+        actions_alignment=ft.MainAxisAlignment.END,
+    )
+
+
 def create_about_dialog(
     content: str,
     on_close,

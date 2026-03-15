@@ -79,6 +79,61 @@ class TestBoilerplateResolverInit:
         )
         assert resolver.search_dirs[0] == Path("/bp/ui_frameworks/tkinter")
 
+    def test_user_boilerplate_dir_prepended_framework(self):
+        resolver = BoilerplateResolver(
+            "myproj",
+            framework="flet",
+            boilerplate_dir=Path("/bp"),
+            user_boilerplate_dir=Path("/user"),
+        )
+        assert resolver.search_dirs == [
+            Path("/user/ui_frameworks/flet"),
+            Path("/user/common"),
+            Path("/bp/ui_frameworks/flet"),
+            Path("/bp/common"),
+        ]
+
+    def test_user_boilerplate_dir_prepended_project_type(self):
+        resolver = BoilerplateResolver(
+            "myproj",
+            project_type="django",
+            boilerplate_dir=Path("/bp"),
+            user_boilerplate_dir=Path("/user"),
+        )
+        assert resolver.search_dirs == [
+            Path("/user/project_types/django"),
+            Path("/user/common"),
+            Path("/bp/project_types/django"),
+            Path("/bp/common"),
+        ]
+
+    def test_user_boilerplate_dir_prepended_both(self):
+        resolver = BoilerplateResolver(
+            "myproj",
+            framework="flet",
+            project_type="django",
+            boilerplate_dir=Path("/bp"),
+            user_boilerplate_dir=Path("/user"),
+        )
+        assert resolver.search_dirs == [
+            Path("/user/ui_frameworks/flet"),
+            Path("/user/project_types/django"),
+            Path("/user/common"),
+            Path("/bp/ui_frameworks/flet"),
+            Path("/bp/project_types/django"),
+            Path("/bp/common"),
+        ]
+
+    def test_no_user_boilerplate_dir_preserves_existing(self):
+        """No user_boilerplate_dir means existing behavior unchanged."""
+        resolver = BoilerplateResolver(
+            "myproj", framework="flet", boilerplate_dir=Path("/bp")
+        )
+        assert resolver.search_dirs == [
+            Path("/bp/ui_frameworks/flet"),
+            Path("/bp/common"),
+        ]
+
 
 class TestBoilerplateResolverResolve:
     """Tests for BoilerplateResolver.resolve() fallback chain."""
@@ -157,6 +212,56 @@ class TestBoilerplateResolverResolve:
             )
             # ui_frameworks/flet doesn't exist — should not error
             assert resolver.resolve("anything.py") is None
+
+
+class TestBoilerplateResolverUserOverlay:
+    """Tests for user overlay directory taking precedence over bundled."""
+
+    def test_user_file_wins_over_bundled(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            base = Path(tmpdir)
+            bp = base / "bundled"
+            user = base / "user"
+            (bp / "common").mkdir(parents=True)
+            (user / "common").mkdir(parents=True)
+            (bp / "common" / "cfg.py").write_text("bundled")
+            (user / "common" / "cfg.py").write_text("user override")
+            resolver = BoilerplateResolver(
+                "demo", boilerplate_dir=bp, user_boilerplate_dir=user
+            )
+            assert resolver.resolve("cfg.py") == "user override"
+
+    def test_falls_back_to_bundled_when_user_missing(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            base = Path(tmpdir)
+            bp = base / "bundled"
+            user = base / "user"
+            (bp / "common").mkdir(parents=True)
+            (user / "common").mkdir(parents=True)
+            (bp / "common" / "cfg.py").write_text("bundled")
+            resolver = BoilerplateResolver(
+                "demo", boilerplate_dir=bp, user_boilerplate_dir=user
+            )
+            assert resolver.resolve("cfg.py") == "bundled"
+
+    def test_user_framework_file_wins(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            base = Path(tmpdir)
+            bp = base / "bundled"
+            user = base / "user"
+            (bp / "ui_frameworks" / "flet").mkdir(parents=True)
+            (bp / "common").mkdir(parents=True)
+            (user / "ui_frameworks" / "flet").mkdir(parents=True)
+            (user / "common").mkdir(parents=True)
+            (bp / "ui_frameworks" / "flet" / "main.py").write_text("bundled flet")
+            (user / "ui_frameworks" / "flet" / "main.py").write_text("user flet")
+            resolver = BoilerplateResolver(
+                "demo",
+                framework="flet",
+                boilerplate_dir=bp,
+                user_boilerplate_dir=user,
+            )
+            assert resolver.resolve("main.py") == "user flet"
 
 
 class TestBoilerplateResolverSubstitute:

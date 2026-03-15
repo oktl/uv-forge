@@ -6,6 +6,7 @@ provides the attach_handlers() function that wires all UI controls.
 
 import flet as ft
 
+from uv_forge.core.settings_manager import get_user_templates_dir
 from uv_forge.core.state import AppState
 from uv_forge.core.template_loader import TemplateLoader
 from uv_forge.handlers.build_handlers import BuildHandlersMixin
@@ -48,7 +49,9 @@ class Handlers(
         self.page = page
         self.controls = controls
         self.state = state
-        self.template_loader = TemplateLoader()
+        self.template_loader = TemplateLoader(
+            user_templates_dir=get_user_templates_dir(state.settings),
+        )
 
 
 def attach_handlers(page: ft.Page, state: AppState) -> None:
@@ -99,6 +102,7 @@ def attach_handlers(page: ft.Page, state: AppState) -> None:
     # --- Folder Management Handlers ---
     controls.add_folder_button.on_click = wrap_async(handlers.on_add_folder)
     controls.remove_folder_button.on_click = wrap_async(handlers.on_remove_folder)
+    controls.edit_file_button.on_click = wrap_async(handlers.on_edit_file)
     controls.auto_save_folder_changes.on_change = wrap_async(
         handlers.on_auto_save_toggle
     )

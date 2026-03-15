@@ -17,6 +17,7 @@ from uv_forge.core.constants import (
 from uv_forge.core.history_manager import add_to_history, make_history_entry
 from uv_forge.core.models import BuildSummaryConfig, ProjectConfig
 from uv_forge.core.preset_manager import add_preset, load_presets, make_preset
+from uv_forge.core.settings_manager import get_user_templates_dir
 from uv_forge.core.template_merger import normalize_folder
 from uv_forge.core.validator import validate_project_name
 from uv_forge.handlers.git_handler import check_gh_authenticated, check_gh_available
@@ -198,6 +199,9 @@ class BuildHandlersMixin:
             else DEFAULT_FOLDERS.copy(),
             packages=list(self.state.packages),
             dev_packages=list(self.state.dev_packages),
+            file_overrides=dict(self.state.file_overrides),
+            user_boilerplate_dir=get_user_templates_dir(self.state.settings)
+            / "boilerplate",
             github_root=Path(self.state.settings.default_github_root),
             git_remote_mode=git_remote_mode or self.state.settings.git_remote_mode,
             github_username=self.state.settings.github_username,
@@ -569,6 +573,7 @@ class BuildHandlersMixin:
             author_email=self.state.author_email,
             description=self.state.description,
             license_type=self.state.license_type,
+            file_override_count=len(self.state.file_overrides),
             post_build_command=self.state.settings.post_build_command,
             post_build_command_enabled=self.state.settings.post_build_command_enabled,
             git_remote_mode=self.state.settings.git_remote_mode,
@@ -666,6 +671,9 @@ class BuildHandlersMixin:
     async def on_keyboard_event(self, e: ft.KeyboardEvent) -> None:
         """Handle keyboard shortcuts.
 
+        When on the /editor route, forwards shortcuts to the editor and
+        handles Escape to close the editor view.
+
         Ctrl+Enter / Cmd+Enter — build project
         Ctrl+F / Cmd+F — add folder/file
         Ctrl+P / Cmd+P — add packages
@@ -673,6 +681,11 @@ class BuildHandlersMixin:
         Ctrl+/ / Cmd+/ — open help
         Escape — close dialog or exit (opens confirmation)
         """
+        # When the editor view is active, forward shortcuts to the editor
+        if len(self.page.views) > 1:
+            await self._handle_editor_keyboard(e)
+            return
+
         if e.key == "Enter" and (e.ctrl or e.meta):
             if (
                 self.state.path_valid
@@ -693,6 +706,55 @@ class BuildHandlersMixin:
                 self.state.active_dialog()
             else:
                 await self.on_exit(e)
+
+    async def _handle_editor_keyboard(self, e: ft.KeyboardEvent) -> None:
+        """Forward keyboard shortcuts to the editor when on the /editor route."""
+        editor_view = getattr(self.page, "editor_view_ref", None)
+        if not editor_view:
+            return
+        editor = getattr(editor_view, "editor", None)
+        if not editor:
+            return
+
+        # Escape: close search bar if open, otherwise close editor view
+        if e.key == "Escape":
+            if hasattr(editor, "_search_bar") and editor._search_bar.is_open:
+                editor._close_search()
+            elif self.state.active_dialog:
+                self.state.active_dialog()
+            return
+
+        # F1: show help
+        if e.key == "F1":
+            editor._show_help()
+            return
+
+        # Cmd/Ctrl shortcuts
+        if not (e.meta or e.ctrl):
+            return
+        key = e.key.upper()
+        if key == "F" and not e.shift and not e.alt:
+            await editor._open_search(with_replace=False)
+        elif (key == "F" and e.alt) or (key == "H" and not e.shift):
+            await editor._open_search(with_replace=True)
+        elif key == "S" and not e.shift:
+            await editor._do_save()
+        elif key == "S" and e.shift:
+            await editor._do_save_as()
+        elif key == "D":
+            editor._toggle_diff_pane()
+        elif key == "G":
+            await editor._handle_goto_line(None)
+        elif key == "L" and not e.shift:
+            editor._toggle_read_only()
+        elif key == "L" and e.shift:
+            editor._handle_language_click(None)
+        elif key == "P" and e.shift:
+            await editor._open_command_palette()
+        elif key in ("=", "+"):
+            editor._change_font_size(1)
+        elif key in ("-", "_"):
+            editor._change_font_size(-1)
 
     async def on_exit(self, e: ft.ControlEvent) -> None:
         """Handle Exit button click — shows confirmation dialog first."""

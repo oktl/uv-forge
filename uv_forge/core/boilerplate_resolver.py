@@ -65,6 +65,7 @@ class BoilerplateResolver:
         framework: str | None = None,
         project_type: str | None = None,
         boilerplate_dir: Path | None = None,
+        user_boilerplate_dir: Path | None = None,
     ):
         if not project_name:
             raise ValueError("project_name cannot be empty")
@@ -73,6 +74,21 @@ class BoilerplateResolver:
         base = boilerplate_dir or BOILERPLATE_DIR
 
         self.search_dirs: list[Path] = []
+
+        # User overlay dirs first (highest priority)
+        if user_boilerplate_dir:
+            if framework:
+                normalized = normalize_framework_name(framework)
+                self.search_dirs.append(
+                    user_boilerplate_dir / "ui_frameworks" / normalized
+                )
+            if project_type:
+                self.search_dirs.append(
+                    user_boilerplate_dir / "project_types" / project_type
+                )
+            self.search_dirs.append(user_boilerplate_dir / "common")
+
+        # Bundled dirs (existing behavior)
         if framework:
             normalized = normalize_framework_name(framework)
             self.search_dirs.append(base / "ui_frameworks" / normalized)

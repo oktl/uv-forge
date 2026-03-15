@@ -10,6 +10,7 @@ from uv_forge.core.settings_manager import (
     SETTINGS_DIR,
     SETTINGS_FILE,
     AppSettings,
+    get_user_templates_dir,
     load_settings,
     save_settings,
 )
@@ -199,6 +200,43 @@ class TestSaveSettings:
         with patch("uv_forge.core.settings_manager.SETTINGS_FILE", fake_file):
             settings = load_settings()
             assert settings.post_build_command == ""
+
+
+class TestGetUserTemplatesDir:
+    """Tests for get_user_templates_dir()."""
+
+    def test_default_when_no_settings(self):
+        result = get_user_templates_dir()
+        assert result == SETTINGS_DIR / "templates"
+
+    def test_default_when_custom_path_empty(self):
+        settings = AppSettings(custom_templates_path="")
+        result = get_user_templates_dir(settings)
+        assert result == SETTINGS_DIR / "templates"
+
+    def test_custom_path_used_when_set(self):
+        settings = AppSettings(custom_templates_path="/my/custom/templates")
+        result = get_user_templates_dir(settings)
+        assert result == Path("/my/custom/templates")
+
+    def test_default_when_settings_is_none(self):
+        result = get_user_templates_dir(None)
+        assert result == SETTINGS_DIR / "templates"
+
+    def test_custom_templates_path_default_empty(self):
+        settings = AppSettings()
+        assert settings.custom_templates_path == ""
+
+    def test_custom_templates_path_roundtrip(self, tmp_path):
+        fake_file = tmp_path / "settings.json"
+        with (
+            patch("uv_forge.core.settings_manager.SETTINGS_FILE", fake_file),
+            patch("uv_forge.core.settings_manager.SETTINGS_DIR", tmp_path),
+        ):
+            original = AppSettings(custom_templates_path="/my/templates")
+            save_settings(original)
+            loaded = load_settings()
+            assert loaded.custom_templates_path == "/my/templates"
 
 
 class TestSettingsConstants:

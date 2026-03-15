@@ -16,7 +16,7 @@ from uv_forge.core.constants import (
 )
 from uv_forge.core.history_manager import clear_history, load_history
 from uv_forge.core.preset_manager import delete_preset, load_presets
-from uv_forge.core.settings_manager import save_settings
+from uv_forge.core.settings_manager import get_user_templates_dir, save_settings
 from uv_forge.ui.content_dialogs import (
     create_about_dialog,
     create_app_cheat_sheet_dialog,
@@ -408,8 +408,16 @@ For more information, visit: https://docs.astral.sh/uv/
             self.page.update()
 
         def on_save(updated_settings):
+            old_templates_path = self.state.settings.custom_templates_path
             save_settings(updated_settings)
             self.state.settings = updated_settings
+            # Rebuild template loader if templates path changed
+            if updated_settings.custom_templates_path != old_templates_path:
+                from uv_forge.core.template_loader import TemplateLoader
+
+                self.template_loader = TemplateLoader(
+                    user_templates_dir=get_user_templates_dir(updated_settings),
+                )
             close_dialog()
             self._reload_and_merge_templates()
             self._show_snackbar("Settings saved")

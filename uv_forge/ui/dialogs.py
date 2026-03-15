@@ -53,6 +53,7 @@ from __future__ import annotations
 
 import ast
 import collections.abc
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import flet as ft
@@ -1237,8 +1238,11 @@ def create_build_summary_dialog(
             visibility = "private" if config.github_repo_private else "public"
             rows.append(_create_summary_row("GitHub:", f"{gh_info} ({visibility})"))
 
+    starter_label = "Yes" if config.starter_files else "No"
+    if config.file_override_count:
+        starter_label += f" ({config.file_override_count} file{'s' if config.file_override_count != 1 else ''} with custom content)"
     rows += [
-        _create_summary_row("Starter Files:", "Yes" if config.starter_files else "No"),
+        _create_summary_row("Starter Files:", starter_label),
     ]
 
     if config.framework:
@@ -1739,7 +1743,7 @@ def create_settings_dialog(
     colors = get_theme_colors(is_dark_mode)
 
     label_style = ft.TextStyle(size=13, color=colors["section_title"])
-    col_width = 410
+    col_width = 460
 
     # --- Default project path ---
     project_path_field = ft.TextField(
@@ -2005,6 +2009,37 @@ def create_settings_dialog(
         text_size=13,
     )
 
+    # --- Custom templates path ---
+    templates_path_field = ft.TextField(
+        label="Custom Path (optional)",
+        value=settings.custom_templates_path,
+        expand=True,
+        label_style=label_style,
+        dense=True,
+        text_size=13,
+    )
+
+    async def browse_templates_path(_):
+        from uv_forge.ui.file_picker import select_folder
+
+        result = await select_folder("Select Templates Directory")
+        if result:
+            templates_path_field.value = result
+            templates_path_field.update()
+
+    templates_path_row = ft.Row(
+        [
+            templates_path_field,
+            ft.IconButton(
+                icon=ft.Icons.FOLDER_OPEN,
+                icon_size=UIConfig.ICON_SIZE_DEFAULT,
+                tooltip="Browse",
+                on_click=browse_templates_path,
+            ),
+        ],
+        spacing=4,
+    )
+
     # --- Save handler ---
     def on_save_click(_):
         from uv_forge.core.settings_manager import AppSettings
@@ -2030,6 +2065,7 @@ def create_settings_dialog(
             git_remote_mode=git_remote_dropdown.value or "local",
             github_username=github_username_field.value or "",
             github_repo_private=github_private_checkbox.value,
+            custom_templates_path=templates_path_field.value or "",
         )
         on_save_callback(updated)
 
@@ -2131,6 +2167,19 @@ def create_settings_dialog(
             ),
             post_build_command_field,
             post_build_packages_field,
+            ft.Divider(height=4, color=colors.get("section_border")),
+            _section_header(
+                "Templates",
+                "Custom boilerplate and folder structure overrides",
+            ),
+            templates_path_row,
+            ft.Text(
+                "Leave empty to use default location. "
+                "Files saved here override bundled templates.",
+                size=11,
+                italic=True,
+                color=colors.get("caption"),
+            ),
         ],
         tight=True,
         spacing=6,
@@ -2149,7 +2198,7 @@ def create_settings_dialog(
                 spacing=16,
                 vertical_alignment=ft.CrossAxisAlignment.START,
             ),
-            width=col_width * 2 + 33,
+            width=col_width * 2 + 33 + 2 * UIConfig.DIALOG_CONTENT_PADDING,
             padding=UIConfig.DIALOG_CONTENT_PADDING,
         ),
         actions=_create_dialog_actions(
@@ -2693,3 +2742,148 @@ def create_presets_dialog(
         actions=actions,
         actions_alignment=ft.MainAxisAlignment.END,
     )
+
+
+def create_file_editor_view(
+    filename: str,
+    initial_content: str,
+    on_save: collections.abc.Callable[[str], None],
+    on_reset: collections.abc.Callable[[], None],
+    on_close: collections.abc.Callable,
+    is_dark_mode: bool,
+    has_override: bool = False,
+    has_user_template: bool = False,
+    user_template_path: str | None = None,
+) -> ft.View:
+    """Create a full-screen View with an enhanced code editor for editing file content.
+
+    Uses a pushed View instead of a modal AlertDialog so that snackbars
+    (e.g. ruff lint errors on save) render correctly above the editor.
+
+    Args:
+        filename: Name of the file being edited (e.g., "main.py").
+        initial_content: Content to populate the editor with.
+        on_save: Callback receiving the edited content string.
+        on_reset: Callback to reset file to boilerplate default.
+        on_close: Callback when the editor view is closed (Cancel / close button).
+        is_dark_mode: Whether dark mode is active.
+        has_override: Whether this file already has a custom override.
+        has_user_template: Whether a user template file exists for this file.
+        user_template_path: Full path to the user template file (for title bar
+            display and built-in Save). Falls back to bare filename if None.
+
+    Returns:
+        Configured ft.View containing an EnhancedCodeEditor.
+    """
+    import asyncio
+    from contextlib import suppress
+
+    import flet_code_editor as fce
+    from fce_enhanced import EnhancedCodeEditor
+    from fce_enhanced.languages import language_for_path
+
+    target_lang = language_for_path(filename)
+
+    # register_keyboard_shortcuts=False so the app's keyboard handler
+    # can forward shortcuts to the editor (and handle Escape to close).
+    editor = EnhancedCodeEditor(
+        value=initial_content,
+        language=target_lang,
+        register_keyboard_shortcuts=False,
+        expand=True,
+    )
+
+    # The underlying fce.CodeEditor doesn't apply syntax highlighting on its
+    # initial render — it requires a language toggle (set dummy → flush → set
+    # real) to trigger a full re-render with colors.  Hook into did_mount to
+    # perform this toggle once the control is in the widget tree.
+    _original_did_mount = editor.did_mount
+
+    def _did_mount_with_highlight():
+        _original_did_mount()
+        dummy_lang = (
+            fce.CodeLanguage.PLAINTEXT
+            if target_lang != fce.CodeLanguage.PLAINTEXT
+            else fce.CodeLanguage.PYTHON
+        )
+        editor._code_editor.language = dummy_lang
+        with suppress(RuntimeError):
+            editor._code_editor.update()
+
+        async def _apply_real_lang():
+            await asyncio.sleep(0.05)
+            editor._code_editor.language = target_lang
+            with suppress(RuntimeError):
+                editor.update()
+
+        asyncio.create_task(_apply_real_lang())
+
+    editor.did_mount = _did_mount_with_highlight
+
+    # Set _current_path so the title bar persists through edits (dirty state)
+    # and so built-in Save (Cmd+S) writes to the correct location.
+    editor._current_path = user_template_path or filename
+    if user_template_path:
+        try:
+            display = "~/" + str(Path(user_template_path).relative_to(Path.home()))
+        except ValueError:
+            display = user_template_path
+        editor._title_bar.value = display
+    else:
+        editor._title_bar.value = filename
+
+    def handle_save(_):
+        on_save(editor.value)
+
+    save_btn = ft.TextButton(
+        "Save",
+        icon=ft.Icons.SAVE,
+        on_click=handle_save,
+    )
+    reset_btn = ft.TextButton(
+        "Reset to Default",
+        icon=ft.Icons.RESTART_ALT,
+        on_click=lambda _: on_reset(),
+        disabled=not (has_override or has_user_template),
+    )
+    cancel_btn = ft.TextButton("Cancel", on_click=lambda _: on_close())
+
+    view = ft.View(
+        route="/editor",
+        controls=[
+            ft.AppBar(
+                leading=ft.Icon(ft.Icons.EDIT, size=16),
+                title=ft.Text(f"Edit: {filename}", size=14),
+                toolbar_height=36,
+                actions=[
+                    ft.IconButton(
+                        ft.Icons.CLOSE,
+                        icon_size=18,
+                        tooltip="Close Editor (Esc)",
+                        on_click=lambda _: on_close(),
+                    ),
+                ],
+            ),
+            ft.Container(
+                content=ft.Column(
+                    controls=[
+                        editor,
+                        ft.Row(
+                            controls=[reset_btn, save_btn, cancel_btn],
+                            alignment=ft.MainAxisAlignment.END,
+                        ),
+                    ],
+                    spacing=4,
+                    expand=True,
+                ),
+                width=880,
+                alignment=ft.Alignment(0, 0),
+                expand=True,
+            ),
+        ],
+        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+        padding=0,
+    )
+    # Expose the editor on the view so handlers can access it for keyboard shortcuts.
+    view.editor = editor
+    return view

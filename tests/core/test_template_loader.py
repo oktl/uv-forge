@@ -134,6 +134,68 @@ class TestGetConfigDisplayName:
         assert display_name.endswith(" template")
 
 
+class TestTemplateLoaderUserDir:
+    """Tests for user_templates_dir overlay in TemplateLoader."""
+
+    def test_init_stores_user_templates_dir(self):
+        loader = TemplateLoader(user_templates_dir=Path("/my/templates"))
+        assert loader.user_templates_dir == Path("/my/templates")
+
+    def test_init_none_by_default(self):
+        loader = TemplateLoader()
+        assert loader.user_templates_dir is None
+
+    def test_user_ui_framework_template_loaded(self):
+        """User template for a UI framework takes precedence over bundled."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            user_dir = Path(tmpdir)
+            fw_dir = user_dir / "ui_frameworks"
+            fw_dir.mkdir(parents=True)
+            template = {"folders": [{"name": "user_custom"}]}
+            (fw_dir / "flet.json").write_text(json.dumps(template))
+
+            loader = TemplateLoader(user_templates_dir=user_dir)
+            config = loader.load_config("flet")
+
+            assert config["folders"] == [{"name": "user_custom"}]
+            assert "user" in str(loader.config_source).lower() or str(
+                loader.config_source
+            ).startswith(tmpdir)
+
+    def test_user_project_type_template_loaded(self):
+        """User template for a project type takes precedence over bundled."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            user_dir = Path(tmpdir)
+            pt_dir = user_dir / "project_types"
+            pt_dir.mkdir(parents=True)
+            template = {"folders": [{"name": "user_django"}]}
+            (pt_dir / "django.json").write_text(json.dumps(template))
+
+            loader = TemplateLoader(user_templates_dir=user_dir)
+            config = loader.load_config("project_types/django")
+
+            assert config["folders"] == [{"name": "user_django"}]
+
+    def test_falls_back_to_bundled_when_user_missing(self):
+        """When user dir has no matching template, bundled is used."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            user_dir = Path(tmpdir)  # empty, no templates
+
+            loader = TemplateLoader(user_templates_dir=user_dir)
+            config = loader.load_config("flet")
+
+            # Should still load successfully from bundled
+            assert isinstance(config, dict)
+            assert "folders" in config
+
+    def test_no_user_dir_preserves_existing_behavior(self):
+        """None user_templates_dir means existing behavior."""
+        loader = TemplateLoader(user_templates_dir=None)
+        config = loader.load_config("flet")
+        assert isinstance(config, dict)
+        assert "folders" in config
+
+
 class TestLoadConfigProjectTypePath:
     """Tests for load_config with project_type style paths (lines 101-102)."""
 

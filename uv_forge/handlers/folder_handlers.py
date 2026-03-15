@@ -1,6 +1,7 @@
 """Handlers for folder tree display and management."""
 
 import asyncio
+from pathlib import Path
 from typing import Any
 
 import flet as ft
@@ -8,6 +9,39 @@ import flet as ft
 from uv_forge.core.validator import validate_folder_name
 from uv_forge.ui.dialogs import create_add_item_dialog
 from uv_forge.ui.ui_config import UIConfig
+
+
+def get_canonical_file_path(
+    folders: list[dict[str, Any]], item_path: list[int | str]
+) -> str | None:
+    """Walk the folder tree by navigation path to build a canonical file path.
+
+    Args:
+        folders: Normalized folder list from state.
+        item_path: Navigation path (e.g., [0, "files", 1] or [0, "subfolders", 0, "files", 2]).
+
+    Returns:
+        Canonical path string like "core/state.py", or None if path is invalid.
+    """
+    parts: list[str] = []
+    current: Any = folders
+    for segment in item_path:
+        if isinstance(segment, int):
+            try:
+                current = current[segment]
+            except (IndexError, KeyError, TypeError):
+                return None
+            # If this is a folder dict, record its name
+            if isinstance(current, dict) and "name" in current:
+                parts.append(current["name"])
+            # If this is a string (a filename), record it
+            elif isinstance(current, str):
+                parts.append(current)
+        elif segment == "subfolders":
+            current = current.get("subfolders", []) if isinstance(current, dict) else []
+        elif segment == "files":
+            current = current.get("files", []) if isinstance(current, dict) else []
+    return "/".join(parts) if parts else None
 
 
 class FolderHandlersMixin:
@@ -18,8 +52,11 @@ class FolderHandlersMixin:
 
     def _create_item_container(
         self, name: str, item_path: list[int | str], item_type: str, indent: int = 0
-    ) -> ft.Container:
+    ) -> ft.Control:
         """Create a clickable container for a folder or file.
+
+        For files, wraps the container in a ContextMenu with preview/edit/import/reset
+        actions. Files with content overrides show a pencil icon indicator.
 
         Args:
             name: Display name of the item.
@@ -28,7 +65,7 @@ class FolderHandlersMixin:
             indent: Indentation level (0 = root).
 
         Returns:
-            Configured Container with click handler and selection highlighting.
+            Configured Container (or ContextMenu wrapping one) with click handler.
         """
         is_selected = (
             self.state.selected_item_path == item_path
@@ -46,22 +83,28 @@ class FolderHandlersMixin:
             display_text = name
             text_color = UIConfig.COLOR_FILE_TEXT
 
-        return ft.Container(
-            content=ft.Row(
-                [
-                    ft.Icon(icon, size=13, color=icon_color),
-                    ft.Text(
-                        display_text,
-                        size=UIConfig.TEXT_SIZE_SMALL,
-                        font_family="monospace",
-                        color=text_color,
-                        overflow=ft.TextOverflow.ELLIPSIS,
-                        expand=True,
-                    ),
-                ],
-                spacing=4,
-                tight=True,
+        row_controls = [
+            ft.Icon(icon, size=13, color=icon_color),
+            ft.Text(
+                display_text,
+                size=UIConfig.TEXT_SIZE_SMALL,
+                font_family="monospace",
+                color=text_color,
+                overflow=ft.TextOverflow.ELLIPSIS,
+                expand=True,
             ),
+        ]
+
+        # Show pencil icon for files with content overrides
+        if item_type == "file":
+            canonical = get_canonical_file_path(self.state.folders, item_path)
+            if canonical and canonical in self.state.file_overrides:
+                row_controls.append(
+                    ft.Icon(ft.Icons.EDIT_NOTE, size=10, color=UIConfig.COLOR_INFO)
+                )
+
+        container = ft.Container(
+            content=ft.Row(row_controls, spacing=4, tight=True),
             data={"path": item_path, "type": item_type, "name": name},
             bgcolor=UIConfig.SELECTED_ITEM_BGCOLOR if is_selected else None,
             border=(
@@ -81,6 +124,41 @@ class FolderHandlersMixin:
             border_radius=2,
             margin=0,
         )
+
+        # Wrap file items in a context menu
+        if item_type == "file":
+            context_menu = ft.ContextMenu(
+                content=container,
+                secondary_items=[
+                    ft.PopupMenuItem(
+                        icon=ft.Icons.PREVIEW,
+                        content=ft.Text("Preview Content"),
+                        data={"action": "preview", "path": item_path, "name": name},
+                        on_click=self._on_file_context_action,
+                    ),
+                    ft.PopupMenuItem(
+                        icon=ft.Icons.EDIT,
+                        content=ft.Text("Edit Content..."),
+                        data={"action": "edit", "path": item_path, "name": name},
+                        on_click=self._on_file_context_action,
+                    ),
+                    ft.PopupMenuItem(
+                        icon=ft.Icons.FILE_OPEN,
+                        content=ft.Text("Import from File..."),
+                        data={"action": "import", "path": item_path, "name": name},
+                        on_click=self._on_file_context_action,
+                    ),
+                    ft.PopupMenuItem(
+                        icon=ft.Icons.RESTART_ALT,
+                        content=ft.Text("Reset to Default"),
+                        data={"action": "reset", "path": item_path, "name": name},
+                        on_click=self._on_file_context_action,
+                    ),
+                ],
+            )
+            return context_menu
+
+        return container
 
     def _process_folder_recursive(
         self,
@@ -164,6 +242,10 @@ class FolderHandlersMixin:
         self._set_status(
             f"Selected {e.control.data['type']}: {item_name}", "info", update=False
         )
+        # Enable/disable edit file button based on whether a file is selected
+        if hasattr(self.controls, "edit_file_button"):
+            is_file = e.control.data["type"] == "file"
+            self.controls.edit_file_button.disabled = not is_file
         self._update_folder_display()
 
     def _get_folder_hierarchy(self) -> list[dict]:
@@ -339,3 +421,298 @@ class FolderHandlersMixin:
         self._style_selected_checkbox(e.control)
         status = "enabled" if self.state.auto_save_folders else "disabled"
         self._set_status(f"Auto-save folder changes {status}.", "info", update=True)
+
+    # ---- File content editing (context menu + button) ----
+
+    def _get_file_boilerplate(self, filename: str) -> str | None:
+        """Resolve boilerplate content for a filename using current config.
+
+        Args:
+            filename: The file name (e.g., "main.py").
+
+        Returns:
+            Boilerplate content string, or None if no boilerplate available.
+        """
+        from uv_forge.core.boilerplate_resolver import BoilerplateResolver
+        from uv_forge.core.settings_manager import get_user_templates_dir
+
+        if not self.state.include_starter_files:
+            return None
+        try:
+            resolver = BoilerplateResolver(
+                project_name=self.state.project_name or "my_project",
+                framework=self.state.framework
+                if self.state.ui_project_enabled
+                else None,
+                project_type=self.state.project_type
+                if self.state.other_project_enabled
+                else None,
+                user_boilerplate_dir=get_user_templates_dir(self.state.settings)
+                / "boilerplate",
+            )
+            return resolver.resolve(filename)
+        except ValueError:
+            return None
+
+    def _get_user_template_path(self, filename: str) -> Path:
+        """Compute the user template file path for the current framework/project type.
+
+        Args:
+            filename: The file name (e.g., "main.py").
+
+        Returns:
+            Path where the user template file would be stored.
+        """
+        from uv_forge.core.boilerplate_resolver import normalize_framework_name
+        from uv_forge.core.settings_manager import get_user_templates_dir
+
+        user_dir = get_user_templates_dir(self.state.settings) / "boilerplate"
+        if self.state.ui_project_enabled and self.state.framework:
+            normalized = normalize_framework_name(self.state.framework)
+            return user_dir / "ui_frameworks" / normalized / filename
+        elif self.state.other_project_enabled and self.state.project_type:
+            return user_dir / "project_types" / self.state.project_type / filename
+        return user_dir / "common" / filename
+
+    def _user_template_exists(self, filename: str) -> bool:
+        """Check if a user template file exists for this filename.
+
+        Args:
+            filename: The file name (e.g., "main.py").
+
+        Returns:
+            True if a user template file exists at the computed path.
+        """
+        return self._get_user_template_path(filename).is_file()
+
+    def _delete_user_template_file(self, filename: str) -> bool:
+        """Remove a user template file.
+
+        Args:
+            filename: The file name (e.g., "main.py").
+
+        Returns:
+            True if the file was deleted, False if it didn't exist.
+        """
+        path = self._get_user_template_path(filename)
+        if path.is_file():
+            path.unlink()
+            return True
+        return False
+
+    def _on_file_context_action(self, e: ft.ControlEvent) -> None:
+        """Dispatch context menu actions to the appropriate handler."""
+        data = e.control.data
+        action = data["action"]
+        item_path = data["path"]
+        name = data["name"]
+
+        if action == "preview":
+            asyncio.create_task(self._preview_file(item_path, name))
+        elif action == "edit":
+            asyncio.create_task(self._edit_file(item_path, name))
+        elif action == "import":
+            asyncio.create_task(self._import_file(item_path, name))
+        elif action == "reset":
+            self._reset_file_override(item_path, name)
+
+    async def on_edit_file(self, e: ft.ControlEvent) -> None:
+        """Handle Edit File button click — edits the currently selected file."""
+        if not self.state.selected_item_path or self.state.selected_item_type != "file":
+            self._set_status("Select a file in the tree first.", "info", update=True)
+            return
+
+        # Find the filename from the last segment of the path
+        parent, idx = self._navigate_to_parent(self.state.selected_item_path)
+        if isinstance(idx, int) and isinstance(parent, list) and idx < len(parent):
+            filename = parent[idx] if isinstance(parent[idx], str) else "unknown"
+        else:
+            return
+
+        await self._edit_file(self.state.selected_item_path, filename)
+
+    async def _preview_file(self, item_path: list[int | str], filename: str) -> None:
+        """Show a read-only preview of file content."""
+        from uv_forge.ui.content_dialogs import create_file_preview_dialog
+
+        canonical = get_canonical_file_path(self.state.folders, item_path)
+        if not canonical:
+            return
+
+        # Get content: override first, then boilerplate, then empty
+        if canonical in self.state.file_overrides:
+            content = self.state.file_overrides[canonical]
+            source = "Custom content (edited)"
+        else:
+            content = self._get_file_boilerplate(filename)
+            if content is not None:
+                source = "From boilerplate"
+            else:
+                content = ""
+                source = "Empty file (no boilerplate available)"
+
+        def close_dialog(_=None):
+            dialog.open = False
+            self.state.active_dialog = None
+            self.page.update()
+
+        dialog = create_file_preview_dialog(
+            filename=filename,
+            content=content,
+            source_label=source,
+            on_close=close_dialog,
+            is_dark_mode=self.state.is_dark_mode,
+        )
+
+        self.page.overlay.append(dialog)
+        dialog.open = True
+        self.state.active_dialog = close_dialog
+        self.page.update()
+
+    async def _edit_file(self, item_path: list[int | str], filename: str) -> None:
+        """Open the editor view for a file."""
+        from uv_forge.ui.dialogs import create_file_editor_view
+
+        canonical = get_canonical_file_path(self.state.folders, item_path)
+        if not canonical:
+            return
+
+        # Get initial content: override first, then boilerplate, then empty
+        if canonical in self.state.file_overrides:
+            initial_content = self.state.file_overrides[canonical]
+        else:
+            initial_content = self._get_file_boilerplate(filename) or ""
+
+        has_user_template = self._user_template_exists(filename)
+
+        def close_editor():
+            if len(self.page.views) > 1:
+                self.page.views.pop()
+            self.state.active_dialog = None
+            self.page.update()
+
+        def on_save(content: str):
+            self.state.file_overrides[canonical] = content
+            close_editor()
+            self._update_folder_display()
+            self._set_status(f"Saved content for {filename}", "success", update=True)
+
+        def on_reset_to_default():
+            if has_user_template:
+                self._do_reset_with_user_template_confirm(None, canonical, filename)
+            else:
+                self.state.file_overrides.pop(canonical, None)
+                close_editor()
+                self._update_folder_display()
+                self._set_status(f"Reset {filename} to default", "info", update=True)
+
+        # Compute user template path for the editor's built-in Save
+        user_template_path = self._get_user_template_path(filename)
+        user_template_path.parent.mkdir(parents=True, exist_ok=True)
+
+        view = create_file_editor_view(
+            filename=filename,
+            initial_content=initial_content,
+            on_save=on_save,
+            on_reset=on_reset_to_default,
+            on_close=close_editor,
+            is_dark_mode=self.state.is_dark_mode,
+            has_override=canonical in self.state.file_overrides,
+            has_user_template=has_user_template,
+            user_template_path=str(user_template_path),
+        )
+
+        self.page.editor_view_ref = view
+        self.page.views.append(view)
+        self.state.active_dialog = close_editor
+        self.page.update()
+
+    def _do_reset_with_user_template_confirm(
+        self, _editor_dialog, canonical: str, filename: str
+    ) -> None:
+        """Show confirmation before deleting a user template file on Reset.
+
+        Args:
+            _editor_dialog: Unused (kept for API compat). Previously the dialog to close.
+            canonical: Canonical file path key in file_overrides.
+            filename: The file name being reset.
+        """
+        from uv_forge.ui.dialogs import create_confirm_dialog
+
+        def on_confirm(_):
+            self._delete_user_template_file(filename)
+            self.state.file_overrides.pop(canonical, None)
+            confirm_dialog.open = False
+            # Close the editor view
+            if len(self.page.views) > 1:
+                self.page.views.pop()
+            self.state.active_dialog = None
+            self._update_folder_display()
+            self._set_status(
+                f"Deleted user template and reset {filename}", "info", update=True
+            )
+
+        def on_cancel(_=None):
+            confirm_dialog.open = False
+            self.page.update()
+
+        confirm_dialog = create_confirm_dialog(
+            title="Delete Custom Template?",
+            message=(
+                f"This will permanently delete your custom template for "
+                f"'{filename}' and fall back to the bundled default."
+            ),
+            confirm_label="Delete",
+            on_confirm=on_confirm,
+            on_cancel=on_cancel,
+            is_dark_mode=self.state.is_dark_mode,
+            confirm_icon=ft.Icons.DELETE_FOREVER,
+        )
+        self.page.overlay.append(confirm_dialog)
+        confirm_dialog.open = True
+        self.page.update()
+
+    async def _import_file(self, item_path: list[int | str], filename: str) -> None:
+        """Import content from a local file into this project file."""
+        canonical = get_canonical_file_path(self.state.folders, item_path)
+        if not canonical:
+            return
+
+        result = await ft.FilePicker().get_file_path(
+            dialog_title=f"Import content for {filename}",
+            allowed_extensions=[
+                "py",
+                "txt",
+                "md",
+                "json",
+                "yaml",
+                "yml",
+                "toml",
+                "cfg",
+                "ini",
+                "html",
+                "css",
+                "js",
+                "ts",
+            ],
+        )
+        if result:
+            try:
+                from pathlib import Path
+
+                content = Path(result).read_text(encoding="utf-8")
+                self.state.file_overrides[canonical] = content
+                self._update_folder_display()
+                self._set_status(
+                    f"Imported content for {filename}", "success", update=True
+                )
+            except (OSError, UnicodeDecodeError) as exc:
+                self._set_status(f"Import failed: {exc}", "error", update=True)
+
+    def _reset_file_override(self, item_path: list[int | str], filename: str) -> None:
+        """Remove any content override for a file."""
+        canonical = get_canonical_file_path(self.state.folders, item_path)
+        if canonical and canonical in self.state.file_overrides:
+            del self.state.file_overrides[canonical]
+            self._update_folder_display()
+            self._set_status(f"Reset {filename} to default", "info", update=True)

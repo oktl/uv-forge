@@ -78,6 +78,9 @@ class AppState:
     )  # package names marked as dev dependencies
     selected_package_idx: int | None = None
 
+    # File content overrides (canonical_path -> content)
+    file_overrides: dict[str, str] = field(default_factory=dict)
+
     # UI state
     is_dark_mode: bool = True
     active_dialog: Callable[[], None] | None = None  # Currently open dismissible dialog
