@@ -4,6 +4,7 @@ This module initializes the Flet application, configures the main page,
 and wires together the application state, UI components, and event handlers.
 """
 
+import os
 import sys
 from pathlib import Path
 
@@ -62,6 +63,12 @@ async def main(page: ft.Page) -> None:
 
 def run() -> None:
     """Entry point for the uv-forge console script."""
+    # Ensure the venv bin dir is on PATH so tools like ruff are discoverable
+    # even when running directly via .venv/bin/python (not via `uv run`).
+    venv_bin = str(Path(sys.executable).parent)
+    if venv_bin not in os.environ.get("PATH", ""):
+        os.environ["PATH"] = venv_bin + os.pathsep + os.environ.get("PATH", "")
+
     assets_dir = Path(__file__).parent / "assets"
     ft.run(main, assets_dir=str(assets_dir))
 

@@ -59,6 +59,8 @@ class MockPage:
         self.theme_mode = None
         self.window = Mock()
         self.opened_controls = []
+        self.route = "/"
+        self.views = [Mock()]  # simulate the default home view
 
     def update(self):
         self.updated = True
@@ -110,6 +112,8 @@ class MockControls:
         self.metadata_checkbox = MockControl(value=False)
         self.metadata_summary = MockText()
         self.preset_dropdown = MockControl(value="None")
+        self.edit_file_button = MockControl()
+        self.edit_file_button.disabled = True
         self.section_titles = []
         self.section_containers = []
 
@@ -253,20 +257,25 @@ def test_create_item_container_folder(mock_handlers):
 
 
 def test_create_item_container_file(mock_handlers):
-    """Test _create_item_container creates file container correctly"""
+    """Test _create_item_container creates file container correctly.
+
+    File items are wrapped in a ContextMenu; the inner container holds the data.
+    """
     handlers, page, controls, state = mock_handlers
 
-    container = handlers._create_item_container(
+    result = handlers._create_item_container(
         name="config.py",
         item_path=[0, "files", 0],
         item_type="file",
         indent=1
     )
 
-    assert container is not None
-    assert container.data["name"] == "config.py"
-    assert container.data["type"] == "file"
-    assert container.data["path"] == [0, "files", 0]
+    assert result is not None
+    # File items return ContextMenu wrapping the Container
+    inner = result.content
+    assert inner.data["name"] == "config.py"
+    assert inner.data["type"] == "file"
+    assert inner.data["path"] == [0, "files", 0]
 
 
 def test_create_item_container_selected_folder(mock_handlers):
@@ -295,16 +304,17 @@ def test_create_item_container_selected_file(mock_handlers):
     state.selected_item_path = [0, "files", 0]
     state.selected_item_type = "file"
 
-    container = handlers._create_item_container(
+    result = handlers._create_item_container(
         name="config.py",
         item_path=[0, "files", 0],
         item_type="file",
         indent=1
     )
 
-    # Should have selection highlighting
-    assert container.bgcolor is not None
-    assert container.border is not None
+    # File items return ContextMenu; inner container has highlighting
+    inner = result.content
+    assert inner.bgcolor is not None
+    assert inner.border is not None
 
 
 def test_create_item_container_not_selected(mock_handlers):
@@ -357,6 +367,14 @@ def test_process_folder_recursive_dict(mock_handlers):
     assert controls_list[0].data["type"] == "folder"
 
 
+def _get_item_data(control):
+    """Extract data dict from a control (Container or ContextMenu wrapping one)."""
+    if hasattr(control, "data") and control.data is not None:
+        return control.data
+    # ContextMenu wrapping a Container
+    return control.content.data
+
+
 def test_process_folder_recursive_with_files(mock_handlers):
     """Test _process_folder_recursive processes files correctly"""
     handlers, page, controls, state = mock_handlers
@@ -371,12 +389,12 @@ def test_process_folder_recursive_with_files(mock_handlers):
 
     # Should have 1 folder + 2 files = 3 controls
     assert len(controls_list) == 3
-    assert controls_list[0].data["name"] == "core"
-    assert controls_list[0].data["type"] == "folder"
-    assert controls_list[1].data["name"] == "config.py"
-    assert controls_list[1].data["type"] == "file"
-    assert controls_list[2].data["name"] == "state.py"
-    assert controls_list[2].data["type"] == "file"
+    assert _get_item_data(controls_list[0])["name"] == "core"
+    assert _get_item_data(controls_list[0])["type"] == "folder"
+    assert _get_item_data(controls_list[1])["name"] == "config.py"
+    assert _get_item_data(controls_list[1])["type"] == "file"
+    assert _get_item_data(controls_list[2])["name"] == "state.py"
+    assert _get_item_data(controls_list[2])["type"] == "file"
 
 
 def test_process_folder_recursive_with_subfolders(mock_handlers):
@@ -421,16 +439,16 @@ def test_process_folder_recursive_nested_with_files(mock_handlers):
 
     # app + main.py + core + state.py + models.py = 5 controls
     assert len(controls_list) == 5
-    assert controls_list[0].data["name"] == "app"
-    assert controls_list[0].data["type"] == "folder"
-    assert controls_list[1].data["name"] == "main.py"
-    assert controls_list[1].data["type"] == "file"
-    assert controls_list[2].data["name"] == "core"
-    assert controls_list[2].data["type"] == "folder"
-    assert controls_list[3].data["name"] == "state.py"
-    assert controls_list[3].data["type"] == "file"
-    assert controls_list[4].data["name"] == "models.py"
-    assert controls_list[4].data["type"] == "file"
+    assert _get_item_data(controls_list[0])["name"] == "app"
+    assert _get_item_data(controls_list[0])["type"] == "folder"
+    assert _get_item_data(controls_list[1])["name"] == "main.py"
+    assert _get_item_data(controls_list[1])["type"] == "file"
+    assert _get_item_data(controls_list[2])["name"] == "core"
+    assert _get_item_data(controls_list[2])["type"] == "folder"
+    assert _get_item_data(controls_list[3])["name"] == "state.py"
+    assert _get_item_data(controls_list[3])["type"] == "file"
+    assert _get_item_data(controls_list[4])["name"] == "models.py"
+    assert _get_item_data(controls_list[4])["type"] == "file"
 
 
 def test_validate_inputs_empty_project_name(mock_handlers):

@@ -85,6 +85,7 @@ class Controls:
         self.auto_save_folder_changes: ft.Checkbox
         self.add_folder_button: ft.Button
         self.remove_folder_button: ft.Button
+        self.edit_file_button: ft.Button
         self.packages_label: ft.Text
         self.packages_container: ft.Container
         self.add_package_button: ft.Button
@@ -374,6 +375,15 @@ def create_controls(state: AppState, colors: dict) -> Controls:
         width=UIConfig.BUTTON_WIDTH_STRUCTURE,
     )
 
+    controls.edit_file_button = ft.Button(
+        "Edit File",
+        icon=ft.Icons.EDIT,
+        tooltip="Edit the content of the selected file\n(or right-click a file in the tree)",
+        style=_split_btn_style,
+        width=UIConfig.BUTTON_WIDTH_STRUCTURE,
+        disabled=True,
+    )
+
     # Package management controls
     controls.packages_label = ft.Text("Packages: 0")
 
@@ -643,6 +653,7 @@ def create_sections(controls: Controls, state: AppState) -> None:
                                 controls=[
                                     controls.add_folder_button,
                                     controls.remove_folder_button,
+                                    controls.edit_file_button,
                                 ],
                             ),
                             ft.Row(

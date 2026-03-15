@@ -218,6 +218,20 @@ wheels = [
 ]
 
 [[package]]
+name = "fce-enhanced"
+version = "0.1.3"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "flet" },
+    { name = "flet-code-editor" },
+    { name = "loguru" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/56/df/1248c9c4b66952d26425eb9d550d48a44383ad0a8308ac8cc762aba90eac/fce_enhanced-0.1.3.tar.gz", hash = "sha256:9997c5cbb315f23545683b00433da7a5ddfa071d28b2fab4b3583f0550484bff", size = 22349, upload-time = "2026-03-12T17:54:58.235Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/3b/0a/9167c8387207076bf9c5240b328ef766f5fa99399ec084a90f20a48edcf9/fce_enhanced-0.1.3-py3-none-any.whl", hash = "sha256:dd2b0decb01230cf20098ce2f14fb2ac2a0420b262f5e33f5d0d5bebc298bd4e", size = 26310, upload-time = "2026-03-12T17:54:56.817Z" },
+]
+
+[[package]]
 name = "filelock"
 version = "3.24.3"
 source = { registry = "https://pypi.org/simple" }
@@ -228,7 +242,7 @@ wheels = [
 
 [[package]]
 name = "flet"
-version = "0.80.5"
+version = "0.82.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "httpx", marker = "platform_system != 'Pyodide'" },
@@ -236,9 +250,21 @@ dependencies = [
     { name = "oauthlib", marker = "platform_system != 'Pyodide'" },
     { name = "repath" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/32/79/5b4e98933b77030f5fafc0ae75fd9a62891712fa8b81280a362eefbb1fcb/flet-0.80.5.tar.gz", hash = "sha256:9317dba543cf6a8773f991d08c570bee377cc916780ed57362114e4777c1ea5c", size = 391425, upload-time = "2026-01-30T00:43:28.017Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/66/a7/46e73c489ec0f3fe65c3c183ddd64ef5c7fff14da2be81df6c0b6ad3e8fc/flet-0.82.2.tar.gz", hash = "sha256:eaad9675ea0c5b81a256c39f92354b219ca3c1fbe27ead7d2a7667a71c835dbe", size = 445579, upload-time = "2026-03-10T01:13:55.398Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a5/55/71f796477263f76b2e25b21dab24ed4acb1988199ff6bc0d9640cdda16a1/flet-0.80.5-py3-none-any.whl", hash = "sha256:8ce4cde04fa698515d273b8dcb6261a873e965c493740c590ca09b8e698cae16", size = 484605, upload-time = "2026-01-30T00:43:26.198Z" },
+    { url = "https://files.pythonhosted.org/packages/b0/e3/4b8ee6a4bc226faa036056b6f24e27a64d41f85f70bc85bb17f0f386c947/flet-0.82.2-py3-none-any.whl", hash = "sha256:278806e5480423772d342566e49f06867bf13ced709bf449890f0bcb27d5a101", size = 541512, upload-time = "2026-03-10T01:13:53.679Z" },
+]
+
+[[package]]
+name = "flet-code-editor"
+version = "0.82.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "flet" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/7c/17/4e3a336fdb32b83b3eea909fb1988927ae85bc89a3416068a860d3363a31/flet_code_editor-0.82.2.tar.gz", hash = "sha256:14f2a32cfa680a14edaad0c5731e73c618573afb98eeae0990b1116f6e7237fb", size = 13564, upload-time = "2026-03-10T01:16:01.947Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/77/eb/7ef638936b6e5da8e4d8acb958c94b5252d170292043d474528b0e890233/flet_code_editor-0.82.2-py3-none-any.whl", hash = "sha256:d84036df75a3ddc5a06370fc730b62d08ff497a9ebc5a01acda6184c72869d54", size = 15507, upload-time = "2026-03-10T01:16:00.784Z" },
 ]
 
 [[package]]
@@ -890,6 +916,7 @@ name = "uv-forger"
 version = "0.2.0"
 source = { editable = "." }
 dependencies = [
+    { name = "fce-enhanced" },
     { name = "flet" },
     { name = "httpx" },
     { name = "loguru" },
@@ -909,6 +936,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "fce-enhanced", specifier = ">=0.1.3" },
     { name = "flet", specifier = ">=0.80.5" },
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "loguru", specifier = ">=0.7.3" },

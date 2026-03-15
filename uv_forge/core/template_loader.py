@@ -33,8 +33,14 @@ class TemplateLoader:
         loaded_template: Template identifier that was loaded (e.g., "flet", "project_types/django").
     """
 
-    def __init__(self):
-        """Initialize TemplateLoader and load default settings."""
+    def __init__(self, user_templates_dir: Path | None = None):
+        """Initialize TemplateLoader and load default settings.
+
+        Args:
+            user_templates_dir: Optional path to user templates overlay directory.
+                Templates found here take precedence over bundled templates.
+        """
+        self.user_templates_dir = user_templates_dir
         self.config_source: Path = TEMPLATES_DIR / "default.json"
         self.loaded_template: str | None = None
         self.settings: dict[str, Any] = self.load_config()
@@ -100,10 +106,28 @@ class TemplateLoader:
             # Check if it's a project type path (e.g., "project_types/django")
             if "/" in template:
                 filename = template.split("/")[-1]
+                # Try user dir first
+                if self.user_templates_dir:
+                    user_path = (
+                        self.user_templates_dir / "project_types" / f"{filename}.json"
+                    )
+                    user_settings = self._load_template(user_path)
+                    if user_settings:
+                        self._update_config_state(user_path, template, user_settings)
+                        return user_settings
                 template_path = PROJECT_TYPE_TEMPLATES_DIR / f"{filename}.json"
             else:
                 # UI framework - look in ui_frameworks directory
                 normalized = normalize_framework_name(template)
+                # Try user dir first
+                if self.user_templates_dir:
+                    user_path = (
+                        self.user_templates_dir / "ui_frameworks" / f"{normalized}.json"
+                    )
+                    user_settings = self._load_template(user_path)
+                    if user_settings:
+                        self._update_config_state(user_path, template, user_settings)
+                        return user_settings
                 template_path = UI_TEMPLATES_DIR / f"{normalized}.json"
 
             settings = self._load_template(template_path)

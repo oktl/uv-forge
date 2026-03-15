@@ -118,6 +118,7 @@ def _create_project_scaffold(
             project_name=config.project_name,
             framework=config.effective_framework,
             project_type=config.project_type,
+            user_boilerplate_dir=config.user_boilerplate_dir,
         )
         if config.include_starter_files
         else None
@@ -129,6 +130,7 @@ def _create_project_scaffold(
         config.folders,
         resolver=resolver,
         skip_files=not config.include_starter_files,
+        file_overrides=config.file_overrides or None,
     )
 
     _progress("Configuring project metadata...")

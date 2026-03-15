@@ -1,5 +1,7 @@
-"""Tests for FolderHandlersMixin — _get_folder_hierarchy, _navigate_to_parent, _on_item_click."""
+"""Tests for FolderHandlersMixin — hierarchy, navigation, item click, user templates."""
 
+import tempfile
+from pathlib import Path
 from unittest.mock import Mock
 
 import pytest
@@ -283,3 +285,74 @@ class TestOnItemClick:
 
         assert state.selected_item_path == [0, "files", 0]
         assert state.selected_item_type == "file"
+
+
+class TestGetUserTemplatePath:
+    """Tests for FolderHandlersMixin._get_user_template_path."""
+
+    def test_framework_path(self, mock_handlers):
+        handlers, state = mock_handlers
+        state.ui_project_enabled = True
+        state.framework = "Flet"
+        state.other_project_enabled = False
+        result = handlers._get_user_template_path("main.py")
+        assert result.parts[-3:] == ("ui_frameworks", "flet", "main.py")
+
+    def test_project_type_path(self, mock_handlers):
+        handlers, state = mock_handlers
+        state.ui_project_enabled = False
+        state.other_project_enabled = True
+        state.project_type = "django"
+        result = handlers._get_user_template_path("urls.py")
+        assert result.parts[-3:] == ("project_types", "django", "urls.py")
+
+    def test_common_path_fallback(self, mock_handlers):
+        handlers, state = mock_handlers
+        state.ui_project_enabled = False
+        state.other_project_enabled = False
+        result = handlers._get_user_template_path("constants.py")
+        assert result.parts[-2:] == ("common", "constants.py")
+
+
+class TestUserTemplateExists:
+    """Tests for FolderHandlersMixin._user_template_exists."""
+
+    def test_returns_false_when_no_file(self, mock_handlers):
+        handlers, state = mock_handlers
+        state.ui_project_enabled = False
+        state.other_project_enabled = False
+        assert handlers._user_template_exists("nonexistent.py") is False
+
+    def test_returns_true_when_file_exists(self, mock_handlers):
+        handlers, state = mock_handlers
+        state.ui_project_enabled = False
+        state.other_project_enabled = False
+        with tempfile.TemporaryDirectory() as tmpdir:
+            state.settings.custom_templates_path = tmpdir
+            common = Path(tmpdir) / "boilerplate" / "common"
+            common.mkdir(parents=True)
+            (common / "test.py").write_text("content")
+            assert handlers._user_template_exists("test.py") is True
+
+
+class TestDeleteUserTemplateFile:
+    """Tests for FolderHandlersMixin._delete_user_template_file."""
+
+    def test_deletes_existing_file(self, mock_handlers):
+        handlers, state = mock_handlers
+        state.ui_project_enabled = False
+        state.other_project_enabled = False
+        with tempfile.TemporaryDirectory() as tmpdir:
+            state.settings.custom_templates_path = tmpdir
+            common = Path(tmpdir) / "boilerplate" / "common"
+            common.mkdir(parents=True)
+            f = common / "test.py"
+            f.write_text("content")
+            assert handlers._delete_user_template_file("test.py") is True
+            assert not f.exists()
+
+    def test_returns_false_when_no_file(self, mock_handlers):
+        handlers, state = mock_handlers
+        state.ui_project_enabled = False
+        state.other_project_enabled = False
+        assert handlers._delete_user_template_file("nonexistent.py") is False

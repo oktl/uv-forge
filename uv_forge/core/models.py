@@ -96,6 +96,8 @@ class ProjectConfig:
     folders: list[str | dict[str, Any] | FolderSpec] = field(default_factory=list)
     packages: list[str] = field(default_factory=list)
     dev_packages: list[str] = field(default_factory=list)
+    file_overrides: dict[str, str] = field(default_factory=dict)
+    user_boilerplate_dir: Path | None = None
     github_root: Path | None = None
     git_remote_mode: str = "local"
     github_username: str = ""
@@ -199,6 +201,7 @@ class BuildSummaryConfig:
     author_email: str = ""
     description: str = ""
     license_type: str = ""
+    file_override_count: int = 0
     post_build_command: str = ""
     post_build_command_enabled: bool = False
     git_remote_mode: str = "local"

@@ -19,6 +19,8 @@ def create_folders(
     parent_create_init: bool = True,
     resolver: BoilerplateResolver | None = None,
     skip_files: bool = False,
+    file_overrides: dict[str, str] | None = None,
+    _parent_canonical: str = "",
 ) -> None:
     """Recursively create directory structure from configuration.
 
@@ -66,10 +68,19 @@ def create_folders(
                 (target / "__init__.py").touch()
 
             # Create specified files in this folder
+            canonical_prefix = (
+                f"{_parent_canonical}{folder_name}/"
+                if _parent_canonical
+                else f"{folder_name}/"
+            )
             if files and not skip_files:
                 for file_name in files:
                     file_path = target / file_name
-                    content = resolver.resolve(file_name) if resolver else None
+                    canonical_key = f"{canonical_prefix}{file_name}"
+                    if file_overrides and canonical_key in file_overrides:
+                        content = file_overrides[canonical_key]
+                    else:
+                        content = resolver.resolve(file_name) if resolver else None
                     if content is not None:
                         file_path.write_text(content, encoding="utf-8")
                     else:
@@ -77,7 +88,15 @@ def create_folders(
 
             # Recursively create subfolders
             if subfolders:
-                create_folders(target, subfolders, create_init, resolver, skip_files)
+                create_folders(
+                    target,
+                    subfolders,
+                    create_init,
+                    resolver,
+                    skip_files,
+                    file_overrides,
+                    canonical_prefix,
+                )
 
 
 def setup_app_structure(
@@ -85,6 +104,7 @@ def setup_app_structure(
     folders: list[str | dict[str, Any]],
     resolver: BoilerplateResolver | None = None,
     skip_files: bool = False,
+    file_overrides: dict[str, str] | None = None,
 ) -> None:
     """Create app directory and configured folder structure.
 
@@ -115,12 +135,22 @@ def setup_app_structure(
     # Create root-level folders at project root
     if root_folders:
         create_folders(
-            project_path, root_folders, resolver=resolver, skip_files=skip_files
+            project_path,
+            root_folders,
+            resolver=resolver,
+            skip_files=skip_files,
+            file_overrides=file_overrides,
         )
 
     # Create app-level folders inside app/
     if app_folders:
-        create_folders(app_dir, app_folders, resolver=resolver, skip_files=skip_files)
+        create_folders(
+            app_dir,
+            app_folders,
+            resolver=resolver,
+            skip_files=skip_files,
+            file_overrides=file_overrides,
+        )
 
     # Move main.py to app/main.py if it exists (uv init creates main.py)
     main_py = project_path / "main.py"
