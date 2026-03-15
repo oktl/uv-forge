@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-03-14
+
+### Added
+
+- File content editing via right-click context menu on files in the folder tree (Preview, Edit, Import from File, Reset to Default)
+- Full-screen code editor powered by fce-enhanced with syntax highlighting, search & replace, diff pane, command palette, and font zoom
+- User templates system — save custom boilerplate that persists across sessions and overrides built-in content
+- Custom content indicators (✎ pencil icon) in the folder tree for files with overrides
+- Edit File toolbar button for quick access to the editor
+- Custom Templates Path setting for user-level boilerplate directory
+- File overrides applied during build with priority over boilerplate
+
+### Changed
+
+- Boilerplate fallback chain updated to check user templates first
+- In-app docs (Help, About, Cheat Sheet) updated to cover file editor features
+
 ## [0.2.0] - 2026-03-11
 
 ### Added
@@ -42,5 +59,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Colour-coded log viewer with clickable source locations
 - Dark and light theme toggle
 
+[0.3.0]: https://github.com/oktl/uv-forge/releases/tag/v0.3.0
 [0.2.0]: https://github.com/oktl/uv-forge/releases/tag/v0.2.0
 [0.1.0]: https://github.com/oktl/uv-forge/releases/tag/v0.1.0

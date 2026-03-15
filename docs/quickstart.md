@@ -43,9 +43,19 @@ The **Folders & Files** section shows what will be created. You can:
 
 - **Add** custom folders or files at any level
 - **Remove** items you don't need
+- **Edit file content** — Right-click any file to preview, edit, or import content before building
+- **Edit File button** — Select a file and click the pencil icon in the toolbar for quick editing
 - Packages are listed separately and can be added, removed, or marked as dev dependencies
 
+<!-- TODO: screenshot of file context menu -->
+<!-- ![File context menu](assets/images/file-context-menu.png){ .img-sm } -->
+
+Files with custom content show a **✎** pencil indicator in the folder tree. Edits are preserved across template reloads.
+
 ![Add Packages dialog](assets/images/add-packages-dialog.png){ .img-sm }
+
+!!! tip
+    Right-click a file and choose **Edit Content...** to open the full-screen code editor with syntax highlighting, search & replace, and more. See [Templates — File Content Editing](guide/templates.md#file-content-editing) for details.
 
 ## 7. Build
 

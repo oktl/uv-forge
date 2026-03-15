@@ -81,12 +81,57 @@ This means selecting "Flet" + "FastAPI" gives you a project with the folder stru
 
 When files are created during a build, UV Forge looks for starter content instead of creating empty files. The lookup follows a fallback chain:
 
-1. `boilerplate/ui_frameworks/{framework}/{filename}` — framework-specific (e.g., Flet's `main.py`)
-2. `boilerplate/project_types/{project_type}/{filename}` — project-type-specific
-3. `boilerplate/common/{filename}` — shared utilities
-4. Empty file — if no boilerplate exists (zero breakage risk)
+1. **User templates** — persistent custom content saved from the file editor (highest priority)
+2. `boilerplate/ui_frameworks/{framework}/{filename}` — framework-specific (e.g., Flet's `main.py`)
+3. `boilerplate/project_types/{project_type}/{filename}` — project-type-specific
+4. `boilerplate/common/{filename}` — shared utilities
+5. Empty file — if no boilerplate exists (zero breakage risk)
 
 Boilerplate files can use `{{project_name}}` as a placeholder. At build time, it's replaced with a title-case version of the project name (e.g., `my_app` becomes `My App`).
+
+User templates are stored in the platform data directory by default (e.g., `~/.config/UV Forge/templates/boilerplate/` on Linux) or at a custom path configured in [Settings](settings.md).
+
+## File content editing
+
+Right-click any file in the folder tree to open a context menu with four actions:
+
+| Action | Description |
+| --- | --- |
+| **Preview Content** | Read-only view of the file's boilerplate or custom content |
+| **Edit Content...** | Opens a full-screen code editor |
+| **Import from File...** | Load content from an existing file on disk |
+| **Reset to Default** | Remove custom overrides and revert to boilerplate |
+
+You can also select a file and click the **Edit File** button (pencil icon) in the Folders section toolbar.
+
+<!-- TODO: screenshot of full-screen editor -->
+<!-- ![File editor](../assets/images/file-editor.png){ .img-lg } -->
+
+### Editor features
+
+The full-screen editor is powered by [fce-enhanced](https://pypi.org/project/fce-enhanced/) and includes:
+
+- **Syntax highlighting** — Python, JSON, YAML, HTML, CSS, JavaScript, and more (language auto-detected from file extension)
+- **Search & replace** — ++cmd+f++ to search, ++cmd+alt+f++ for search & replace
+- **Diff pane** — ++cmd+d++ to compare your changes side-by-side with the original
+- **Go to line** — ++cmd+g++
+- **Command palette** — ++cmd+shift+p++
+- **Font zoom** — ++cmd+plus++ / ++cmd+minus++
+- **Read-only toggle** — ++cmd+l++
+
+On Windows/Linux, replace ++cmd++ with ++ctrl++.
+
+See [Keyboard Shortcuts](../reference/keyboard-shortcuts.md#file-editor) for the full shortcut list.
+
+### Custom content indicators
+
+Files with custom content (edited or imported) show a **✎** pencil indicator in the folder tree. These overrides take priority over boilerplate during the build and survive template reloads.
+
+### User templates
+
+When you save from the editor (++cmd+s++), your content is persisted to a user templates directory. These user templates sit at the **top** of the [boilerplate fallback chain](#smart-scaffolding-boilerplate), so they override built-in content for all future projects.
+
+The default storage location is platform-dependent (e.g., `~/.config/UV Forge/templates/boilerplate/` on Linux, `~/Library/Application Support/UV Forge/templates/boilerplate/` on macOS). You can set a custom path in [Settings](settings.md).
 
 ## Adding a new template
 

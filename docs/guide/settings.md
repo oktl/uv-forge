@@ -18,6 +18,7 @@ Open Settings from the overflow menu (**...**) in the app bar. All settings are 
 | **Create Private Repos** | Whether GitHub repos are created as private or public            | On (private)               |
 | **Default Author Name**  | Pre-filled in the Project Metadata dialog                       | —                          |
 | **Default Author Email** | Pre-filled in the Project Metadata dialog                       | —                          |
+| **Custom Templates Path** | Directory for user-level boilerplate templates                  | Platform default           |
 | **Post-build Command**   | Shell command to run after each successful build                 | —                          |
 | **Enable Post-build**    | Whether the post-build command runs by default                   | Off                        |
 | **Post-build Packages**  | Packages required by the post-build command (comma-separated)    | —                          |
