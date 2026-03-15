@@ -352,7 +352,7 @@ def create_controls(state: AppState, colors: dict) -> Controls:
     )
 
     controls.auto_save_folder_changes = ft.Checkbox(
-        label="Auto-save folder changes to config",
+        label="Save to config",
         value=state.auto_save_folders,
         tooltip="Select to save changes to the template.",
     )
@@ -653,11 +653,12 @@ def create_sections(controls: Controls, state: AppState) -> None:
                                 controls=[
                                     controls.add_folder_button,
                                     controls.remove_folder_button,
-                                    controls.edit_file_button,
+                                    # controls.edit_file_button,
                                 ],
                             ),
                             ft.Row(
                                 controls=[
+                                    controls.edit_file_button,
                                     controls.auto_save_folder_changes,
                                     ft.Icon(
                                         ft.Icons.INFO_OUTLINE,
