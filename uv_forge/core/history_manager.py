@@ -32,6 +32,7 @@ class ProjectHistoryEntry:
         project_type: Selected project type name, or None.
         folders: Folder structure at build time.
         packages: Packages installed at build time.
+        dev_packages: Packages marked as dev dependencies at build time.
         built_at: ISO-format timestamp of the build.
     """
 
@@ -158,6 +159,7 @@ def make_history_entry(
         project_type: Selected project type name, or None.
         folders: Folder structure at build time.
         packages: Packages installed at build time.
+        dev_packages: Packages marked as dev dependencies at build time.
 
     Returns:
         A new ProjectHistoryEntry with built_at set to now.

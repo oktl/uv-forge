@@ -26,14 +26,21 @@ class AppState:
         framework: Selected UI framework (if ui_project_enabled is True).
         other_project_enabled: Whether an other project type is selected.
         project_type: Selected project type (if other_project_enabled is True).
+        author_name: Author name for pyproject.toml metadata.
+        author_email: Author email for pyproject.toml metadata.
+        description: Project description for pyproject.toml metadata.
+        license_type: SPDX license identifier for pyproject.toml metadata.
         folders: Current folder structure from template.
         auto_save_folders: Whether to auto-save folder changes to config.
         selected_item_path: Path to selected item for folder/file removal.
         selected_item_type: Whether selected item is a "folder" or "file".
         packages: List of packages to install (pre-populated from framework/project type, user-editable).
         auto_packages: Last set of packages derived from maps; used to distinguish user additions from auto ones.
+        dev_packages: Set of package names marked as dev dependencies.
         selected_package_idx: Index of selected package for removal, or None.
+        file_overrides: Mapping of canonical file paths to imported content.
         is_dark_mode: Whether dark theme is active.
+        active_dialog: Callable to dismiss the currently open dialog, or None.
         path_valid: Whether the current path passes validation.
         name_valid: Whether the current project name passes validation.
     """

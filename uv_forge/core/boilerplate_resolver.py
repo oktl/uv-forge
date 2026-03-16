@@ -52,11 +52,17 @@ class BoilerplateResolver:
         3. boilerplate/common/{filename}
         4. None (caller falls back to empty .touch())
 
+    Attributes:
+        project_name: Name of the project being created (used for placeholder substitution).
+        search_dirs: Ordered list of directories to search for boilerplate files.
+
     Args:
         project_name: Name of the project being created (used for placeholder substitution).
         framework: Optional UI framework name (display name, will be normalized).
         project_type: Optional project type key (e.g., "django", "fastapi").
         boilerplate_dir: Optional override for the boilerplate directory (for testing).
+        user_boilerplate_dir: Optional path to user boilerplate overlay directory
+            (takes precedence over bundled boilerplate).
     """
 
     def __init__(

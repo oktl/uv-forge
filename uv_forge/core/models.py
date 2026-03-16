@@ -82,6 +82,17 @@ class ProjectConfig:
             if empty (default: []).
         packages: Explicit list of packages to install. When non-empty, overrides the
             packages derived from framework/project type maps (default: []).
+        dev_packages: List of packages to install as dev dependencies (default: []).
+        file_overrides: Mapping of canonical file paths to user-provided content (default: {}).
+        user_boilerplate_dir: Optional path to user boilerplate overlay directory.
+        github_root: Base directory for bare git hub repos, or None.
+        git_remote_mode: Git remote strategy: "local", "github", or "none" (default: "local").
+        github_username: GitHub username for repo creation (default: "").
+        github_repo_private: Whether GitHub repos are created as private (default: True).
+        author_name: Author name for pyproject.toml metadata (default: "").
+        author_email: Author email for pyproject.toml metadata (default: "").
+        description: Project description for pyproject.toml metadata (default: "").
+        license_type: SPDX license identifier for pyproject.toml metadata (default: "").
     """
 
     project_name: str
@@ -175,7 +186,18 @@ class BuildSummaryConfig:
         folder_count: Number of folders to be created in the project.
         file_count: Number of files to be created in the project.
         packages: List of packages that will be installed (default: []).
+        dev_packages: List of packages marked as dev dependencies (default: []).
         folders: Normalized folder structure for tree preview display.
+        author_name: Author name for pyproject.toml metadata.
+        author_email: Author email for pyproject.toml metadata.
+        description: Project description for pyproject.toml metadata.
+        license_type: SPDX license identifier for pyproject.toml metadata.
+        file_override_count: Number of files with user-provided content overrides.
+        post_build_command: Shell command to run after build.
+        post_build_command_enabled: Whether the post-build command is enabled for this build.
+        git_remote_mode: Git remote strategy: "local", "github", or "none".
+        github_username: GitHub username for repo creation.
+        github_repo_private: Whether GitHub repos are created as private.
 
     Note:
         ui_project_enabled and other_project_enabled are independent—both can be

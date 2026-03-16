@@ -37,6 +37,7 @@ class ProjectPreset:
         description: Project description for pyproject.toml.
         license_type: SPDX license identifier.
         saved_at: ISO-format timestamp of when the preset was saved.
+        builtin: Whether this is a factory-provided preset (not user-created).
     """
 
     name: str

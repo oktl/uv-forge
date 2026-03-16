@@ -30,8 +30,17 @@ class AppSettings:
         git_enabled_default: Whether git init is enabled by default.
         starter_files_default: Whether to include starter files by default.
         default_license: Default SPDX license identifier for new projects.
+        default_author_name: Default author name for project metadata.
+        default_author_email: Default author email for project metadata.
         open_folder_default: Whether to open project folder after build by default.
         open_terminal_default: Whether to open terminal at project root after build by default.
+        post_build_command: Shell command to run after a successful build.
+        post_build_command_enabled: Whether the post-build command runs by default.
+        post_build_packages: Comma-separated packages required by the post-build command.
+        git_remote_mode: Git remote strategy: "local", "github", or "none".
+        github_username: GitHub username for repo creation when git_remote_mode is "github".
+        github_repo_private: Whether GitHub repos are created as private by default.
+        custom_templates_path: Custom directory for user-level project templates.
     """
 
     default_project_path: str = str(Path.home() / "Projects")

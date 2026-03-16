@@ -28,6 +28,7 @@ class TemplateLoader:
     - Project types: app/config/templates/project_types/ (e.g., django.json, fastapi.json)
 
     Attributes:
+        user_templates_dir: Optional path to user templates overlay directory.
         config_source: Path to the active template file being used.
         settings: Current configuration dictionary with 'folders' key.
         loaded_template: Template identifier that was loaded (e.g., "flet", "project_types/django").
