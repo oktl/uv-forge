@@ -43,25 +43,35 @@ class Controls:
         auto_save_folder_changes: Checkbox for auto-save option.
         add_folder_button: Button to add a folder.
         remove_folder_button: Button to remove a folder.
+        edit_file_button: Button to edit a file's content.
         packages_label: Label for packages display.
         packages_container: Container showing packages list.
         add_package_button: Button to open the add-packages dialog.
         remove_package_button: Button to remove the selected package.
         clear_packages_button: Button to remove all packages from the list.
-        path_preview_text: Small greyed text showing the resolved project path as the user types.
+        toggle_dev_button: Button to toggle selected package between runtime and dev dependency.
         include_starter_files_checkbox: Checkbox to include starter files in template.
+        path_preview_text: Small greyed text showing the resolved project path as the user types.
+        status_icon: Icon to indicate status (info, warning, error).
         status_text: Text for displaying status messages.
         build_project_button: Button to build the project.
         reset_button: Button to reset all fields.
         exit_button: Button to exit the application.
         progress_ring: Progress indicator for async operations.
-        overflow_menu: PopupMenuButton containing infrequent actions.
-        help_menu_item: Menu item to show help dialog.
+        progress_bar: Progress bar for multi-step operations.
+        progress_step_text: Text to show current step in multi-step operations.
         about_menu_item: Menu item to show about dialog.
+        help_menu_item: Menu item to show help dialog.
+        app_cheat_sheet_menu_item: Menu item to show app cheat sheet dialog.
         settings_menu_item: Menu item to show settings dialog.
         history_menu_item: Menu item to show recent projects dialog.
+        presets_menu_item: Menu item to show presets management dialog.
         log_viewer_menu_item: Menu item to show log viewer dialog.
+        overflow_menu: PopupMenuButton containing infrequent actions.
         theme_toggle_button: Button to toggle theme.
+        pypi_status_text: Text to show PyPI name availability status.
+        metadata_checkbox: Checkbox to enable project metadata input.
+        metadata_summary: Text to show a summary of the entered metadata.
         main_title: Main title text.
         section_titles: List of section title texts.
         section_containers: List of section containers.
@@ -355,6 +365,9 @@ def create_controls(state: AppState, colors: dict) -> Controls:
         label="Save to config",
         value=state.auto_save_folders,
         tooltip="Select to save changes to the template.",
+        label_style=ft.TextStyle(
+            size=UIConfig.TEXT_SIZE_SMALL, color=UIConfig.COLOR_INFO
+        ),
     )
 
     _split_btn_style = ft.ButtonStyle(
@@ -588,8 +601,8 @@ def create_sections(controls: Controls, state: AppState) -> None:
                                                 size=12,
                                                 color=UIConfig.COLOR_INFO,
                                                 tooltip=(
-                                                    "Creates a local Git repo and a bare hub repository.\n"
-                                                    "The hub acts as a local remote origin you can push to.\n"
+                                                    "Creates a local Git repo and  GitHub or local\n bare hub repository.\n"
+                                                    "The local hub acts as a local remote origin \nyou can push to.\n"
                                                     "Hub location is configurable in Settings."
                                                 ),
                                             ),
@@ -653,7 +666,6 @@ def create_sections(controls: Controls, state: AppState) -> None:
                                 controls=[
                                     controls.add_folder_button,
                                     controls.remove_folder_button,
-                                    # controls.edit_file_button,
                                 ],
                             ),
                             ft.Row(
@@ -726,7 +738,7 @@ def create_app_bars(page: ft.Page, controls: Controls, colors: dict) -> None:
     """
     page.appbar = ft.AppBar(
         title=ft.Text(
-            "Forge a New Project with uv",
+            "Forge a new project with uv",
             size=UIConfig.APPBAR_TITLE_SIZE,
             color=colors["main_title"],
         ),
@@ -771,9 +783,7 @@ def create_layout(controls: Controls) -> ft.Column:
 
     return ft.Column(
         controls=[
-            ft.Image(
-                src="images/badge.png",
-            ),
+            ft.Image(src="images/badge.png", width=60),
             ft.Container(height=UIConfig.VSPACE_SMALL),  # Spacer
             ft.Row(
                 controls=[

@@ -17,36 +17,37 @@ Table of Contents
 =================
 
 Content/documentation dialogs have been extracted to content_dialogs.py:
-  create_dialog_text_field, create_help_dialog, create_app_cheat_sheet_dialog,
-  create_about_dialog
+    create_dialog_text_field, create_help_dialog, create_app_cheat_sheet_dialog,
+    create_about_dialog
 
 Helpers (private)
 -----------------
-  create_tooltip .................. line ~76
-  _create_dialog_title ............ line ~98
-  _create_dialog_actions .......... line ~125
-  _create_summary_row ............. line ~190
-  _build_badge_row ................ line ~209
-  _autofocus_selected_radio ....... line ~273
-  _create_none_option_container ... line ~296
-  _parse_log_location ............. line ~337
-  _parse_log_line ................. line ~355
+    create_tooltip .................. line ~75
+    _create_dialog_title ............ line ~97
+    _create_dialog_actions .......... line ~124
+    _create_summary_row ............. line ~189
+    _build_badge_row ................ line ~208
+    _autofocus_selected_radio ....... line ~272
+    _create_none_option_container ... line ~295
+    _parse_log_location ............. line ~336
+    _parse_log_line ................. line ~354
 
 Public dialog functions
 -----------------------
-  create_confirm_dialog ........... line ~447
-  _create_categorized_radio_dialog  line ~533  (shared by project type/framework)
-  create_project_type_dialog ...... line ~665
-  create_framework_dialog ......... line ~697
-  create_add_item_dialog .......... line ~729
-  create_build_error_dialog ....... line ~889
-  create_add_packages_dialog ...... line ~950
-  create_build_summary_dialog ..... line ~1181
-  create_log_viewer_dialog ........ line ~1459
-  create_metadata_dialog .......... line ~1531
-  create_settings_dialog .......... line ~1636
-  create_history_dialog ........... line ~1957
-  create_presets_dialog ........... line ~2157
+    create_confirm_dialog ........... line ~446
+    _create_categorized_radio_dialog  line ~532  (shared by project type/framework)
+    create_project_type_dialog ...... line ~664
+    create_framework_dialog ......... line ~696
+    create_add_item_dialog .......... line ~728
+    create_build_error_dialog ....... line ~936
+    create_add_packages_dialog ...... line ~997
+    create_build_summary_dialog ..... line ~1246
+    create_log_viewer_dialog ........ line ~1591
+    create_metadata_dialog .......... line ~1663
+    create_settings_dialog .......... line ~1768
+    create_history_dialog ........... line ~2266
+    create_presets_dialog ........... line ~2466
+    create_file_editor_view ......... line ~2796
 """
 
 from __future__ import annotations
@@ -2928,6 +2929,9 @@ def create_file_editor_view(
                 width=880,
                 alignment=ft.Alignment(0, 0),
                 expand=True,
+                border_radius=8,
+                border=ft.border.all(1, ft.Colors.OUTLINE_VARIANT),
+                margin=ft.margin.only(bottom=12),
             ),
         ],
         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
