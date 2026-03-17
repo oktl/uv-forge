@@ -65,7 +65,7 @@ PROJECT_TYPE_PACKAGE_MAP = {
     "cli_typer": ["typer[all]"],
     "cli_rich": ["rich"],
     # API Development
-    "api_fastapi": ["fastapi", "uvicorn", "pydantic"],
+    "api_fastapi": ["fastapi", "uvicorn", "httpx", "pydantic"],
     "api_graphql": ["strawberry-graphql[fastapi]"],
     "api_grpc": ["grpcio", "grpcio-tools", "protobuf"],
     # Automation & Scraping

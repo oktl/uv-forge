@@ -261,14 +261,14 @@ class TestContextMenuAndIndicator:
         assert hasattr(result, "secondary_items")
         assert len(result.secondary_items) == 4
 
-    def test_folder_item_returns_container(self, handlers):
+    def test_folder_item_returns_context_menu(self, handlers):
         h, _, _, state = handlers
         state.folders = [{"name": "core", "subfolders": [], "files": []}]
 
         result = h._create_item_container("core", [0], "folder")
-        # Should be a plain Container (no secondary_items)
-        assert not hasattr(result, "secondary_items")
-        assert result.data["type"] == "folder"
+        # Should be a ContextMenu wrapping the folder container
+        assert hasattr(result, "secondary_items")
+        assert result.content.data["type"] == "folder"
 
     def test_pencil_icon_when_override_exists(self, handlers):
         h, _, _, state = handlers

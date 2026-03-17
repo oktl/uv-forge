@@ -10,6 +10,113 @@ from uv_forge.core.validator import validate_folder_name
 from uv_forge.ui.dialogs import create_add_item_dialog
 from uv_forge.ui.ui_config import UIConfig
 
+IMPORTABLE_EXTENSIONS: list[str] = [
+    "py",
+    "txt",
+    "md",
+    "json",
+    "yaml",
+    "yml",
+    "toml",
+    "cfg",
+    "ini",
+    "html",
+    "css",
+    "js",
+    "ts",
+]
+
+_SKIP_DIRS: set[str] = {
+    ".git",
+    "__pycache__",
+    "node_modules",
+    ".venv",
+    ".env",
+    ".tox",
+    ".mypy_cache",
+    ".ruff_cache",
+    ".pytest_cache",
+    "dist",
+    "build",
+}
+
+
+def scan_folder_from_disk(
+    folder_path: Path,
+    *,
+    max_files: int = 50,
+    max_depth: int = 5,
+) -> tuple[dict[str, Any], dict[str, str], dict[str, int]]:
+    """Scan a directory from disk and return a folder structure with file contents.
+
+    Args:
+        folder_path: Path to the directory to scan.
+        max_files: Maximum number of files to read content for.
+        max_depth: Maximum recursion depth for subdirectories.
+
+    Returns:
+        Tuple of (folder_dict, file_overrides, stats):
+        - folder_dict: Nested dict matching FolderSpec format.
+        - file_overrides: Mapping of canonical paths to file contents.
+        - stats: Counts of folders, files, and skipped items.
+    """
+    file_count = [0]
+    stats: dict[str, int] = {"folders": 0, "files": 0, "skipped": 0}
+
+    def _scan(path: Path, depth: int, prefix: str) -> dict[str, Any]:
+        result: dict[str, Any] = {
+            "name": path.name,
+            "create_init": False,
+            "subfolders": [],
+            "files": [],
+        }
+        stats["folders"] += 1
+
+        if depth >= max_depth:
+            return result
+
+        try:
+            entries = sorted(path.iterdir(), key=lambda p: (p.is_file(), p.name))
+        except PermissionError:
+            return result
+
+        for entry in entries:
+            if entry.name.startswith("."):
+                continue
+
+            if entry.is_dir():
+                if entry.name in _SKIP_DIRS:
+                    continue
+                child = _scan(entry, depth + 1, f"{prefix}{entry.name}/")
+                result["subfolders"].append(child)
+
+            elif entry.is_file():
+                ext = entry.suffix.lstrip(".")
+                if ext not in IMPORTABLE_EXTENSIONS:
+                    stats["skipped"] += 1
+                    continue
+
+                if file_count[0] >= max_files:
+                    stats["skipped"] += 1
+                    continue
+
+                try:
+                    content = entry.read_text(encoding="utf-8")
+                except (UnicodeDecodeError, PermissionError):
+                    stats["skipped"] += 1
+                    continue
+
+                result["files"].append(entry.name)
+                file_overrides[f"{prefix}{entry.name}"] = content
+                file_count[0] += 1
+                stats["files"] += 1
+
+        return result
+
+    file_overrides: dict[str, str] = {}
+    root = _scan(folder_path, 0, f"{folder_path.name}/")
+    return root, file_overrides, stats
+
 
 def get_canonical_file_path(
     folders: list[dict[str, Any]], item_path: list[int | str]
@@ -153,6 +260,25 @@ class FolderHandlersMixin:
                         content=ft.Text("Reset to Default"),
                         data={"action": "reset", "path": item_path, "name": name},
                         on_click=self._on_file_context_action,
+                    ),
+                ],
+            )
+            return context_menu
+
+        # Wrap folder items in a context menu
+        if item_type == "folder":
+            context_menu = ft.ContextMenu(
+                content=container,
+                secondary_items=[
+                    ft.PopupMenuItem(
+                        icon=ft.Icons.CREATE_NEW_FOLDER,
+                        content=ft.Text("Import Folder from Disk..."),
+                        data={
+                            "action": "import_folder",
+                            "path": item_path,
+                            "name": name,
+                        },
+                        on_click=self._on_folder_context_action,
                     ),
                 ],
             )
@@ -307,7 +433,7 @@ class FolderHandlersMixin:
             name: str,
             item_type: str,
             parent_path: list | None,
-            content: str | None = None,
+            content: str | tuple | None = None,
         ):
             """Add folder or file to state."""
             valid, error = validate_folder_name(name)
@@ -339,11 +465,40 @@ class FolderHandlersMixin:
                     parent_container = parent_folder.setdefault("files", [])
 
             if item_type == "folder":
-                new_item = {"name": name, "subfolders": [], "files": []}
+                # Check if content is an imported folder (tuple of dict, overrides)
+                if isinstance(content, tuple):
+                    folder_dict, file_overrides = content
+                    new_item = folder_dict
+                    new_item["name"] = name  # Use user-edited name
+                else:
+                    new_item = {"name": name, "subfolders": [], "files": []}
+
                 if parent_path is None:
                     self.state.folders.append(new_item)
                 else:
                     parent_container.append(new_item)
+
+                # Merge file_overrides for imported folders
+                if isinstance(content, tuple):
+                    _, file_overrides = content
+                    # Build canonical prefix for insertion point
+                    if parent_path is not None:
+                        parent_canonical = get_canonical_file_path(
+                            self.state.folders, parent_path
+                        )
+                        prefix = f"{parent_canonical}/" if parent_canonical else ""
+                    else:
+                        prefix = ""
+                    # file_overrides keys are like "origname/sub/file.py"
+                    # Replace the original folder name prefix with the user name
+                    for rel_path, file_content in file_overrides.items():
+                        # rel_path starts with "original_name/..."
+                        parts = rel_path.split("/", 1)
+                        if len(parts) == 2:
+                            adjusted = f"{name}/{parts[1]}"
+                        else:
+                            adjusted = rel_path
+                        self.state.file_overrides[f"{prefix}{adjusted}"] = file_content
             else:
                 if parent_path is None:
                     dialog.warning_text.value = "Files must be added inside a folder."
@@ -368,7 +523,9 @@ class FolderHandlersMixin:
             self.state.active_dialog = None
 
             status = f"{item_type.title()} '{name}' added."
-            if content is not None:
+            if isinstance(content, tuple):
+                status = f"Folder '{name}' imported from disk."
+            elif content is not None:
                 status = f"File '{name}' added with imported content."
             self._set_status(status, "success", update=True)
 
@@ -377,21 +534,7 @@ class FolderHandlersMixin:
             files = await ft.FilePicker().pick_files(
                 dialog_title="Select file to import",
                 file_type=ft.FilePickerFileType.CUSTOM,
-                allowed_extensions=[
-                    "py",
-                    "txt",
-                    "md",
-                    "json",
-                    "yaml",
-                    "yml",
-                    "toml",
-                    "cfg",
-                    "ini",
-                    "html",
-                    "css",
-                    "js",
-                    "ts",
-                ],
+                allowed_extensions=IMPORTABLE_EXTENSIONS,
                 allow_multiple=False,
             )
             if files:
@@ -411,6 +554,32 @@ class FolderHandlersMixin:
                     browse_feedback.visible = True
                     self.page.update()
 
+        async def browse_folder(name_field, imported_folder_data, browse_feedback):
+            """Open directory picker and scan folder for import."""
+            result = await ft.FilePicker().get_directory_path(
+                dialog_title="Select folder to import",
+            )
+            if not result:
+                return
+
+            folder_path = Path(result)
+            folder_dict, file_overrides, stats = scan_folder_from_disk(folder_path)
+
+            if stats["files"] == 0 and stats["folders"] <= 1:
+                browse_feedback.value = "Folder is empty or has no importable files"
+                browse_feedback.visible = True
+                self.page.update()
+                return
+
+            imported_folder_data[0] = (folder_dict, file_overrides)
+            name_field.value = folder_path.name
+            summary = f"{stats['folders']} folders, {stats['files']} files"
+            if stats["skipped"] > 0:
+                summary += f", {stats['skipped']} skipped"
+            browse_feedback.value = summary
+            browse_feedback.visible = True
+            self.page.update()
+
         def close_dialog(_=None):
             dialog.open = False
             self.state.active_dialog = None
@@ -424,6 +593,7 @@ class FolderHandlersMixin:
             parent_folders,
             self.state.is_dark_mode,
             on_browse_callback=browse_file,
+            on_browse_folder_callback=browse_folder,
         )
 
         self._set_warning("", update=False)
@@ -553,6 +723,72 @@ class FolderHandlersMixin:
             path.unlink()
             return True
         return False
+
+    def _on_folder_context_action(self, e: ft.ControlEvent) -> None:
+        """Dispatch folder context menu actions."""
+        data = e.control.data
+        action = data["action"]
+        item_path = data["path"]
+
+        if action == "import_folder":
+            asyncio.create_task(self._import_folder_from_disk(parent_path=item_path))
+
+    async def _import_folder_from_disk(
+        self, parent_path: list[int | str] | None
+    ) -> None:
+        """Import an entire directory from disk into the folder tree.
+
+        Args:
+            parent_path: Navigation path to the parent folder where the imported
+                folder will be inserted as a subfolder. None for root level.
+        """
+        result = await ft.FilePicker().get_directory_path(
+            dialog_title="Select folder to import",
+        )
+        if not result:
+            return
+
+        folder_dict, file_overrides, stats = scan_folder_from_disk(Path(result))
+
+        if stats["files"] == 0 and stats["folders"] <= 1:
+            self._set_status(
+                "Selected folder is empty or has no importable files.",
+                "info",
+                update=True,
+            )
+            return
+
+        # Insert the folder into the tree
+        if parent_path is None:
+            self.state.folders.append(folder_dict)
+        else:
+            parent_container, idx = self._navigate_to_parent(parent_path)
+            if isinstance(idx, int):
+                parent_folder = parent_container[idx]
+            else:
+                parent_folder = parent_container
+            parent_folder.setdefault("subfolders", []).append(folder_dict)
+
+        # Compute canonical prefix for file_overrides
+        # Build the prefix by walking the parent path
+        if parent_path is not None:
+            parent_canonical = get_canonical_file_path(self.state.folders, parent_path)
+            if parent_canonical:
+                prefix = f"{parent_canonical}/"
+            else:
+                prefix = ""
+        else:
+            prefix = ""
+
+        for rel_path, content in file_overrides.items():
+            self.state.file_overrides[f"{prefix}{rel_path}"] = content
+
+        self._update_folder_display()
+
+        status = f"Imported '{folder_dict['name']}' ({stats['folders']} folders, {stats['files']} files)"
+        if stats["skipped"] > 0:
+            status += f", {stats['skipped']} skipped"
+        self._set_status(status, "success", update=True)
 
     def _on_file_context_action(self, e: ft.ControlEvent) -> None:
         """Dispatch context menu actions to the appropriate handler."""
@@ -735,21 +971,7 @@ class FolderHandlersMixin:
         files = await ft.FilePicker().pick_files(
             dialog_title=f"Import content for {filename}",
             file_type=ft.FilePickerFileType.CUSTOM,
-            allowed_extensions=[
-                "py",
-                "txt",
-                "md",
-                "json",
-                "yaml",
-                "yml",
-                "toml",
-                "cfg",
-                "ini",
-                "html",
-                "css",
-                "js",
-                "ts",
-            ],
+            allowed_extensions=IMPORTABLE_EXTENSIONS,
             allow_multiple=False,
         )
         if files:

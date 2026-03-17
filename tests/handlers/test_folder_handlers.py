@@ -441,3 +441,231 @@ class TestAddItemWithContent:
 
         # No file_overrides should exist
         assert state.file_overrides == {}
+
+
+class TestScanFolderFromDisk:
+    """Tests for scan_folder_from_disk() pure function."""
+
+    def test_scan_empty_folder(self):
+        """Empty folder returns structure with no files or subfolders."""
+        from uv_forge.handlers.folder_handlers import scan_folder_from_disk
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            folder_dict, file_overrides, stats = scan_folder_from_disk(Path(tmpdir))
+            assert folder_dict["name"] == Path(tmpdir).name
+            assert folder_dict["subfolders"] == []
+            assert folder_dict["files"] == []
+            assert folder_dict["create_init"] is False
+            assert file_overrides == {}
+            assert stats["files"] == 0
+            assert stats["folders"] == 1
+
+    def test_scan_folder_with_files(self):
+        """Picks up importable files and reads their content."""
+        from uv_forge.handlers.folder_handlers import scan_folder_from_disk
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            (root / "main.py").write_text("print('hello')", encoding="utf-8")
+            (root / "config.json").write_text('{"key": 1}', encoding="utf-8")
+
+            folder_dict, file_overrides, stats = scan_folder_from_disk(root)
+            assert sorted(folder_dict["files"]) == ["config.json", "main.py"]
+            assert stats["files"] == 2
+            assert f"{root.name}/main.py" in file_overrides
+            assert file_overrides[f"{root.name}/main.py"] == "print('hello')"
+
+    def test_scan_folder_skips_hidden(self):
+        """Hidden files and directories are ignored."""
+        from uv_forge.handlers.folder_handlers import scan_folder_from_disk
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            (root / ".hidden_file.py").write_text("secret")
+            hidden_dir = root / ".hidden_dir"
+            hidden_dir.mkdir()
+            (hidden_dir / "inner.py").write_text("inner")
+            (root / "visible.py").write_text("ok")
+
+            folder_dict, file_overrides, stats = scan_folder_from_disk(root)
+            assert folder_dict["files"] == ["visible.py"]
+            assert folder_dict["subfolders"] == []
+            assert stats["files"] == 1
+
+    def test_scan_folder_skips_pycache(self):
+        """__pycache__ directories are ignored."""
+        from uv_forge.handlers.folder_handlers import scan_folder_from_disk
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            cache = root / "__pycache__"
+            cache.mkdir()
+            (cache / "module.cpython-312.pyc").write_text("bytecode")
+            (root / "app.py").write_text("code")
+
+            folder_dict, file_overrides, stats = scan_folder_from_disk(root)
+            assert folder_dict["files"] == ["app.py"]
+            assert len(folder_dict["subfolders"]) == 0
+
+    def test_scan_folder_skips_binary_extensions(self):
+        """Files with non-importable extensions are skipped."""
+        from uv_forge.handlers.folder_handlers import scan_folder_from_disk
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            (root / "image.png").write_bytes(b"\x89PNG")
+            (root / "app.exe").write_bytes(b"\x00\x00")
+            (root / "main.py").write_text("code")
+
+            folder_dict, file_overrides, stats = scan_folder_from_disk(root)
+            assert folder_dict["files"] == ["main.py"]
+            assert stats["skipped"] == 2
+
+    def test_scan_folder_skips_unreadable_utf8(self):
+        """Non-UTF-8 files are skipped and counted."""
+        from uv_forge.handlers.folder_handlers import scan_folder_from_disk
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            (root / "binary.py").write_bytes(b"\xff\xfe\x00\x01\x80\x81")
+            (root / "good.py").write_text("ok", encoding="utf-8")
+
+            folder_dict, file_overrides, stats = scan_folder_from_disk(root)
+            assert folder_dict["files"] == ["good.py"]
+            assert stats["skipped"] == 1
+            assert stats["files"] == 1
+
+    def test_scan_folder_max_files(self):
+        """Stops reading content after max_files, counts remainder as skipped."""
+        from uv_forge.handlers.folder_handlers import scan_folder_from_disk
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            for i in range(10):
+                (root / f"file_{i:02d}.py").write_text(f"content {i}")
+
+            folder_dict, file_overrides, stats = scan_folder_from_disk(
+                root, max_files=3
+            )
+            assert stats["files"] == 3
+            assert stats["skipped"] == 7
+            assert len(file_overrides) == 3
+            # Only the first 3 alphabetically should be in files list
+            assert len(folder_dict["files"]) == 3
+
+    def test_scan_folder_max_depth(self):
+        """Directories beyond max_depth are not recursed into."""
+        from uv_forge.handlers.folder_handlers import scan_folder_from_disk
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            # Create depth: root/a/b/c/deep.py
+            deep = root / "a" / "b" / "c"
+            deep.mkdir(parents=True)
+            (deep / "deep.py").write_text("deep content")
+            (root / "top.py").write_text("top")
+
+            folder_dict, file_overrides, stats = scan_folder_from_disk(
+                root, max_depth=2
+            )
+            # root (depth 0) has a/ (depth 1) which has b/ (depth 2)
+            # b/ at depth 2 == max_depth, so c/ is not entered
+            assert stats["files"] == 1  # only top.py
+            assert f"{root.name}/top.py" in file_overrides
+
+    def test_scan_folder_nested_structure(self):
+        """Correct nesting of subfolders and files."""
+        from uv_forge.handlers.folder_handlers import scan_folder_from_disk
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            sub = root / "core"
+            sub.mkdir()
+            (sub / "models.py").write_text("class Model: pass")
+            (root / "main.py").write_text("import core")
+
+            folder_dict, file_overrides, stats = scan_folder_from_disk(root)
+            assert folder_dict["files"] == ["main.py"]
+            assert len(folder_dict["subfolders"]) == 1
+            assert folder_dict["subfolders"][0]["name"] == "core"
+            assert folder_dict["subfolders"][0]["files"] == ["models.py"]
+            assert stats["folders"] == 2
+            assert stats["files"] == 2
+            assert f"{root.name}/core/models.py" in file_overrides
+
+
+class TestFolderContextMenu:
+    """Tests for folder context menu in _create_item_container."""
+
+    def test_folder_has_context_menu(self, mock_handlers):
+        """Folder items should be wrapped in a ContextMenu."""
+        import flet as ft
+
+        handlers, state = mock_handlers
+        state.folders = [{"name": "core", "subfolders": [], "files": []}]
+
+        result = handlers._create_item_container("core", [0], "folder")
+        assert isinstance(result, ft.ContextMenu)
+
+    def test_folder_context_menu_has_import_action(self, mock_handlers):
+        """Folder context menu should contain 'Import Folder from Disk...' action."""
+        handlers, state = mock_handlers
+        state.folders = [{"name": "core", "subfolders": [], "files": []}]
+
+        result = handlers._create_item_container("core", [0], "folder")
+        items = result.secondary_items
+        assert len(items) == 1
+        assert items[0].data["action"] == "import_folder"
+        assert items[0].content.value == "Import Folder from Disk..."
+
+    def test_file_still_has_file_context_menu(self, mock_handlers):
+        """File items should still have the original context menu."""
+        import flet as ft
+
+        handlers, state = mock_handlers
+        state.folders = [{"name": "core", "subfolders": [], "files": ["main.py"]}]
+
+        result = handlers._create_item_container(
+            "main.py", [0, "files", 0], "file"
+        )
+        assert isinstance(result, ft.ContextMenu)
+        actions = [item.data["action"] for item in result.secondary_items]
+        assert "preview" in actions
+        assert "edit" in actions
+        assert "import" in actions
+        assert "reset" in actions
+
+
+class TestAddItemDialogBrowseFolder:
+    """Tests for browse folder visibility in create_add_item_dialog."""
+
+    def test_browse_folder_row_visible_for_folder_type(self):
+        """Browse folder row should be visible when type is folder and callback provided."""
+        from uv_forge.ui.dialogs import create_add_item_dialog
+
+        dialog = create_add_item_dialog(
+            on_add_callback=lambda *a: None,
+            on_close_callback=lambda *a: None,
+            parent_folders=[],
+            is_dark_mode=True,
+            on_browse_folder_callback=lambda *a: None,
+        )
+        # The dialog content column should contain the browse_folder_row
+        column = dialog.content.content
+        # browse_folder_row is at index 3 (after name_field, warning_text, browse_row)
+        browse_folder_row = column.controls[3]
+        assert browse_folder_row.visible is True
+
+    def test_browse_folder_row_hidden_without_callback(self):
+        """Browse folder row should be hidden when no callback provided."""
+        from uv_forge.ui.dialogs import create_add_item_dialog
+
+        dialog = create_add_item_dialog(
+            on_add_callback=lambda *a: None,
+            on_close_callback=lambda *a: None,
+            parent_folders=[],
+            is_dark_mode=True,
+        )
+        column = dialog.content.content
+        browse_folder_row = column.controls[3]
+        assert browse_folder_row.visible is False

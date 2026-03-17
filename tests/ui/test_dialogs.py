@@ -781,7 +781,7 @@ def test_create_add_item_dialog_with_parent_folders():
 
 
 def test_create_add_item_dialog_browse_hidden_without_callback():
-    """Test browse row is hidden when no on_browse_callback is provided."""
+    """Test browse rows are hidden when no callbacks are provided."""
     dialog = create_add_item_dialog(
         on_add_callback=lambda n, t, p, c: None,
         on_close_callback=lambda _: None,
@@ -790,13 +790,14 @@ def test_create_add_item_dialog_browse_hidden_without_callback():
     )
     column = dialog.content.content
     rows = [c for c in column.controls if isinstance(c, ft.Row)]
-    # Browse row exists but is not visible
-    assert len(rows) == 1  # the browse_row
-    assert rows[0].visible is False
+    # Both browse_row and browse_folder_row exist but are not visible
+    assert len(rows) == 2
+    assert rows[0].visible is False  # browse_row (file)
+    assert rows[1].visible is False  # browse_folder_row (no callback)
 
 
 def test_create_add_item_dialog_browse_row_with_callback():
-    """Test browse row exists when on_browse_callback is provided."""
+    """Test browse rows exist when callbacks are provided."""
     dialog = create_add_item_dialog(
         on_add_callback=lambda n, t, p, c: None,
         on_close_callback=lambda _: None,
@@ -806,9 +807,10 @@ def test_create_add_item_dialog_browse_row_with_callback():
     )
     column = dialog.content.content
     rows = [c for c in column.controls if isinstance(c, ft.Row)]
-    # Browse row exists but starts hidden (type defaults to "folder")
-    assert len(rows) == 1
-    assert rows[0].visible is False
+    # browse_row (file) hidden since type defaults to folder; browse_folder_row hidden (no callback)
+    assert len(rows) == 2
+    assert rows[0].visible is False  # browse_row
+    assert rows[1].visible is False  # browse_folder_row (no callback provided)
 
 
 def test_create_add_item_dialog_callback_receives_content_none():

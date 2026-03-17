@@ -732,6 +732,7 @@ def create_add_item_dialog(
     parent_folders: list[dict],
     is_dark_mode: bool,
     on_browse_callback=None,
+    on_browse_folder_callback=None,
 ) -> ft.AlertDialog:
     """Create dialog for adding a folder or file.
 
@@ -741,6 +742,7 @@ def create_add_item_dialog(
         parent_folders: List of parent folder options [{"label": "core/", "path": [0]}, ...]
         is_dark_mode: Whether dark mode is active
         on_browse_callback: Optional async callback for browsing files from disk
+        on_browse_folder_callback: Optional async callback for browsing folders from disk
 
     Returns:
         Configured AlertDialog for adding items
@@ -749,8 +751,9 @@ def create_add_item_dialog(
 
     colors = get_theme_colors(is_dark_mode)
 
-    # Mutable container for imported file content
+    # Mutable containers for imported content
     imported_content: list[str | None] = [None]
+    imported_folder_data: list[tuple | None] = [None]
 
     # Warning banner for validation errors (defined first so it can be referenced)
     warning_text = ft.Text(
@@ -792,7 +795,7 @@ def create_add_item_dialog(
         on_change=on_name_change,
     )
 
-    # Browse button and feedback text (visible only when type == "file")
+    # Browse file button and feedback text (visible only when type == "file")
     browse_feedback = ft.Text(
         value="No file selected",
         size=12,
@@ -820,13 +823,50 @@ def create_add_item_dialog(
         spacing=10,
     )
 
+    # Browse folder button and feedback text (visible only when type == "folder")
+    browse_folder_feedback = ft.Text(
+        value="No folder selected",
+        size=12,
+        color=colors["status_default"],
+        italic=True,
+        visible=False,
+    )
+
+    def _on_browse_folder_click(e):
+        """Handle Browse Folder button click — delegates to handler callback."""
+        if on_browse_folder_callback:
+            asyncio.create_task(
+                on_browse_folder_callback(
+                    name_field, imported_folder_data, browse_folder_feedback
+                )
+            )
+
+    browse_folder_button = ft.TextButton(
+        content=ft.Text("Import from Disk..."),
+        icon=ft.Icons.DRIVE_FOLDER_UPLOAD,
+        on_click=_on_browse_folder_click,
+    )
+
+    browse_folder_row = ft.Row(
+        [browse_folder_button, browse_folder_feedback],
+        visible=on_browse_folder_callback is not None,
+        spacing=10,
+    )
+
     # Type selection
     def on_type_change(e):
         """Toggle browse row visibility based on type selection."""
         is_file = type_radio.value == "file"
         browse_row.visible = is_file and on_browse_callback is not None
-        # Clear imported content when switching to folder
-        if not is_file:
+        browse_folder_row.visible = (
+            not is_file and on_browse_folder_callback is not None
+        )
+        # Clear imported content when switching types
+        if is_file:
+            imported_folder_data[0] = None
+            browse_folder_feedback.value = "No folder selected"
+            browse_folder_feedback.visible = False
+        else:
             imported_content[0] = None
             browse_feedback.value = "No file selected"
             browse_feedback.visible = False
@@ -893,8 +933,13 @@ def create_add_item_dialog(
             except _parse_errors:
                 parent_path = None
 
-        # Pass imported content for files (None if not imported)
-        content = imported_content[0] if item_type == "file" else None
+        # Determine content to pass
+        if item_type == "folder" and imported_folder_data[0] is not None:
+            content = imported_folder_data[0]
+        elif item_type == "file":
+            content = imported_content[0]
+        else:
+            content = None
         on_add_callback(name, item_type, parent_path, content)
 
     name_field.on_submit = on_add_click
@@ -910,6 +955,7 @@ def create_add_item_dialog(
                     name_field,
                     warning_text,
                     browse_row,
+                    browse_folder_row,
                     ft.Container(height=10),
                     ft.Text("Type:", size=14),
                     type_radio,

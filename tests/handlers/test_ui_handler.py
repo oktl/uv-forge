@@ -239,17 +239,19 @@ def test_update_folder_display_empty(mock_handlers):
 
 
 def test_create_item_container_folder(mock_handlers):
-    """Test _create_item_container creates folder container correctly"""
+    """Test _create_item_container creates folder context menu correctly"""
     handlers, page, controls, state = mock_handlers
 
-    container = handlers._create_item_container(
+    result = handlers._create_item_container(
         name="core",
         item_path=[0],
         item_type="folder",
         indent=0
     )
 
-    assert container is not None
+    assert result is not None
+    # Folder items are now wrapped in a ContextMenu
+    container = result.content
     assert container.data["name"] == "core"
     assert container.data["type"] == "folder"
     assert container.data["path"] == [0]
@@ -285,14 +287,15 @@ def test_create_item_container_selected_folder(mock_handlers):
     state.selected_item_path = [0]
     state.selected_item_type = "folder"
 
-    container = handlers._create_item_container(
+    result = handlers._create_item_container(
         name="core",
         item_path=[0],
         item_type="folder",
         indent=0
     )
 
-    # Should have selection highlighting
+    # Folder is wrapped in ContextMenu; inner container has selection highlighting
+    container = result.content
     assert container.bgcolor is not None
     assert container.border is not None
 
@@ -324,14 +327,15 @@ def test_create_item_container_not_selected(mock_handlers):
     state.selected_item_path = [1]
     state.selected_item_type = "folder"
 
-    container = handlers._create_item_container(
+    result = handlers._create_item_container(
         name="core",
         item_path=[0],
         item_type="folder",
         indent=0
     )
 
-    # Should NOT have selection highlighting
+    # Folder wrapped in ContextMenu; inner container should NOT have highlighting
+    container = result.content
     assert container.bgcolor is None
     assert container.border is None
 
@@ -346,8 +350,8 @@ def test_process_folder_recursive_minimal_dict(mock_handlers):
     )
 
     assert len(controls_list) == 1
-    assert controls_list[0].data["name"] == "core"
-    assert controls_list[0].data["type"] == "folder"
+    assert _get_item_data(controls_list[0])["name"] == "core"
+    assert _get_item_data(controls_list[0])["type"] == "folder"
 
 
 def test_process_folder_recursive_dict(mock_handlers):
@@ -363,8 +367,8 @@ def test_process_folder_recursive_dict(mock_handlers):
     handlers._process_folder_recursive(folder_dict, [0], 0, controls_list)
 
     assert len(controls_list) == 1
-    assert controls_list[0].data["name"] == "ui"
-    assert controls_list[0].data["type"] == "folder"
+    assert _get_item_data(controls_list[0])["name"] == "ui"
+    assert _get_item_data(controls_list[0])["type"] == "folder"
 
 
 def _get_item_data(control):
@@ -414,9 +418,9 @@ def test_process_folder_recursive_with_subfolders(mock_handlers):
 
     # Should have ui + components + styles = 3 folders
     assert len(controls_list) == 3
-    assert controls_list[0].data["name"] == "ui"
-    assert controls_list[1].data["name"] == "components"
-    assert controls_list[2].data["name"] == "styles"
+    assert _get_item_data(controls_list[0])["name"] == "ui"
+    assert _get_item_data(controls_list[1])["name"] == "components"
+    assert _get_item_data(controls_list[2])["name"] == "styles"
 
 
 def test_process_folder_recursive_nested_with_files(mock_handlers):
