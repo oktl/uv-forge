@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1] - 2026-03-15
+
+### Added
+
+- Import existing folder from disk into project template
+  - "Import from Disk..." button in Add File/Folder dialog (Folder type)
+  - Right-click context menu on folders: "Import Folder from Disk..."
+  - Recursive directory scanner with depth (5) and file (50) limits
+  - Reads content of importable file types (.py, .json, .toml, .md, .yaml, .html, .css, .js,
+  .ts, etc.)
+  - Skips hidden dirs, __pycache__, node_modules, .venv, dist, build, and other noise
+  - Skips binary/non-UTF-8 files gracefully with skipped count reported
+  - Imported file contents stored as overrides and written during build
+- Context menu on folders (previously only files had one)
+
+### Changed
+
+- Added httpx to FastAPI project type packages
+- Updated FastAPI built-in preset to include httpx and pydantic as runtime deps
+
+### Internal
+
+- Extracted `IMPORTABLE_EXTENSIONS` constant (was duplicated in two places)
+- 14 new tests (scanner, context menu, dialog) — 719 total
+
 ## [0.3.0] - 2026-03-15
 
 ### Added
@@ -65,6 +90,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Colour-coded log viewer with clickable source locations
 - Dark and light theme toggle
 
+[0.3.1]: https://github.com/oktl/uv-forge/releases/tag/v0.3.1
 [0.3.0]: https://github.com/oktl/uv-forge/releases/tag/v0.3.0
 [0.2.0]: https://github.com/oktl/uv-forge/releases/tag/v0.2.0
 [0.1.0]: https://github.com/oktl/uv-forge/releases/tag/v0.1.0
