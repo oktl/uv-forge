@@ -69,7 +69,7 @@ Files get starter content instead of being empty. Fallback chain:
 
 ---
 
-## File Content Editing
+## File & Folder Content Editing
 
 Right-click a file in the folder tree for a context menu:
 
@@ -80,6 +80,20 @@ Right-click a file in the folder tree for a context menu:
 | Import from File... | Load content from a file on disk |
 | Browse... (Add File dialog) | Import existing file content when adding a new file |
 | Reset to Default | Remove overrides, revert to boilerplate |
+
+Right-click a folder in the folder tree:
+
+| Action | What it does |
+| --- | --- |
+| Import Folder from Disk... | Pick a directory and import it as a subfolder with all its contents |
+
+Import an existing folder via the Add Folder/File dialog:
+
+| Action | What it does |
+| --- | --- |
+| Import from Disk... (Add Folder dialog) | Pick a directory — its structure and file contents are scanned and added |
+
+Folder import scans up to 5 levels deep and 50 files. Skips hidden dirs, `.git`, `__pycache__`, `node_modules`, `.venv`, and binary files. A summary shows folders/files/skipped counts.
 
 Files with custom content show a **✎** pencil indicator.
 

@@ -41,7 +41,8 @@ Each selection auto-loads a folder structure and package list. You can customize
 
 The **Folders & Files** section shows what will be created. You can:
 
-- **Add** custom folders or files at any level — when adding a file, click **Browse...** to import an existing file from disk in one step
+- **Add** custom folders or files at any level — when adding a file, click **Browse...** to import an existing file from disk in one step; when adding a folder, click **Import from Disk...** to import an entire directory tree with its file contents
+- **Import folders** — Right-click any folder in the tree and choose **Import Folder from Disk...** to add an existing directory as a subfolder
 - **Remove** items you don't need
 - **Edit file content** — Right-click any file to preview, edit, or import content before building
 - **Edit File button** — Select a file and click the pencil icon in the toolbar for quick editing

@@ -102,11 +102,36 @@ Right-click any file in the folder tree to open a context menu with four actions
 | **Import from File...** | Load content from an existing file on disk |
 | **Reset to Default** | Remove custom overrides and revert to boilerplate |
 
+Right-click any folder to see:
+
+| Action | Description |
+| --- | --- |
+| **Import Folder from Disk...** | Pick a directory from disk and import it as a subfolder with all its contents |
+
 You can also select a file and click the **Edit File** button (pencil icon) in the Folders section toolbar.
 
 ### Browse button (Add File dialog)
 
 When adding a new file via the Add Folder/File dialog, switch the type to "File" to reveal a **Browse...** button. Clicking it opens a file picker — the selected file's name auto-fills the name field (editable) and its content is stored in the project's file overrides. This lets you import an existing file from disk in a single step, instead of adding a blank file and then right-clicking to import.
+
+### Import from Disk (Add Folder dialog)
+
+When adding a new folder via the Add Folder/File dialog (with type set to "Folder"), an **Import from Disk...** button appears. Clicking it opens a directory picker — the selected folder is scanned recursively and its entire structure (subfolders and file contents) is imported into the project template.
+
+The scanner:
+
+- Reads up to **5 levels deep** and **50 files**
+- Imports text files with common extensions (`.py`, `.json`, `.yaml`, `.toml`, `.md`, `.html`, `.css`, `.js`, `.ts`, and more)
+- Skips hidden directories, `.git`, `__pycache__`, `node_modules`, `.venv`, and other build/cache directories
+- Skips binary and non-UTF-8 files silently
+
+After scanning, a summary line shows how many folders, files, and skipped items were found. The folder name auto-fills from the picked directory but is editable before adding.
+
+### Import Folder via right-click
+
+Right-click any folder in the project tree to see an **Import Folder from Disk...** context menu item. This uses the same scanning logic as the Add Folder dialog but imports the directory directly as a subfolder of the clicked folder — no dialog needed.
+
+Both methods store all imported file contents in the project's file overrides, so the content will be written into the built project instead of using boilerplate.
 
 <!-- TODO: screenshot of full-screen editor -->
 <!-- ![File editor](../assets/images/file-editor.png){ .img-lg } -->

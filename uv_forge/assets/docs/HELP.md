@@ -132,12 +132,13 @@ Files are populated from boilerplate in this priority order:
 
 You can customize the structure by:
 
-- **Add Folder/File** - Add custom folders or files at any level. When adding a file, a **Browse...** button lets you pick an existing file from disk — the name auto-fills (but is editable) and the file's content is stored so it will be included in the built project
+- **Add Folder/File** - Add custom folders or files at any level. When adding a file, a **Browse...** button lets you pick an existing file from disk — the name auto-fills (but is editable) and the file's content is stored so it will be included in the built project. When adding a folder, an **Import from Disk...** button lets you pick an existing directory — its entire structure and file contents are scanned and imported (up to 5 levels deep, 50 files). The folder name auto-fills but is editable, and a summary shows how many folders, files, and skipped items were found
+- **Import Folder via Right-Click** - Right-click any folder in the tree to see an "Import Folder from Disk..." option. This imports a directory from disk as a subfolder of the clicked folder, using the same scanning logic as the Add Folder dialog
 - **Remove Folder/File** - Select an item and click Remove to delete it
 - **Clear Packages** - Removes all packages (shows confirmation first); framework/project type packages are restored on the next template reload
 - **Auto-save Folder Changes** - Optionally save your custom structure back to the template
 
-### 8. **File Content Editing**
+### 8. **File & Folder Content Editing**
 
 Right-click any file in the folder tree to open a context menu with these actions:
 
@@ -146,12 +147,18 @@ Right-click any file in the folder tree to open a context menu with these action
 - **Import from File...** — Load content from an existing file on disk
 - **Reset to Default** — Remove custom overrides and revert to boilerplate content
 
+Right-click any folder in the folder tree for:
+
+- **Import Folder from Disk...** — Pick a directory from disk and import it as a subfolder, including its entire structure and file contents
+
 You can also select a file and click the **Edit File** button (pencil icon) in the Folders section toolbar.
 
-There are two ways to import content from disk:
+There are several ways to import content from disk:
 
-1. **Browse in Add dialog** — When adding a new file, click "Browse..." to select a file and import its content in one step
+1. **Browse in Add File dialog** — When adding a new file, click "Browse..." to select a file and import its content in one step
 2. **Right-click → Import from File...** — For files already in the tree, load content from disk via the context menu
+3. **Import from Disk in Add Folder dialog** — When adding a new folder, click "Import from Disk..." to pick a directory and import its entire structure (subfolders and file contents)
+4. **Right-click folder → Import Folder from Disk...** — For folders already in the tree, import a directory as a subfolder via the context menu
 
 Files with custom content show a **✎** pencil indicator in the folder tree. Custom content overrides take priority over boilerplate during the build and survive template reloads.
 
