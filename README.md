@@ -13,7 +13,7 @@ Pick a UI framework or project type, (or both), configure your options, and UV F
 
 ---
 
-![UV Forge main window](uv_forge/assets/images/main-window.png)
+![UV Forge main window](https://raw.githubusercontent.com/oktl/uv-forge/main/uv_forge/assets/images/main-window.png)
 
 ## ✨ Key Features
 
