@@ -103,13 +103,23 @@ class _OverlayMenu(ft.Container):
 
     def _create_menu(self) -> ft.Container:
         """Create the animated menu container with blur and border styling."""
+        is_light = self.page and self.page.theme_mode == ft.ThemeMode.LIGHT
+        if is_light:
+            self.text_color = DEFAULT_TEXTCOLOR_LIGHTMODE
+            bg = MENU_BG_LIGHTMODE
+            border = DEFAULT_BORDER_LIGHTMODE
+        else:
+            self.text_color = DEFAULT_TEXTCOLOR_DARKMODE
+            bg = MENU_BG_DARKMODE
+            border = DEFAULT_BORDER_DARKMODE
+
         self.menu = ft.Container(
             height=0,
             width=self._width,
             left=self._left,
             top=self._top,
             border_radius=DEFAULT_RADIUS,
-            bgcolor=MENU_BG_DARKMODE,
+            bgcolor=bg,
             opacity=0,
             animate_opacity=ft.Animation(
                 duration=DEFAULT_ANIMATION_OPACITY,
@@ -119,7 +129,7 @@ class _OverlayMenu(ft.Container):
                 duration=DEFAULT_ANIMATION_SPEED,
                 curve=ft.AnimationCurve.LINEAR_TO_EASE_OUT,
             ),
-            border=DEFAULT_BORDER_DARKMODE,
+            border=border,
             content=self._build_menu_content(),
         )
         return self.menu
