@@ -8,19 +8,19 @@ Presets let you save a full project configuration as a named template for one-cl
 
 UV Forge ships with 4 starter presets so you can build immediately without configuring anything:
 
-| Preset                | Framework / Type | Packages                                         |
-| --------------------- | ---------------- | ------------------------------------------------ |
-| **Flet Desktop App**  | Flet (UI)        | flet + pytest, ruff (dev)                        |
-| **FastAPI Backend**   | FastAPI          | fastapi, uvicorn + pytest, ruff, httpx (dev)     |
-| **Data Science Starter** | Data Analysis | pandas, numpy, matplotlib, jupyter               |
-| **CLI Tool (Typer)**  | CLI (Typer)      | typer[all] + pytest, ruff (dev)                  |
+| Preset                   | Framework / Type | Packages                                     |
+| ------------------------ | ---------------- | -------------------------------------------- |
+| **Flet Desktop App**     | Flet (UI)        | flet + pytest, ruff (dev)                    |
+| **FastAPI Backend**      | FastAPI          | fastapi, uvicorn + pytest, ruff, httpx (dev) |
+| **Data Science Starter** | Data Analysis    | pandas, numpy, matplotlib, jupyter           |
+| **CLI Tool (Typer)**     | CLI (Typer)      | typer[all] + pytest, ruff (dev)              |
 
 Built-in presets use Python 3.13, git enabled, starter files enabled, and MIT license. They appear with a teal **Built-in** badge and cannot be deleted.
 
 ## Saving a preset
 
 1. Configure your project the way you want it
-2. Open the Presets dialog
+2. Open the Presets dialog from the overflow menu
 3. Enter a name and click **Save Current**
 
 This captures everything: Python version, git and starter file settings, UI framework, project type, folder structure, all packages (including dev), and project metadata.

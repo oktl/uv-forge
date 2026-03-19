@@ -23,7 +23,9 @@ Select from Python 3.10 through 3.14 using the dropdown. The version is written 
 
 Check **Git Repository** to get a fully initialized git repo with an automatic first commit. You can choose the remote mode — local bare hub (default), GitHub, or no remote — in [Settings](guide/settings.md). See [Git Integration](guide/git-integration.md) for details on the two-phase setup and each mode.
 
-## 5. Optional: Select a UI framework and/or project type
+## 5. Optional: Select a preset, UI framework, and/or project type
+
+- Use the **Preset** dropdown to apply a saved project configuration in one click — this auto-fills the framework, project type, packages, and folder structure. See [Presets](guide/presets.md) for details.
 
 - Check **UI Project** to pick from 10 UI frameworks
 
