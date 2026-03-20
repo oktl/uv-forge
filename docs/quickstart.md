@@ -2,6 +2,17 @@
 
 This walkthrough creates a project from scratch in under a minute.
 
+```mermaid
+flowchart LR
+    A[Name & Path] --> B[Python Version]
+    B --> C{Options}
+    C --> D[Preset]
+    C --> E[UI Framework]
+    C --> F[Project Type]
+    D & E & F --> G[Review & Customize]
+    G --> H[Build]
+```
+
 ## 1. Enter a project name
 
 Type a valid Python package name — letters, numbers, and underscores. UV Forge validates as you type, showing a green checkmark when the name is valid.
@@ -48,17 +59,21 @@ The **Folders & Files** section shows what will be created. You can:
 - **Remove** items you don't need
 - **Edit file content** — Right-click any file to preview, edit, or import content before building
 - **Edit File button** — Select a file and click the pencil icon in the toolbar for quick editing
-- Packages are listed separately and can be added, removed, or marked as dev dependencies
 
 <!-- TODO: screenshot of file context menu -->
 <!-- ![File context menu](assets/images/file-context-menu.png){ .img-sm } -->
 
 Files with custom content show a **✎** pencil indicator in the folder tree. Edits are preserved across template reloads.
 
-![Add Packages dialog](assets/images/add-packages-dialog.png){ .img-sm }
-
 !!! tip
     Right-click a file and choose **Edit Content...** to open the full-screen code editor with syntax highlighting, search & replace, and more. See [Templates — File Content Editing](guide/templates.md#file-content-editing) for details.
+
+- Packages are listed separately and can be added, removed, or marked as dev dependencies
+
+![Add Packages dialog](assets/images/add-packages-dialog.png){ .img-sm }
+
+!!! tip "Save your setup as a preset"
+    Happy with your configuration? Open **Presets** from the overflow menu and click **Save Current** to save it as a named preset. Next time, apply it in one click and skip straight to building. See [Presets](guide/presets.md) for details.
 
 ## 7. Build
 

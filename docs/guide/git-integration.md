@@ -12,6 +12,29 @@ UV Forge supports three remote modes, configurable in [Settings](settings.md) an
 | **GitHub**                    | GitHub repo via `gh repo create`      | Yes, to GitHub     |
 | **None (local only)**         | No remote                             | No                 |
 
+```mermaid
+flowchart TD
+    Start[Git enabled] --> Init[git init in project dir]
+
+    Init --> Mode{Remote mode?}
+
+    Mode -- "Local Bare Repo" --> Bare[Create bare hub + add origin]
+    Mode -- "GitHub" --> GH1[No remote yet]
+    Mode -- "None" --> None1[No remote]
+
+    Bare --> Commit[Stage + commit all files]
+    GH1 --> Commit
+    None1 --> Commit
+
+    Commit --> Push{Push?}
+    Push -- "Local Bare Repo" --> PushHub[Push to bare hub]
+    Push -- "GitHub" --> PushGH[gh repo create + push]
+    Push -- "None" --> Done[Done]
+
+    PushHub --> Done
+    PushGH --> Done
+```
+
 ---
 
 ## Local Bare Repo (default)

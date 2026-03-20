@@ -49,13 +49,13 @@ Each template is a JSON file defining a list of `FolderSpec` structures:
 ]
 ```
 
-| Field          | Type     | Description                                         |
-| -------------- | -------- | --------------------------------------------------- |
-| `name`         | string   | Folder name                                         |
-| `create_init`  | boolean  | Whether to create `__init__.py` in this folder      |
-| `root_level`   | boolean  | `true` = created at project root, `false` = inside `app/` |
-| `subfolders`   | array    | Nested `FolderSpec` objects                         |
-| `files`        | array    | Filenames to create in this folder                  |
+| Field         | Type    | Description                                               |
+| ------------- | ------- | --------------------------------------------------------- |
+| `name`        | string  | Folder name                                               |
+| `create_init` | boolean | Whether to create `__init__.py` in this folder            |
+| `root_level`  | boolean | `true` = created at project root, `false` = inside `app/` |
+| `subfolders`  | array   | Nested `FolderSpec` objects                               |
+| `files`       | array   | Filenames to create in this folder                        |
 
 ## Loading fallback chain
 
@@ -81,7 +81,20 @@ This means selecting "Flet" + "FastAPI" gives you a project with the folder stru
 
 When files are created during a build, UV Forge looks for starter content instead of creating empty files. The lookup follows a fallback chain:
 
-1. **User templates** — persistent custom content saved from the file editor (highest priority)
+```mermaid
+flowchart TD
+    A[File created during build] --> B{User template exists?}
+    B -- yes --> U[Use user template]
+    B -- no --> C{Framework boilerplate exists?}
+    C -- yes --> F[Use framework boilerplate]
+    C -- no --> D{Project type boilerplate exists?}
+    D -- yes --> P[Use project type boilerplate]
+    D -- no --> E{Common boilerplate exists?}
+    E -- yes --> K[Use common boilerplate]
+    E -- no --> T[Create empty file]
+```
+
+1. **[User templates](#user-templates)** — persistent custom content saved from the file editor (highest priority)
 2. `boilerplate/ui_frameworks/{framework}/{filename}` — framework-specific (e.g., Flet's `main.py`)
 3. `boilerplate/project_types/{project_type}/{filename}` — project-type-specific
 4. `boilerplate/common/{filename}` — shared utilities
@@ -95,17 +108,17 @@ User templates are stored in the platform data directory by default (e.g., `~/.c
 
 Right-click any file in the folder tree to open a context menu with four actions:
 
-| Action | Description |
-| --- | --- |
-| **Preview Content** | Read-only view of the file's boilerplate or custom content |
-| **Edit Content...** | Opens a full-screen code editor |
-| **Import from File...** | Load content from an existing file on disk |
-| **Reset to Default** | Remove custom overrides and revert to boilerplate |
+| Action                  | Description                                                |
+| ----------------------- | ---------------------------------------------------------- |
+| **Preview Content**     | Read-only view of the file's boilerplate or custom content |
+| **Edit Content...**     | Opens a full-screen code editor                            |
+| **Import from File...** | Load content from an existing file on disk                 |
+| **Reset to Default**    | Remove custom overrides and revert to boilerplate          |
 
 Right-click any folder to see:
 
-| Action | Description |
-| --- | --- |
+| Action                         | Description                                                                   |
+| ------------------------------ | ----------------------------------------------------------------------------- |
 | **Import Folder from Disk...** | Pick a directory from disk and import it as a subfolder with all its contents |
 
 You can also select a file and click the **Edit File** button (pencil icon) in the Folders section toolbar.
@@ -160,7 +173,11 @@ Files with custom content (edited or imported) show a **✎** pencil indicator i
 
 When you save from the editor (++cmd+s++), your content is persisted to a user templates directory. These user templates sit at the **top** of the [boilerplate fallback chain](#smart-scaffolding-boilerplate), so they override built-in content for all future projects.
 
-The default storage location is platform-dependent (e.g., `~/.config/UV Forge/templates/boilerplate/` on Linux, `~/Library/Application Support/UV Forge/templates/boilerplate/` on macOS). You can set a custom path in [Settings](settings.md).
+- The default storage location is platform-dependent:
+    - `~/Library/Application Support/UV Forge/templates/boilerplate/` on macOS
+    - `%LOCALAPPDATA%/UV Forge/` on Windows
+    - `~/.config/UV Forge/templates/boilerplate/` on Linux 
+- You can **set a custom path** in [Settings](settings.md).
 
 ## Adding a new template
 

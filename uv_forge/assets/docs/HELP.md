@@ -138,6 +138,8 @@ You can customize the structure by:
 - **Clear Packages** - Removes all packages (shows confirmation first); framework/project type packages are restored on the next template reload
 - **Auto-save Folder Changes** - Optionally save your custom structure back to the template
 
+Any custom folders or files you add here are included when you save a preset — so you can build a tailored structure once and reuse it across projects.
+
 ### 8. **File & Folder Content Editing**
 
 Right-click any file in the folder tree to open a context menu with these actions:
@@ -279,9 +281,11 @@ Enter a name in the text field at the top of the dialog and click **Save Current
 
 - Python version, git, and starter files settings
 - UI framework and project type selections
-- Folder structure (as-is, no template reload on apply)
+- Folder structure (as-is, no template reload on apply), including any custom folders and files you added beyond the template defaults
 - All packages (including dev dependencies)
 - Project metadata (author, email, description, license)
+
+**Tip:** If you edit file content in the editor and save (`⌘S`), the content is persisted as a user template. User templates sit at the top of the boilerplate fallback chain, so they are automatically picked up on future builds whenever that file path is created — even in a different project. This means your preset's folder structure combined with your saved user templates reproduces your full customized setup.
 
 Saving with an existing name overwrites the previous preset.
 

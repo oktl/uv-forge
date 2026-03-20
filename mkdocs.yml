@@ -40,7 +40,11 @@ plugins:
 markdown_extensions:
   - admonition
   - pymdownx.details
-  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
   - pymdownx.highlight:
       anchor_linenums: true
   - pymdownx.inlinehilite
@@ -70,6 +74,7 @@ nav:
   - Reference:
       - Frameworks & Project Types: reference/frameworks-and-types.md
       - Keyboard Shortcuts: reference/keyboard-shortcuts.md
+      - Architecture: reference/architecture.md
       - Troubleshooting: reference/troubleshooting.md
   - Contributing: contributing.md
   - Changelog: changelog.md
