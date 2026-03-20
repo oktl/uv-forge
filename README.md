@@ -225,10 +225,10 @@ uv run ruff format uv_forge     # Auto-format
 
 ## Contributing
 
-Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on reporting bugs, adding templates, and submitting pull requests.
+Contributions are welcome! See [CONTRIBUTING.md](https://github.com/oktl/uv-forge/blob/main/CONTRIBUTING.md) for guidelines on reporting bugs, adding templates, and submitting pull requests.
 
 ---
 
 ## License
 
-[MIT License](LICENSE)
+[MIT License](https://github.com/oktl/uv-forge/blob/main/LICENSE)
