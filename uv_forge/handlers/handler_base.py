@@ -54,6 +54,22 @@ class HandlerBase:
                 ft.Icons.CANCEL, color=UIConfig.COLOR_VALIDATION_ERROR
             )
 
+    def _update_preset_button_state(self) -> None:
+        """Enable Save as Preset button when there's meaningful config to save.
+
+        Enabled when a framework or project type is selected, the user has
+        manually added packages, or the folder structure has been modified.
+        """
+        auto = set(self.state.auto_packages)
+        user_packages = any(p not in auto for p in self.state.packages)
+        has_config = bool(
+            self.state.framework
+            or self.state.project_type
+            or user_packages
+            or self.state.folders_modified
+        )
+        self.controls.save_as_preset_button.disabled = not has_config
+
     def _update_build_button_state(self) -> None:
         """Enable/disable build button and copy-path button based on validation state."""
         is_ready = self.state.path_valid and self.state.name_valid

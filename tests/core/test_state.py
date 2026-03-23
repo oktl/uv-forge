@@ -20,7 +20,6 @@ def test_appstate_initialization():
     assert state.other_project_enabled == False
     assert state.project_type is None
     assert state.folders == []
-    assert state.auto_save_folders == False
     assert state.is_dark_mode == True
     assert state.path_valid == True
     assert state.name_valid == False  # Empty name is invalid
@@ -38,7 +37,6 @@ def test_appstate_custom_initialization():
         other_project_enabled=True,
         project_type="django",
         folders=["core", "ui", "utils"],
-        auto_save_folders=True,
         is_dark_mode=False,
         path_valid=False,
         name_valid=True,
@@ -53,7 +51,6 @@ def test_appstate_custom_initialization():
     assert state.other_project_enabled == True
     assert state.project_type == "django"
     assert state.folders == ["core", "ui", "utils"]
-    assert state.auto_save_folders == True
     assert state.is_dark_mode == False
     assert state.path_valid == False
     assert state.name_valid == True
@@ -72,7 +69,6 @@ def test_appstate_reset():
         other_project_enabled=True,
         project_type="django",
         folders=["core", "ui", "utils"],
-        auto_save_folders=True,
         is_dark_mode=False,  # Set to False to test it's preserved
         path_valid=False,
         name_valid=True,
@@ -91,7 +87,6 @@ def test_appstate_reset():
     assert state.other_project_enabled == False
     assert state.project_type is None
     assert state.folders == []
-    assert state.auto_save_folders == False
     assert state.is_dark_mode == False  # PRESERVED (was False, still False)
     assert state.path_valid == True
     assert state.name_valid == False
@@ -120,7 +115,6 @@ def test_appstate_reset_preserves_dark_mode_false():
     ("framework", "pyqt6"),
     ("other_project_enabled", True),
     ("project_type", "fastapi"),
-    ("auto_save_folders", True),
     ("is_dark_mode", False),
     ("path_valid", False),
     ("name_valid", True),

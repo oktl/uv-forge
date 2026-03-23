@@ -610,13 +610,10 @@ class BuildHandlersMixin:
         self.controls.ui_project_checkbox.label = UI_PROJECT_CHECKBOX_LABEL
         self.controls.other_projects_checkbox.value = False
         self.controls.other_projects_checkbox.label = OTHER_PROJECT_CHECKBOX_LABEL
-        self.controls.auto_save_folder_changes.value = False
-
         for cb in (
             self.controls.create_git_checkbox,
             self.controls.ui_project_checkbox,
             self.controls.other_projects_checkbox,
-            self.controls.auto_save_folder_changes,
         ):
             cb.label_style = None
         self._style_selected_checkbox(self.controls.include_starter_files_checkbox)
@@ -677,6 +674,7 @@ class BuildHandlersMixin:
         Ctrl+Enter / Cmd+Enter — build project
         Ctrl+F / Cmd+F — add folder/file
         Ctrl+P / Cmd+P — add packages
+        Ctrl+S / Cmd+S — save as preset
         Ctrl+R / Cmd+R — reset
         Ctrl+/ / Cmd+/ — open help
         Escape — close dialog or exit (opens confirmation)
@@ -697,6 +695,9 @@ class BuildHandlersMixin:
             await self.on_add_folder(e)
         elif e.key == "P" and (e.ctrl or e.meta):
             await self.on_add_package(e)
+        elif e.key == "S" and (e.ctrl or e.meta):
+            if not self.controls.save_as_preset_button.disabled:
+                await self.on_presets_click(e)
         elif e.key == "R" and (e.ctrl or e.meta):
             await self.on_reset(e)
         elif e.key == "/" and (e.ctrl or e.meta):

@@ -167,7 +167,7 @@ See [Keyboard Shortcuts](../reference/keyboard-shortcuts.md#file-editor) for the
 
 ### Custom content indicators
 
-Files with custom content (edited or imported) show a **✎** pencil indicator in the folder tree. These overrides take priority over boilerplate during the build and survive template reloads.
+Files with custom content (edited or imported) show a **✎** pencil indicator in the folder tree. These overrides take priority over boilerplate during the build and survive template reloads. To persist your customized folder structure and packages for reuse, [save it as a preset](presets.md).
 
 ### User templates
 

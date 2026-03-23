@@ -7,6 +7,7 @@
 | `⌘Enter` | Build project           |
 | `⌘F`     | Add folder or file      |
 | `⌘P`     | Add packages            |
+| `⌘S`     | Save as Preset          |
 | `⌘R`     | Reset all fields        |
 | `⌘/`     | Open Help               |
 | `Esc`    | Close dialog / Exit app |

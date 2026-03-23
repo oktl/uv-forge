@@ -358,6 +358,7 @@ class FolderHandlersMixin:
             f"App Subfolders: {folder_count} folders, {file_count} files"
         )
 
+        self._update_preset_button_state()
         self.page.update()
 
     def _on_item_click(self, e: ft.ControlEvent) -> None:
@@ -515,6 +516,7 @@ class FolderHandlersMixin:
                     if canonical:
                         self.state.file_overrides[canonical] = content
 
+            self.state.folders_modified = True
             self._update_folder_display()
 
             dialog.warning_text.value = ""
@@ -632,19 +634,13 @@ class FolderHandlersMixin:
             self.state.selected_item_path = None
             self.state.selected_item_type = None
 
+            self.state.folders_modified = True
             self._update_folder_display()
             self._set_status(
                 f"{item_type.title()} '{item_name}' removed.", "success", update=True
             )
         else:
             self._set_warning("Cannot remove item: index out of range.", update=True)
-
-    async def on_auto_save_toggle(self, e: ft.ControlEvent) -> None:
-        """Handle auto-save folder changes checkbox toggle."""
-        self.state.auto_save_folders = e.control.value
-        self._style_selected_checkbox(e.control)
-        status = "enabled" if self.state.auto_save_folders else "disabled"
-        self._set_status(f"Auto-save folder changes {status}.", "info", update=True)
 
     # ---- File content editing (context menu + button) ----
 
@@ -883,6 +879,7 @@ class FolderHandlersMixin:
 
         def on_save(content: str):
             self.state.file_overrides[canonical] = content
+            self.state.folders_modified = True
             close_editor()
             self._update_folder_display()
             self._set_status(f"Saved content for {filename}", "success", update=True)

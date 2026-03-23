@@ -40,7 +40,7 @@ class Controls:
         other_projects_checkbox: Checkbox for Other Project types option.
         app_subfolders_label: Label for folder display.
         subfolders_container: Container showing folder structure.
-        auto_save_folder_changes: Checkbox for auto-save option.
+        save_as_preset_button: Button to save current config as a preset.
         add_folder_button: Button to add a folder.
         remove_folder_button: Button to remove a folder.
         edit_file_button: Button to edit a file's content.
@@ -92,7 +92,7 @@ class Controls:
         self.other_projects_checkbox: ft.Checkbox
         self.app_subfolders_label: ft.Text
         self.subfolders_container: ft.Container
-        self.auto_save_folder_changes: ft.Checkbox
+        self.save_as_preset_button: ft.Button
         self.add_folder_button: ft.Button
         self.remove_folder_button: ft.Button
         self.edit_file_button: ft.Button
@@ -361,15 +361,6 @@ def create_controls(state: AppState, colors: dict) -> Controls:
         width=UIConfig.SPLIT_CONTAINER_WIDTH,
     )
 
-    controls.auto_save_folder_changes = ft.Checkbox(
-        label="Save to config",
-        value=state.auto_save_folders,
-        tooltip="Select to save changes to the template.",
-        label_style=ft.TextStyle(
-            size=UIConfig.TEXT_SIZE_SMALL, color=UIConfig.COLOR_INFO
-        ),
-    )
-
     _split_btn_style = ft.ButtonStyle(
         text_style=ft.TextStyle(size=UIConfig.TEXT_SIZE_SMALL)
     )
@@ -386,6 +377,15 @@ def create_controls(state: AppState, colors: dict) -> Controls:
         tooltip="Select an item in the list, then click to remove it",
         style=_split_btn_style,
         width=UIConfig.BUTTON_WIDTH_STRUCTURE,
+    )
+
+    controls.save_as_preset_button = ft.Button(
+        "Save as Preset",
+        icon=ft.Icons.SAVE,
+        tooltip="Save the current project configuration as a reusable preset\n\n⌘S / Ctrl+S",
+        style=_split_btn_style,
+        width=UIConfig.BUTTON_WIDTH_STRUCTURE,
+        disabled=True,
     )
 
     controls.edit_file_button = ft.Button(
@@ -671,21 +671,8 @@ def create_sections(controls: Controls, state: AppState) -> None:
                             ft.Row(
                                 controls=[
                                     controls.edit_file_button,
-                                    controls.auto_save_folder_changes,
-                                    ft.Icon(
-                                        ft.Icons.INFO_OUTLINE,
-                                        size=14,
-                                        color=UIConfig.COLOR_INFO,
-                                        tooltip=(
-                                            "When enabled, any folder structure changes "
-                                            "(add, remove) are automatically saved to the "
-                                            "project template config.\n"
-                                            "Your customisations persist for future projects "
-                                            "of the same framework or type."
-                                        ),
-                                    ),
+                                    controls.save_as_preset_button,
                                 ],
-                                spacing=4,
                             ),
                         ],
                         spacing=UIConfig.SPACING_SMALL,

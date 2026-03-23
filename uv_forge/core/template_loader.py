@@ -147,20 +147,6 @@ class TemplateLoader:
         self._update_config_state(default_template, template, defaults)
         return defaults
 
-    def save_config(self, settings: dict[str, Any] | None = None) -> None:
-        """Save folder structure to the active template.
-
-        Writes the current settings to the template file being used.
-
-        Args:
-            settings: Optional settings dictionary to save. If None, uses self.settings
-        """
-        if settings is None:
-            settings = self.settings
-
-        with open(self.config_source, "w") as f:
-            json.dump({"folders": settings["folders"]}, f, indent=2)
-
     def get_config_display_name(self) -> str:
         """Get a user-friendly name for the active config source.
 

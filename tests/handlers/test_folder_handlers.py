@@ -67,7 +67,7 @@ class MockControls:
         self.include_starter_files_checkbox = MockControl(value=False)
         self.ui_project_checkbox = MockControl(value=False)
         self.other_projects_checkbox = MockControl(value=False)
-        self.auto_save_folder_changes = MockControl(value=False)
+        self.save_as_preset_button = MockControl()
         self.app_subfolders_label = MockText()
         self.subfolders_container = MockContainer()
         self.packages_label = MockText()

@@ -31,7 +31,6 @@ class AppState:
         description: Project description for pyproject.toml metadata.
         license_type: SPDX license identifier for pyproject.toml metadata.
         folders: Current folder structure from template.
-        auto_save_folders: Whether to auto-save folder changes to config.
         selected_item_path: Path to selected item for folder/file removal.
         selected_item_type: Whether selected item is a "folder" or "file".
         packages: List of packages to install (pre-populated from framework/project type, user-editable).
@@ -69,7 +68,7 @@ class AppState:
 
     # Folder management
     folders: list[str | dict[str, Any]] = field(default_factory=list)
-    auto_save_folders: bool = False
+    folders_modified: bool = False  # Set when user adds/removes/edits folders or files
 
     # Selection tracking for folder/file removal
     selected_item_path: list[int | str] | None = None

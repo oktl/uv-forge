@@ -136,7 +136,7 @@ You can customize the structure by:
 - **Import Folder via Right-Click** - Right-click any folder in the tree to see an "Import Folder from Disk..." option. This imports a directory from disk as a subfolder of the clicked folder, using the same scanning logic as the Add Folder dialog
 - **Remove Folder/File** - Select an item and click Remove to delete it
 - **Clear Packages** - Removes all packages (shows confirmation first); framework/project type packages are restored on the next template reload
-- **Auto-save Folder Changes** - Optionally save your custom structure back to the template
+- **Save as Preset** (`⌘S`) - Save the current project configuration (folders, packages, framework, project type, metadata) as a named preset for reuse. The button enables once you've customised something (selected a framework/project type, added packages, or modified the folder structure)
 
 Any custom folders or files you add here are included when you save a preset — so you can build a tailored structure once and reuse it across projects.
 
@@ -326,6 +326,7 @@ Log files are stored in the `logs/` directory and rotate daily. The viewer alway
 | `⌘Enter` / `Ctrl+Enter` | Build project (when inputs are valid)   |
 | `⌘F` / `Ctrl+F`         | Open Add Folder/File dialog             |
 | `⌘P` / `Ctrl+P`         | Open Add Packages dialog                |
+| `⌘S` / `Ctrl+S`         | Save as Preset (when config is modified)|
 | `⌘R` / `Ctrl+R`         | Reset all fields (opens confirmation)   |
 | `⌘/` / `Ctrl+/`         | Open this Help dialog                   |
 | `Esc`                   | Close current dialog / Exit application |

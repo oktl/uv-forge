@@ -45,7 +45,7 @@ class MockControls:
         self.include_starter_files_checkbox = Mock(value=True, label="Include Starter Files", label_style=None)
         self.ui_project_checkbox = Mock(value=False, label="Create UI Project", label_style=None)
         self.other_projects_checkbox = Mock(value=False, label="Create Other Project Type", label_style=None)
-        self.auto_save_folder_changes = Mock(value=False)
+        self.save_as_preset_button = Mock()
         self.build_project_button = Mock(disabled=True, opacity=0.5, tooltip="")
         self.copy_path_button = Mock(disabled=True, opacity=0.4, tooltip="")
         self.pypi_status_text = Mock(value="")

@@ -259,7 +259,8 @@ class OptionHandlersMixin:
         else:
             self.state.folders = self._load_template_folders(None)
 
-        # Clear selections since structure changed
+        # Clear selections and modification flag since structure was replaced
+        self.state.folders_modified = False
         self.state.selected_item_path = None
         self.state.selected_item_type = None
         self.state.selected_package_idx = None

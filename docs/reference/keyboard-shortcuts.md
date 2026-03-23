@@ -5,6 +5,7 @@
 | ++cmd+enter++ / ++ctrl+enter++ | Build project (when inputs are valid)  |
 | ++cmd+f++ / ++ctrl+f++       | Open Add Folder/File dialog             |
 | ++cmd+p++ / ++ctrl+p++       | Open Add Packages dialog                |
+| ++cmd+s++ / ++ctrl+s++       | Save as Preset (when config is modified)|
 | ++cmd+r++ / ++ctrl+r++       | Reset all fields (shows confirmation)   |
 | ++cmd+slash++ / ++ctrl+slash++ | Open Help dialog                      |
 | ++escape++                   | Close current dialog / Exit application |

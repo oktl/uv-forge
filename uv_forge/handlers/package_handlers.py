@@ -88,6 +88,7 @@ class PackageHandlersMixin:
         self.controls.packages_container.content.controls = package_controls
         count = len(self.state.packages)
         self.controls.packages_label.value = f"Packages: {count}"
+        self._update_preset_button_state()
         self.page.update()
 
     def _on_package_click(self, e: ft.ControlEvent) -> None:

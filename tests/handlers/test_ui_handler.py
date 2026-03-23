@@ -84,7 +84,7 @@ class MockControls:
         self.include_starter_files_checkbox = MockControl(value=False)
         self.ui_project_checkbox = MockControl(value=False, label=UI_PROJECT_CHECKBOX_LABEL)
         self.other_projects_checkbox = MockControl(value=False, label=OTHER_PROJECT_CHECKBOX_LABEL)
-        self.auto_save_folder_changes = MockControl(value=False)
+        self.save_as_preset_button = MockControl()
         self.app_subfolders_label = MockText()
         self.subfolders_container = MockContainer()
         self.packages_label = MockText()
@@ -595,7 +595,6 @@ async def test_wrap_async_creates_callable():
     ("framework", "flet"),
     ("other_project_enabled", True),
     ("project_type", "django"),
-    ("auto_save_folders", True),
 ])
 def test_state_updates_from_handlers(mock_handlers, field, value):
     """Test that handler methods properly update state"""

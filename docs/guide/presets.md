@@ -20,7 +20,7 @@ Built-in presets use Python 3.13, git enabled, starter files enabled, and MIT li
 ## Saving a preset
 
 1. Configure your project the way you want it
-2. Open the Presets dialog from the overflow menu
+2. Click **Save as Preset** in the Project Structure section (or press ++cmd+s++ / ++ctrl+s++), or open the Presets dialog from the overflow menu
 3. Enter a name and click **Save Current**
 
 This captures everything: Python version, git and starter file settings, UI framework, project type, folder structure, all packages (including dev), and project metadata.
@@ -47,7 +47,7 @@ Saving with an existing name overwrites the previous preset. There's no limit on
 3. Edit `main.py` with your preferred boilerplate and save (++cmd+s++)
 4. Add `httpx` and mark `pytest` as dev
 5. Set your author name and MIT license
-6. Open Presets → name it "My Full-Stack Starter" → **Save Current**
+6. Click **Save as Preset** (or ++cmd+s++) → name it "My Full-Stack Starter" → **Save Current**
 7. Next project: apply the preset, change the name, and build — done
 
 ## Applying a preset
