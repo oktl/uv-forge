@@ -366,7 +366,9 @@ class BuildHandlersMixin:
         self.controls.check_pypi_button.disabled = not self.state.name_valid
         self.controls.warning_banner.value = ""
         self.page.title = (
-            f"UV Forger — {entry.project_name}" if self.state.name_valid else "UV Forger"
+            f"UV Forger — {entry.project_name}"
+            if self.state.name_valid
+            else "UV Forger"
         )
 
         self._show_snackbar(f"Restored: {entry.project_name}")

@@ -132,7 +132,9 @@ class InputHandlersMixin:
         self.controls.check_pypi_button.disabled = not self.state.name_valid
         self._update_build_button_state()
         self._update_path_preview()
-        self.page.title = f"UV Forger — {name}" if self.state.name_valid else "UV Forger"
+        self.page.title = (
+            f"UV Forger — {name}" if self.state.name_valid else "UV Forger"
+        )
         self.page.update()
 
     async def on_check_pypi(self, e: ft.ControlEvent) -> None:
