@@ -7,10 +7,10 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from uv_forge.core.constants import DEFAULT_PYTHON_VERSION
-from uv_forge.core.state import AppState
-from uv_forge.handlers.ui_handler import Handlers
-from uv_forge.ui.dialog_data import (
+from uv_forger.core.constants import DEFAULT_PYTHON_VERSION
+from uv_forger.core.state import AppState
+from uv_forger.handlers.ui_handler import Handlers
+from uv_forger.ui.dialog_data import (
     OTHER_PROJECT_CHECKBOX_LABEL,
     UI_PROJECT_CHECKBOX_LABEL,
 )
@@ -752,7 +752,7 @@ def test_show_project_type_dialog_adds_to_overlay(mock_handlers):
     handlers, page, controls, state = mock_handlers
 
     # Mock the dialog creation
-    with patch('uv_forge.ui.dialogs.create_project_type_dialog') as mock_create:
+    with patch('uv_forger.ui.dialogs.create_project_type_dialog') as mock_create:
         mock_dialog = Mock()
         mock_dialog.open = False
         mock_create.return_value = mock_dialog
@@ -835,7 +835,7 @@ def test_reload_and_merge_templates_both_selected(mock_handlers):
             {"folders": [{"name": "api", "subfolders": [], "files": []}]},
         ]
 
-        with patch('uv_forge.handlers.option_handlers.merge_folder_lists') as mock_merge:
+        with patch('uv_forger.handlers.option_handlers.merge_folder_lists') as mock_merge:
             mock_merge.return_value = [
                 {"name": "ui", "subfolders": [], "files": []},
                 {"name": "api", "subfolders": [], "files": []},
@@ -901,7 +901,7 @@ def test_show_framework_dialog_adds_to_overlay(mock_handlers):
     """Test that framework dialog is added to page overlay"""
     handlers, page, controls, state = mock_handlers
 
-    with patch('uv_forge.handlers.option_handlers.create_framework_dialog') as mock_create:
+    with patch('uv_forger.handlers.option_handlers.create_framework_dialog') as mock_create:
         mock_dialog = Mock()
         mock_dialog.open = False
         mock_create.return_value = mock_dialog
@@ -1200,8 +1200,8 @@ def test_update_build_button_state_both_invalid(mock_handlers):
 
 def test_create_build_summary_dialog_basic():
     """Test create_build_summary_dialog creates a dialog"""
-    from uv_forge.core.models import BuildSummaryConfig
-    from uv_forge.ui.dialogs import create_build_summary_dialog
+    from uv_forger.core.models import BuildSummaryConfig
+    from uv_forger.ui.dialogs import create_build_summary_dialog
 
     config = BuildSummaryConfig(
         project_name="my_project",
@@ -1231,8 +1231,8 @@ def test_create_build_summary_dialog_basic():
 
 def test_create_build_summary_dialog_with_framework():
     """Test dialog includes framework when provided"""
-    from uv_forge.core.models import BuildSummaryConfig
-    from uv_forge.ui.dialogs import create_build_summary_dialog
+    from uv_forger.core.models import BuildSummaryConfig
+    from uv_forger.ui.dialogs import create_build_summary_dialog
 
     config = BuildSummaryConfig(
         project_name="my_app",
@@ -1264,8 +1264,8 @@ def test_create_build_summary_dialog_with_framework():
 
 def test_create_build_summary_dialog_with_project_type():
     """Test dialog includes project type when provided"""
-    from uv_forge.core.models import BuildSummaryConfig
-    from uv_forge.ui.dialogs import create_build_summary_dialog
+    from uv_forger.core.models import BuildSummaryConfig
+    from uv_forger.ui.dialogs import create_build_summary_dialog
 
     config = BuildSummaryConfig(
         project_name="my_app",
@@ -1489,7 +1489,7 @@ def test_framework_dialog_on_select_sets_state(mock_handlers):
     """Test framework dialog on_select callback sets framework and reloads templates"""
     handlers, page, controls, state = mock_handlers
 
-    with patch('uv_forge.handlers.option_handlers.create_framework_dialog') as mock_create:
+    with patch('uv_forger.handlers.option_handlers.create_framework_dialog') as mock_create:
         mock_dialog = Mock()
         mock_dialog.open = True
         mock_create.return_value = mock_dialog
@@ -1518,7 +1518,7 @@ def test_framework_dialog_on_select_none_clears_state(mock_handlers):
     controls.ui_project_checkbox.value = True
     controls.ui_project_checkbox.label = "UI Project: flet"
 
-    with patch('uv_forge.handlers.option_handlers.create_framework_dialog') as mock_create:
+    with patch('uv_forger.handlers.option_handlers.create_framework_dialog') as mock_create:
         mock_dialog = Mock()
         mock_dialog.open = True
         mock_create.return_value = mock_dialog
@@ -1547,7 +1547,7 @@ def test_framework_dialog_on_close_unchecks_when_no_prior_selection(mock_handler
     state.framework = None
     controls.ui_project_checkbox.value = True
 
-    with patch('uv_forge.handlers.option_handlers.create_framework_dialog') as mock_create:
+    with patch('uv_forger.handlers.option_handlers.create_framework_dialog') as mock_create:
         mock_dialog = Mock()
         mock_dialog.open = True
         mock_create.return_value = mock_dialog
@@ -1574,7 +1574,7 @@ def test_framework_dialog_on_close_keeps_prior_selection(mock_handlers):
     controls.ui_project_checkbox.value = True
     controls.ui_project_checkbox.label = "UI Project: PyQt6"
 
-    with patch('uv_forge.handlers.option_handlers.create_framework_dialog') as mock_create:
+    with patch('uv_forger.handlers.option_handlers.create_framework_dialog') as mock_create:
         mock_dialog = Mock()
         mock_dialog.open = True
         mock_create.return_value = mock_dialog
@@ -1605,7 +1605,7 @@ def test_project_type_dialog_on_select_none_clears_state(mock_handlers):
     controls.other_projects_checkbox.value = True
     controls.other_projects_checkbox.label = "Project: Django"
 
-    with patch('uv_forge.ui.dialogs.create_project_type_dialog') as mock_create:
+    with patch('uv_forger.ui.dialogs.create_project_type_dialog') as mock_create:
         mock_dialog = Mock()
         mock_dialog.open = True
         mock_create.return_value = mock_dialog
@@ -1796,7 +1796,7 @@ async def test_on_about_click_opens_dialog(mock_handlers):
     """Test on_about_click loads ABOUT.md and opens a dialog."""
     handlers, page, controls, state = mock_handlers
 
-    with patch("uv_forge.handlers.feature_handlers.ABOUT_FILE") as mock_file:
+    with patch("uv_forger.handlers.feature_handlers.ABOUT_FILE") as mock_file:
         mock_file.read_text.return_value = "# About\nTest content"
         await handlers.on_about_click(None)
 
@@ -1811,7 +1811,7 @@ async def test_on_about_click_handles_missing_file(mock_handlers):
     """Test on_about_click handles missing ABOUT.md gracefully."""
     handlers, page, controls, state = mock_handlers
 
-    with patch("uv_forge.handlers.feature_handlers.ABOUT_FILE") as mock_file:
+    with patch("uv_forger.handlers.feature_handlers.ABOUT_FILE") as mock_file:
         mock_file.read_text.side_effect = FileNotFoundError("not found")
         await handlers.on_about_click(None)
 
@@ -1825,7 +1825,7 @@ async def test_on_about_internal_link_help(mock_handlers):
     """Test About dialog internal link navigates to Help dialog."""
     handlers, page, controls, state = mock_handlers
 
-    with patch("uv_forge.handlers.feature_handlers.ABOUT_FILE") as mock_file:
+    with patch("uv_forger.handlers.feature_handlers.ABOUT_FILE") as mock_file:
         mock_file.read_text.return_value = "# About\n[Help](app://help)"
         await handlers.on_about_click(None)
 
@@ -1844,7 +1844,7 @@ async def test_help_dialog_internal_link_about(mock_handlers):
     """Test Help dialog internal link navigates to About dialog."""
     handlers, page, controls, state = mock_handlers
 
-    with patch("uv_forge.handlers.feature_handlers.HELP_FILE") as mock_file:
+    with patch("uv_forger.handlers.feature_handlers.HELP_FILE") as mock_file:
         mock_file.read_text.return_value = "# Help\n[About](app://about)"
         await handlers.on_help_click(None)
 
@@ -1903,7 +1903,7 @@ async def test_help_dialog_sets_active_dialog(mock_handlers):
     """Test opening Help dialog sets state.active_dialog."""
     handlers, page, controls, state = mock_handlers
 
-    with patch("uv_forge.handlers.feature_handlers.HELP_FILE") as mock_file:
+    with patch("uv_forger.handlers.feature_handlers.HELP_FILE") as mock_file:
         mock_file.read_text.return_value = "# Help\nTest"
         await handlers.on_help_click(None)
 
@@ -1916,7 +1916,7 @@ async def test_help_dialog_close_clears_active_dialog(mock_handlers):
     """Test closing Help dialog clears state.active_dialog."""
     handlers, page, controls, state = mock_handlers
 
-    with patch("uv_forge.handlers.feature_handlers.HELP_FILE") as mock_file:
+    with patch("uv_forger.handlers.feature_handlers.HELP_FILE") as mock_file:
         mock_file.read_text.return_value = "# Help\nTest"
         await handlers.on_help_click(None)
 
@@ -1931,7 +1931,7 @@ async def test_app_cheat_sheet_dialog_sets_active_dialog(mock_handlers):
     """Test opening App Cheat Sheet dialog sets state.active_dialog."""
     handlers, page, controls, state = mock_handlers
 
-    with patch("uv_forge.handlers.feature_handlers.APP_CHEAT_SHEET_FILE") as mock_file:
+    with patch("uv_forger.handlers.feature_handlers.APP_CHEAT_SHEET_FILE") as mock_file:
         mock_file.read_text.return_value = "# App\nTest"
         await handlers.on_app_cheat_sheet_click(None)
 
@@ -1944,7 +1944,7 @@ async def test_app_cheat_sheet_close_clears_active_dialog(mock_handlers):
     """Test closing App Cheat Sheet dialog clears state.active_dialog."""
     handlers, page, controls, state = mock_handlers
 
-    with patch("uv_forge.handlers.feature_handlers.APP_CHEAT_SHEET_FILE") as mock_file:
+    with patch("uv_forger.handlers.feature_handlers.APP_CHEAT_SHEET_FILE") as mock_file:
         mock_file.read_text.return_value = "# App\nTest"
         await handlers.on_app_cheat_sheet_click(None)
 
@@ -1957,7 +1957,7 @@ async def test_app_cheat_sheet_file_not_found(mock_handlers):
     """Test App Cheat Sheet handles missing file gracefully."""
     handlers, page, controls, state = mock_handlers
 
-    with patch("uv_forge.handlers.feature_handlers.APP_CHEAT_SHEET_FILE") as mock_file:
+    with patch("uv_forger.handlers.feature_handlers.APP_CHEAT_SHEET_FILE") as mock_file:
         mock_file.read_text.side_effect = FileNotFoundError("not found")
         await handlers.on_app_cheat_sheet_click(None)
 
@@ -1969,7 +1969,7 @@ async def test_about_dialog_sets_active_dialog(mock_handlers):
     """Test opening About dialog sets state.active_dialog."""
     handlers, page, controls, state = mock_handlers
 
-    with patch("uv_forge.handlers.feature_handlers.ABOUT_FILE") as mock_file:
+    with patch("uv_forger.handlers.feature_handlers.ABOUT_FILE") as mock_file:
         mock_file.read_text.return_value = "# About\nTest"
         await handlers.on_about_click(None)
 
@@ -1982,7 +1982,7 @@ async def test_about_dialog_close_clears_active_dialog(mock_handlers):
     """Test closing About dialog clears state.active_dialog."""
     handlers, page, controls, state = mock_handlers
 
-    with patch("uv_forge.handlers.feature_handlers.ABOUT_FILE") as mock_file:
+    with patch("uv_forger.handlers.feature_handlers.ABOUT_FILE") as mock_file:
         mock_file.read_text.return_value = "# About\nTest"
         await handlers.on_about_click(None)
 
@@ -1995,7 +1995,7 @@ async def test_escape_closes_help_dialog_end_to_end(mock_handlers):
     """Test Escape key closes an open Help dialog end-to-end."""
     handlers, page, controls, state = mock_handlers
 
-    with patch("uv_forge.handlers.feature_handlers.HELP_FILE") as mock_file:
+    with patch("uv_forger.handlers.feature_handlers.HELP_FILE") as mock_file:
         mock_file.read_text.return_value = "# Help\nTest"
         await handlers.on_help_click(None)
 

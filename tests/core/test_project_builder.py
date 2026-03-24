@@ -5,8 +5,8 @@ from pathlib import Path
 from subprocess import CalledProcessError
 from unittest.mock import MagicMock, patch
 
-from uv_forge.core.models import ProjectConfig
-from uv_forge.handlers.project_builder import (
+from uv_forger.core.models import ProjectConfig
+from uv_forger.handlers.project_builder import (
     _collect_packages_to_install,
     build_project,
     remove_partial_project,
@@ -216,7 +216,7 @@ class TestBuildProjectErrors:
             cmd_error = CalledProcessError(1, ["uv", "init"], stderr="some error")
 
             with patch(
-                "uv_forge.handlers.project_builder._create_project_scaffold",
+                "uv_forger.handlers.project_builder._create_project_scaffold",
                 side_effect=cmd_error,
             ):
                 result = build_project(config)
@@ -231,7 +231,7 @@ class TestBuildProjectErrors:
             config = _make_config(tmpdir, project_name="my_proj")
 
             with patch(
-                "uv_forge.handlers.project_builder._create_project_scaffold",
+                "uv_forger.handlers.project_builder._create_project_scaffold",
                 side_effect=OSError("disk full"),
             ):
                 result = build_project(config)
@@ -244,7 +244,7 @@ class TestBuildProjectErrors:
             config = _make_config(tmpdir, project_name="my_proj")
 
             with patch(
-                "uv_forge.handlers.project_builder._create_project_scaffold",
+                "uv_forger.handlers.project_builder._create_project_scaffold",
                 side_effect=RuntimeError("unexpected"),
             ):
                 result = build_project(config)
@@ -257,11 +257,11 @@ class TestBuildProjectErrors:
             config = _make_config(deep_path, project_name="my_proj")
 
             with patch(
-                "uv_forge.handlers.project_builder._create_project_scaffold"
+                "uv_forger.handlers.project_builder._create_project_scaffold"
             ) as mock_scaffold, patch(
-                "uv_forge.handlers.project_builder._install_dependencies"
+                "uv_forger.handlers.project_builder._install_dependencies"
             ), patch(
-                "uv_forge.handlers.project_builder.finalize_git_setup"
+                "uv_forger.handlers.project_builder.finalize_git_setup"
             ):
                 mock_scaffold.return_value = None
                 result = build_project(config)
@@ -285,11 +285,11 @@ class TestBuildProjectErrors:
             config = _make_config(tmpdir, project_name="my_proj")
 
             with patch(
-                "uv_forge.handlers.project_builder._create_project_scaffold"
+                "uv_forger.handlers.project_builder._create_project_scaffold"
             ), patch(
-                "uv_forge.handlers.project_builder._install_dependencies"
+                "uv_forger.handlers.project_builder._install_dependencies"
             ), patch(
-                "uv_forge.handlers.project_builder.finalize_git_setup"
+                "uv_forger.handlers.project_builder.finalize_git_setup"
             ):
                 result = build_project(config)
 

@@ -1,16 +1,16 @@
-# UV Forge
+# UV Forger
 
 **Forge Python projects in seconds — not minutes.**
 
-UV Forge is a desktop app that scaffolds production-ready Python projects using the [uv](https://docs.astral.sh/uv/) package manager. Pick a UI framework, project type, or both — UV Forge generates the folder structure, boilerplate files, packages, virtual environment, git repo, and `pyproject.toml` in one click.
+UV Forger is a desktop app that scaffolds production-ready Python projects using the [uv](https://docs.astral.sh/uv/) package manager. Pick a UI framework, project type, or both — UV Forger generates the folder structure, boilerplate files, packages, virtual environment, git repo, and `pyproject.toml` in one click.
 
-![UV Forge main window](assets/images/main-window.png){ .img-lg }
+![UV Forger main window](assets/images/main-window.png){ .img-lg }
 
 ---
 
-## Why UV Forge?
+## Why UV Forger?
 
-Setting up a new Python project means repeating the same steps every time: create directories, write boilerplate, configure `pyproject.toml`, set up git, install packages. UV Forge handles all of that so you can start writing actual code immediately.
+Setting up a new Python project means repeating the same steps every time: create directories, write boilerplate, configure `pyproject.toml`, set up git, install packages. UV Forger handles all of that so you can start writing actual code immediately.
 
 - **10 UI frameworks** — Flet, PyQt6, PySide6, tkinter, customtkinter, Kivy, Pygame, NiceGUI, Streamlit, Gradio
 - **21 project types** — Django, FastAPI, Flask, data science, ML, CLI tools, REST/GraphQL/gRPC APIs, web scraping, and more
@@ -30,7 +30,7 @@ Setting up a new Python project means repeating the same steps every time: creat
 
 <div class="grid cards" markdown>
 
-- :material-download: **[Installation](installation.md)** — Get UV Forge running
+- :material-download: **[Installation](installation.md)** — Get UV Forger running
 - :material-rocket-launch: **[Quick Start](quickstart.md)** — Build your first project
 - :material-file-tree: **[Templates](guide/templates.md)** — How the template system works
 - :material-cog: **[Settings](guide/settings.md)** — Configure defaults and preferences

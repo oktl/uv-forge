@@ -1,8 +1,8 @@
 """Tests for template_merger.py - folder normalization and merging utilities."""
 
 
-from uv_forge.core.models import FolderSpec
-from uv_forge.core.template_merger import _merge_files, merge_folder_lists, normalize_folder
+from uv_forger.core.models import FolderSpec
+from uv_forger.core.template_merger import _merge_files, merge_folder_lists, normalize_folder
 
 # ========== TestNormalizeFolder ==========
 

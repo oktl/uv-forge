@@ -6,10 +6,10 @@ from unittest.mock import AsyncMock, Mock
 import flet as ft
 import pytest
 
-from uv_forge.core.models import BuildSummaryConfig
-from uv_forge.core.state import AppState
-from uv_forge.ui.content_dialogs import create_about_dialog
-from uv_forge.ui.dialogs import (
+from uv_forger.core.models import BuildSummaryConfig
+from uv_forger.core.state import AppState
+from uv_forger.ui.content_dialogs import create_about_dialog
+from uv_forger.ui.dialogs import (
     _parse_log_line,
     _parse_log_location,
     create_add_item_dialog,
@@ -18,7 +18,7 @@ from uv_forge.ui.dialogs import (
     create_metadata_dialog,
     create_project_type_dialog,
 )
-from uv_forge.ui.tree_builder import build_project_tree_lines
+from uv_forger.ui.tree_builder import build_project_tree_lines
 
 
 def test_create_project_type_dialog_basic():
@@ -431,7 +431,7 @@ def test_tree_create_init_false_no_init_py():
 
 def test_tree_create_init_false_inherited_by_string_subfolders():
     """String subfolders inherit create_init=False from parent — no __init__.py."""
-    from uv_forge.core.template_merger import normalize_folder
+    from uv_forger.core.template_merger import normalize_folder
 
     raw_folder = {
         "name": "assets",
@@ -603,8 +603,8 @@ def test_parse_log_line_light_mode_info_color():
 
 def test_parse_log_location_valid():
     """Test parsing a standard log location segment."""
-    result = _parse_log_location("uv_forge.core.state:load:42")
-    assert result == ("uv_forge.core.state", 42)
+    result = _parse_log_location("uv_forger.core.state:load:42")
+    assert result == ("uv_forger.core.state", 42)
 
 
 def test_parse_log_location_invalid():

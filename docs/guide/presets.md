@@ -6,7 +6,7 @@ Presets let you save a full project configuration as a named template for one-cl
 
 ## Built-in presets
 
-UV Forge ships with 4 starter presets so you can build immediately without configuring anything:
+UV Forger ships with 4 starter presets so you can build immediately without configuring anything:
 
 | Preset                   | Framework / Type | Packages                                     |
 | ------------------------ | ---------------- | -------------------------------------------- |

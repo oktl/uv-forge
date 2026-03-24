@@ -4,7 +4,7 @@ Tests the new selected_item_path and selected_item_type fields
 added for folder/file selection functionality.
 """
 
-from uv_forge.core.state import AppState
+from uv_forger.core.state import AppState
 
 
 class TestSelectionTracking:

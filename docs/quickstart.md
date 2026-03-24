@@ -15,7 +15,7 @@ flowchart LR
 
 ## 1. Enter a project name
 
-Type a valid Python package name — letters, numbers, and underscores. UV Forge validates as you type, showing a green checkmark when the name is valid.
+Type a valid Python package name — letters, numbers, and underscores. UV Forger validates as you type, showing a green checkmark when the name is valid.
 
 A live path preview appears below the field showing the full resolved project path.
 

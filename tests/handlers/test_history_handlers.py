@@ -6,9 +6,9 @@ from unittest.mock import Mock, patch
 import flet as ft
 import pytest
 
-from uv_forge.core.history_manager import ProjectHistoryEntry
-from uv_forge.core.state import AppState
-from uv_forge.handlers.ui_handler import Handlers
+from uv_forger.core.history_manager import ProjectHistoryEntry
+from uv_forger.core.state import AppState
+from uv_forger.handlers.ui_handler import Handlers
 
 
 class MockPage:
@@ -20,7 +20,7 @@ class MockPage:
         self.bottom_appbar = Mock(bgcolor=None)
         self.theme_mode = None
         self.window = Mock()
-        self.title = "UV Forge"
+        self.title = "UV Forger"
         self._shown_dialogs = []
 
     def update(self):
@@ -103,7 +103,7 @@ async def test_on_history_click_opens_dialog(handler_setup):
     """on_history_click opens a dialog via page.overlay."""
     handlers, page, controls, state = handler_setup
 
-    with patch("uv_forge.handlers.feature_handlers.load_history", return_value=[]):
+    with patch("uv_forger.handlers.feature_handlers.load_history", return_value=[]):
         await handlers.on_history_click(None)
 
     assert len(page.overlay) == 1
@@ -116,7 +116,7 @@ async def test_on_history_click_with_entries(handler_setup):
     handlers, page, controls, state = handler_setup
     entry = _make_entry()
 
-    with patch("uv_forge.handlers.feature_handlers.load_history", return_value=[entry]):
+    with patch("uv_forger.handlers.feature_handlers.load_history", return_value=[entry]):
         await handlers.on_history_click(None)
 
     assert len(page.overlay) == 1
@@ -213,9 +213,9 @@ async def test_history_saved_after_successful_build(handler_setup):
     mock_result = Mock(success=True, message="Project created!")
 
     with (
-        patch("uv_forge.handlers.build_handlers.AsyncExecutor.run", return_value=mock_result),
-        patch("uv_forge.handlers.build_handlers.add_to_history") as mock_add,
-        patch("uv_forge.handlers.build_handlers.make_history_entry") as mock_make,
+        patch("uv_forger.handlers.build_handlers.AsyncExecutor.run", return_value=mock_result),
+        patch("uv_forger.handlers.build_handlers.add_to_history") as mock_add,
+        patch("uv_forger.handlers.build_handlers.make_history_entry") as mock_make,
     ):
         mock_entry = Mock()
         mock_make.return_value = mock_entry

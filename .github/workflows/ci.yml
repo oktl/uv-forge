@@ -13,8 +13,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
-      - run: uv run ruff check uv_forge
-      - run: uv run ruff format --check uv_forge
+      - run: uv run ruff check uv_forger
+      - run: uv run ruff format --check uv_forger
 
   test:
     runs-on: ${{ matrix.os }}

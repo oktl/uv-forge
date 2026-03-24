@@ -3,7 +3,7 @@
 import httpx
 import pytest
 
-from uv_forge.core.pypi_checker import (
+from uv_forger.core.pypi_checker import (
     check_pypi_availability,
     extract_package_name,
     normalize_pypi_name,

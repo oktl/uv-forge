@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from uv_forge.core.boilerplate_resolver import BoilerplateResolver, normalize_framework_name
+from uv_forger.core.boilerplate_resolver import BoilerplateResolver, normalize_framework_name
 
 
 class TestNormalizeFrameworkName:

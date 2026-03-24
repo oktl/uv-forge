@@ -8,7 +8,7 @@
 
 ## Install from PyPI
 
-The simplest way to run UV Forge:
+The simplest way to run UV Forger:
 
 ```bash
 # Run directly without installing (recommended)
@@ -25,8 +25,8 @@ uv-forger
 ## Run from source
 
 ```bash
-git clone https://github.com/oktl/uv-forge.git
-cd uv-forge
+git clone https://github.com/oktl/uv-forger.git
+cd uv-forger
 uv run uv-forger
 ```
 

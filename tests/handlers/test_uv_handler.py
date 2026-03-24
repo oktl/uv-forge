@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from uv_forge.handlers.uv_handler import (
+from uv_forger.handlers.uv_handler import (
     _resolve_entry_point,
     configure_pyproject,
     get_uv_path,
@@ -118,7 +118,7 @@ class TestUvCommandsWithMocks:
 
     def test_run_uv_init_command_structure(self):
         """Test run_uv_init command structure"""
-        with patch('uv_forge.handlers.uv_handler.get_uv_path', return_value='/usr/bin/uv'):
+        with patch('uv_forger.handlers.uv_handler.get_uv_path', return_value='/usr/bin/uv'):
             with patch('subprocess.run') as mock_run:
                 mock_run.return_value = MagicMock(returncode=0)
 
@@ -136,7 +136,7 @@ class TestUvCommandsWithMocks:
 
     def test_setup_virtual_env_command_structure(self):
         """Test setup_virtual_env command structure"""
-        with patch('uv_forge.handlers.uv_handler.get_uv_path', return_value='/usr/bin/uv'):
+        with patch('uv_forger.handlers.uv_handler.get_uv_path', return_value='/usr/bin/uv'):
             with patch('subprocess.run') as mock_run:
                 mock_run.return_value = MagicMock(returncode=0)
 

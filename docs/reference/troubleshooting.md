@@ -26,13 +26,13 @@ Git is optional — uncheck the Git Repository checkbox if you don't need it. Ot
 
 ## Settings or presets not saving
 
-UV Forge stores data in your platform's user data directory. Ensure you have write permissions to:
+UV Forger stores data in your platform's user data directory. Ensure you have write permissions to:
 
 | Platform | Path                                      |
 | -------- | ----------------------------------------- |
-| macOS    | `~/Library/Application Support/UV Forge/` |
-| Linux    | `~/.local/share/UV Forge/`                |
-| Windows  | `%LOCALAPPDATA%/UV Forge/`                |
+| macOS    | `~/Library/Application Support/UV Forger/` |
+| Linux    | `~/.local/share/UV Forger/`                |
+| Windows  | `%LOCALAPPDATA%/UV Forger/`                |
 
 ## App won't start
 
@@ -41,7 +41,7 @@ UV Forge stores data in your platform's user data directory. Ensure you have wri
 python --version
 
 # Try running directly
-uv run python uv_forge/main.py
+uv run python uv_forger/main.py
 
 # Check for missing dependencies
 uv sync
@@ -49,7 +49,7 @@ uv sync
 
 ## Still stuck?
 
-Open an issue on [GitHub](https://github.com/oktl/uv-forge/issues) with:
+Open an issue on [GitHub](https://github.com/oktl/uv-forger/issues) with:
 
 - Your OS and Python version
 - Steps to reproduce the problem

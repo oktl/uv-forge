@@ -7,7 +7,7 @@ from unittest.mock import patch
 
 import pytest
 
-from uv_forge.handlers.git_handler import (
+from uv_forger.handlers.git_handler import (
     check_gh_authenticated,
     check_gh_available,
     finalize_git_setup,
@@ -36,7 +36,7 @@ def _isolate_hub(tmp_path):
     ~/Projects/git-repos/ with leftover tmp*.git directories."""
     hub_dir = tmp_path / "git-repos"
     hub_dir.mkdir()
-    with patch("uv_forge.handlers.git_handler.DEFAULT_GIT_HUB_ROOT", hub_dir):
+    with patch("uv_forger.handlers.git_handler.DEFAULT_GIT_HUB_ROOT", hub_dir):
         yield
 
 
@@ -246,7 +246,7 @@ class TestCheckGhAvailable:
 
     def test_returns_true_when_gh_installed(self):
         """Returns True when gh --version succeeds."""
-        with patch("uv_forge.handlers.git_handler.subprocess.run") as mock_run:
+        with patch("uv_forger.handlers.git_handler.subprocess.run") as mock_run:
             mock_run.return_value = subprocess.CompletedProcess(
                 args=["gh", "--version"], returncode=0, stdout="gh version 2.0"
             )
@@ -255,7 +255,7 @@ class TestCheckGhAvailable:
     def test_returns_false_when_gh_not_installed(self):
         """Returns False when gh is not found."""
         with patch(
-            "uv_forge.handlers.git_handler.subprocess.run",
+            "uv_forger.handlers.git_handler.subprocess.run",
             side_effect=FileNotFoundError,
         ):
             assert check_gh_available() is False
@@ -263,7 +263,7 @@ class TestCheckGhAvailable:
     def test_returns_false_on_non_zero_exit(self):
         """Returns False when gh --version fails."""
         with patch(
-            "uv_forge.handlers.git_handler.subprocess.run",
+            "uv_forger.handlers.git_handler.subprocess.run",
             side_effect=subprocess.CalledProcessError(1, "gh"),
         ):
             assert check_gh_available() is False
@@ -273,7 +273,7 @@ class TestCheckGhAuthenticated:
     """Tests for check_gh_authenticated function."""
 
     def test_returns_true_when_authenticated(self):
-        with patch("uv_forge.handlers.git_handler.subprocess.run") as mock_run:
+        with patch("uv_forger.handlers.git_handler.subprocess.run") as mock_run:
             mock_run.return_value = subprocess.CompletedProcess(
                 args=["gh", "auth", "status"], returncode=0
             )
@@ -281,14 +281,14 @@ class TestCheckGhAuthenticated:
 
     def test_returns_false_when_not_authenticated(self):
         with patch(
-            "uv_forge.handlers.git_handler.subprocess.run",
+            "uv_forger.handlers.git_handler.subprocess.run",
             side_effect=subprocess.CalledProcessError(1, "gh"),
         ):
             assert check_gh_authenticated() is False
 
     def test_returns_false_when_gh_not_installed(self):
         with patch(
-            "uv_forge.handlers.git_handler.subprocess.run",
+            "uv_forger.handlers.git_handler.subprocess.run",
             side_effect=FileNotFoundError,
         ):
             assert check_gh_authenticated() is False
@@ -406,7 +406,7 @@ class TestFinalizeGitSetupRemoteModes:
             self._setup_local_repo(project_path)
             (project_path / "README.md").write_text("# Hello")
 
-            with patch("uv_forge.handlers.git_handler._run_git") as mock_run:
+            with patch("uv_forger.handlers.git_handler._run_git") as mock_run:
                 # Let real git commands through for add/status/config/commit
                 original_run = subprocess.run
 
@@ -451,7 +451,7 @@ class TestFinalizeGitSetupRemoteModes:
             self._setup_local_repo(project_path)
             (project_path / "README.md").write_text("# Hello")
 
-            with patch("uv_forge.handlers.git_handler._run_git") as mock_run:
+            with patch("uv_forger.handlers.git_handler._run_git") as mock_run:
                 original_run = subprocess.run
 
                 def side_effect(cmd, cwd, **kwargs):
@@ -489,7 +489,7 @@ class TestFinalizeGitSetupRemoteModes:
             self._setup_local_repo(project_path)
             (project_path / "README.md").write_text("# Hello")
 
-            with patch("uv_forge.handlers.git_handler._run_git") as mock_run:
+            with patch("uv_forger.handlers.git_handler._run_git") as mock_run:
                 original_run = subprocess.run
 
                 def side_effect(cmd, cwd, **kwargs):

@@ -6,8 +6,8 @@ from unittest.mock import Mock
 
 import pytest
 
-from uv_forge.core.state import AppState
-from uv_forge.handlers.ui_handler import Handlers
+from uv_forger.core.state import AppState
+from uv_forger.handlers.ui_handler import Handlers
 
 
 class MockControl:
@@ -374,7 +374,7 @@ class TestAddItemWithContent:
         files_list.append("new_file.py")
 
         # Compute canonical path the same way add_item does
-        from uv_forge.handlers.folder_handlers import get_canonical_file_path
+        from uv_forger.handlers.folder_handlers import get_canonical_file_path
 
         file_idx = len(files_list) - 1
         file_path = parent_path + ["files", file_idx]
@@ -415,7 +415,7 @@ class TestAddItemWithContent:
             }
         ]
 
-        from uv_forge.handlers.folder_handlers import get_canonical_file_path
+        from uv_forger.handlers.folder_handlers import get_canonical_file_path
 
         # Path to helpers.py: folders[0] → subfolders[0] → files[0]
         item_path = [0, "subfolders", 0, "files", 0]
@@ -448,7 +448,7 @@ class TestScanFolderFromDisk:
 
     def test_scan_empty_folder(self):
         """Empty folder returns structure with no files or subfolders."""
-        from uv_forge.handlers.folder_handlers import scan_folder_from_disk
+        from uv_forger.handlers.folder_handlers import scan_folder_from_disk
 
         with tempfile.TemporaryDirectory() as tmpdir:
             folder_dict, file_overrides, stats = scan_folder_from_disk(Path(tmpdir))
@@ -462,7 +462,7 @@ class TestScanFolderFromDisk:
 
     def test_scan_folder_with_files(self):
         """Picks up importable files and reads their content."""
-        from uv_forge.handlers.folder_handlers import scan_folder_from_disk
+        from uv_forger.handlers.folder_handlers import scan_folder_from_disk
 
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
@@ -477,7 +477,7 @@ class TestScanFolderFromDisk:
 
     def test_scan_folder_skips_hidden(self):
         """Hidden files and directories are ignored."""
-        from uv_forge.handlers.folder_handlers import scan_folder_from_disk
+        from uv_forger.handlers.folder_handlers import scan_folder_from_disk
 
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
@@ -494,7 +494,7 @@ class TestScanFolderFromDisk:
 
     def test_scan_folder_skips_pycache(self):
         """__pycache__ directories are ignored."""
-        from uv_forge.handlers.folder_handlers import scan_folder_from_disk
+        from uv_forger.handlers.folder_handlers import scan_folder_from_disk
 
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
@@ -509,7 +509,7 @@ class TestScanFolderFromDisk:
 
     def test_scan_folder_skips_binary_extensions(self):
         """Files with non-importable extensions are skipped."""
-        from uv_forge.handlers.folder_handlers import scan_folder_from_disk
+        from uv_forger.handlers.folder_handlers import scan_folder_from_disk
 
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
@@ -523,7 +523,7 @@ class TestScanFolderFromDisk:
 
     def test_scan_folder_skips_unreadable_utf8(self):
         """Non-UTF-8 files are skipped and counted."""
-        from uv_forge.handlers.folder_handlers import scan_folder_from_disk
+        from uv_forger.handlers.folder_handlers import scan_folder_from_disk
 
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
@@ -537,7 +537,7 @@ class TestScanFolderFromDisk:
 
     def test_scan_folder_max_files(self):
         """Stops reading content after max_files, counts remainder as skipped."""
-        from uv_forge.handlers.folder_handlers import scan_folder_from_disk
+        from uv_forger.handlers.folder_handlers import scan_folder_from_disk
 
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
@@ -555,7 +555,7 @@ class TestScanFolderFromDisk:
 
     def test_scan_folder_max_depth(self):
         """Directories beyond max_depth are not recursed into."""
-        from uv_forge.handlers.folder_handlers import scan_folder_from_disk
+        from uv_forger.handlers.folder_handlers import scan_folder_from_disk
 
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
@@ -575,7 +575,7 @@ class TestScanFolderFromDisk:
 
     def test_scan_folder_nested_structure(self):
         """Correct nesting of subfolders and files."""
-        from uv_forge.handlers.folder_handlers import scan_folder_from_disk
+        from uv_forger.handlers.folder_handlers import scan_folder_from_disk
 
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
@@ -641,7 +641,7 @@ class TestAddItemDialogBrowseFolder:
 
     def test_browse_folder_row_visible_for_folder_type(self):
         """Browse folder row should be visible when type is folder and callback provided."""
-        from uv_forge.ui.dialogs import create_add_item_dialog
+        from uv_forger.ui.dialogs import create_add_item_dialog
 
         dialog = create_add_item_dialog(
             on_add_callback=lambda *a: None,
@@ -658,7 +658,7 @@ class TestAddItemDialogBrowseFolder:
 
     def test_browse_folder_row_hidden_without_callback(self):
         """Browse folder row should be hidden when no callback provided."""
-        from uv_forge.ui.dialogs import create_add_item_dialog
+        from uv_forger.ui.dialogs import create_add_item_dialog
 
         dialog = create_add_item_dialog(
             on_add_callback=lambda *a: None,

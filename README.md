@@ -1,19 +1,19 @@
-# 🛠️ UV Forge
+# 🛠️ UV Forger
 
 [![PyPI version](https://img.shields.io/pypi/v/uv-forger)](https://pypi.org/project/uv-forger/)
 [![Python 3.12+](https://img.shields.io/pypi/pyversions/uv-forger)](https://pypi.org/project/uv-forger/)
-[![License: MIT](https://img.shields.io/github/license/oktl/uv-forge)](https://github.com/oktl/uv-forge/blob/main/LICENSE)
-[![CI](https://img.shields.io/github/actions/workflow/status/oktl/uv-forge/ci.yml?label=CI)](https://github.com/oktl/uv-forge/actions)
+[![License: MIT](https://img.shields.io/github/license/oktl/uv-forger)](https://github.com/oktl/uv-forger/blob/main/LICENSE)
+[![CI](https://img.shields.io/github/actions/workflow/status/oktl/uv-forger/ci.yml?label=CI)](https://github.com/oktl/uv-forger/actions)
 [![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
 [![Built with Flet](https://img.shields.io/badge/built%20with-Flet-0553B1?logo=flet)](https://flet.dev)
 
-UV Forge is a high-performance [Flet](https://flet.dev) desktop application designed to "forge" new Python projects using the [uv](https://docs.astral.sh/uv/) package manager. It bridges the gap between powerful command-line tooling and a visual, intuitive workflow, allowing developers to scaffold production-ready environments in seconds.  
+UV Forger is a high-performance [Flet](https://flet.dev) desktop application designed to "forge" new Python projects using the [uv](https://docs.astral.sh/uv/) package manager. It bridges the gap between powerful command-line tooling and a visual, intuitive workflow, allowing developers to scaffold production-ready environments in seconds.  
 
-Pick a UI framework or project type, (or both), configure your options, and UV Forge generates a fully wired project: folder structure, boilerplate files, package installation, virtual environment, git repo, and pyproject.toml, and optionally does an initial commit  — all in one click.
+Pick a UI framework or project type, (or both), configure your options, and UV Forger generates a fully wired project: folder structure, boilerplate files, package installation, virtual environment, git repo, and pyproject.toml, and optionally does an initial commit  — all in one click.
 
 ---
 
-![UV Forge main window](https://raw.githubusercontent.com/oktl/uv-forge/main/uv_forge/assets/images/main-window.png)
+![UV Forger main window](https://raw.githubusercontent.com/oktl/uv-forger/main/uv_forger/assets/images/main-window.png)
 
 ## ✨ Key Features
 
@@ -65,10 +65,10 @@ uv-forger
 ## Running from Source
 
 ```bash
-git clone https://github.com/oktl/uv-forge.git
-cd uv-forge
+git clone https://github.com/oktl/uv-forger.git
+cd uv-forger
 uv run uv-forger       # Via entry point
-python uv_forge/main.py     # Direct execution
+python uv_forger/main.py     # Direct execution
 ```
 
 ---
@@ -112,16 +112,16 @@ All secondary actions live in the app bar overflow menu:
 
 ## Documentation
 
-Full documentation is available at **[oktl.github.io/uv-forge](https://oktl.github.io/uv-forge/)** — including a user guide, template system reference, and troubleshooting.
+Full documentation is available at **[oktl.github.io/uv-forger](https://oktl.github.io/uv-forger/)** — including a user guide, template system reference, and troubleshooting.
 
 ---
 
 ## Template System
 
-Templates are JSON files in `uv_forge/config/templates/` defining folder structures:
+Templates are JSON files in `uv_forger/config/templates/` defining folder structures:
 
 ```plaintext
-uv_forge/config/templates/
+uv_forger/config/templates/
 ├── ui_frameworks/     # flet.json, pyqt6.json, default.json, etc.
 ├── project_types/     # django.json, fastapi.json, etc.
 └── boilerplate/       # Starter file content
@@ -146,17 +146,17 @@ uv_forge/config/templates/
 
 ### Adding a New Framework or Project Type
 
-1. Add to `UI_FRAMEWORKS` or `PROJECT_TYPE_PACKAGE_MAP` in `uv_forge/core/constants.py`
+1. Add to `UI_FRAMEWORKS` or `PROJECT_TYPE_PACKAGE_MAP` in `uv_forger/core/constants.py`
 2. Add package mapping to `FRAMEWORK_PACKAGE_MAP` (for UI frameworks)
-3. Add display entry to `UI_FRAMEWORK_CATEGORIES` or `PROJECT_TYPE_CATEGORIES` in `uv_forge/ui/dialog_data.py`
+3. Add display entry to `UI_FRAMEWORK_CATEGORIES` or `PROJECT_TYPE_CATEGORIES` in `uv_forger/ui/dialog_data.py`
 4. Create a template JSON in the appropriate subdirectory
-5. (Optional) Drop boilerplate files into `uv_forge/config/templates/boilerplate/` — no code changes needed
+5. (Optional) Drop boilerplate files into `uv_forger/config/templates/boilerplate/` — no code changes needed
 
 ---
 
 ## Git Integration
 
-When **Git Repository** is checked, UV Forge uses a two-phase setup. The behaviour varies by **Git Remote Mode** (configurable in Settings, overridable per-build in the Confirm dialog):
+When **Git Repository** is checked, UV Forger uses a two-phase setup. The behaviour varies by **Git Remote Mode** (configurable in Settings, overridable per-build in the Confirm dialog):
 
 ### Local Bare Repo (default)
 
@@ -177,13 +177,13 @@ When **Git Repository** is checked, UV Forge uses a two-phase setup. The behavio
 
 ## Settings & Persistence
 
-Settings are stored in the platform-appropriate user data directory (e.g. `~/Library/Application Support/UV Forge/` on macOS):
+Settings are stored in the platform-appropriate user data directory (e.g. `~/Library/Application Support/UV Forger/` on macOS):
 
-| File                   | Contents                                                                                |
-| ---------------------- | --------------------------------------------------------------------------------------- |
+| File                   | Contents                                                                                                                                 |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | `settings.json`        | Default path, GitHub root, Python version, IDE, git default, git remote mode, GitHub username, private repos, author, post-build command |
-| `recent_projects.json` | Last 5 successful builds (name, path, config, timestamp)                                |
-| `presets.json`         | Named project configuration presets (no limit)                                          |
+| `recent_projects.json` | Last 5 successful builds (name, path, config, timestamp)                                                                                 |
+| `presets.json`         | Named project configuration presets (no limit)                                                                                           |
 
 Log files rotate daily and are stored in the `logs/` subdirectory alongside settings.
 
@@ -193,17 +193,17 @@ Log files rotate daily and are stored in the `logs/` subdirectory alongside sett
 
 ```bash
 uv run pytest              # Run 619+ tests (coverage automatic)
-uv run ruff check uv_forge      # Lint (runs automatically on commit)
-uv run ruff format uv_forge     # Auto-format
+uv run ruff check uv_forger      # Lint (runs automatically on commit)
+uv run ruff format uv_forger     # Auto-format
 ```
 
-**Running tests:** Uses `pytest-asyncio` in auto mode. All tests are in `tests/` mirroring the `uv_forge/` structure.
+**Running tests:** Uses `pytest-asyncio` in auto mode. All tests are in `tests/` mirroring the `uv_forger/` structure.
 
-**Linting:** Ruff enforces `E`, `F`, `I`, `W`, `UP`, `B`, `SIM` rules. A pre-commit hook lints and format-checks `uv_forge/` automatically.
+**Linting:** Ruff enforces `E`, `F`, `I`, `W`, `UP`, `B`, `SIM` rules. A pre-commit hook lints and format-checks `uv_forger/` automatically.
 
 **Key patterns:**
 
-- All imports use absolute `uv_forge.*` paths
+- All imports use absolute `uv_forger.*` paths
 - `AppState` is the single mutable state object — never duplicated
 - Async handlers wrapped via `wrap_async()` to keep Flet's sync callback system happy
 - `Dropdown.on_select` (not `on_change`) — Flet 0.80+ requirement
@@ -225,10 +225,10 @@ uv run ruff format uv_forge     # Auto-format
 
 ## Contributing
 
-Contributions are welcome! See [CONTRIBUTING.md](https://github.com/oktl/uv-forge/blob/main/CONTRIBUTING.md) for guidelines on reporting bugs, adding templates, and submitting pull requests.
+Contributions are welcome! See [CONTRIBUTING.md](https://github.com/oktl/uv-forger/blob/main/CONTRIBUTING.md) for guidelines on reporting bugs, adding templates, and submitting pull requests.
 
 ---
 
 ## License
 
-[MIT License](https://github.com/oktl/uv-forge/blob/main/LICENSE)
+[MIT License](https://github.com/oktl/uv-forger/blob/main/LICENSE)

@@ -5,7 +5,7 @@ import time
 
 import pytest
 
-from uv_forge.core.async_executor import AsyncExecutor
+from uv_forger.core.async_executor import AsyncExecutor
 
 
 class TestAsyncExecutorClass:

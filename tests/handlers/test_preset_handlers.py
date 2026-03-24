@@ -4,9 +4,9 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from uv_forge.core.preset_manager import ProjectPreset
-from uv_forge.core.state import AppState
-from uv_forge.handlers.ui_handler import Handlers
+from uv_forger.core.preset_manager import ProjectPreset
+from uv_forger.core.state import AppState
+from uv_forger.handlers.ui_handler import Handlers
 
 
 class MockPage:
@@ -18,7 +18,7 @@ class MockPage:
         self.bottom_appbar = Mock(bgcolor=None)
         self.theme_mode = None
         self.window = Mock()
-        self.title = "UV Forge"
+        self.title = "UV Forger"
         self._shown_dialogs = []
 
     def update(self):
@@ -233,7 +233,7 @@ def test_save_current_as_preset(handler_setup):
     state.dev_packages = {"ruff"}
     state.author_name = "Charlie"
 
-    with patch("uv_forge.handlers.build_handlers.add_preset") as mock_add:
+    with patch("uv_forger.handlers.build_handlers.add_preset") as mock_add:
         handlers._save_current_as_preset("My Preset")
 
         mock_add.assert_called_once()
@@ -252,7 +252,7 @@ async def test_on_presets_click_opens_dialog(handler_setup):
     """on_presets_click opens a dialog via page.overlay."""
     handlers, page, controls, state = handler_setup
 
-    with patch("uv_forge.handlers.feature_handlers.load_presets", return_value=[]):
+    with patch("uv_forger.handlers.feature_handlers.load_presets", return_value=[]):
         await handlers.on_presets_click(None)
 
     assert len(page.overlay) == 1
@@ -265,7 +265,7 @@ async def test_on_presets_click_with_presets(handler_setup):
     handlers, page, controls, state = handler_setup
     preset = _make_preset()
 
-    with patch("uv_forge.handlers.feature_handlers.load_presets", return_value=[preset]):
+    with patch("uv_forger.handlers.feature_handlers.load_presets", return_value=[preset]):
         await handlers.on_presets_click(None)
 
     assert len(page.overlay) == 1

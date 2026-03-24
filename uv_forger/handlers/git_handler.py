@@ -1,0 +1,254 @@
+"""Git repository operations.
+
+This module implements a two-phase git setup for newly created projects:
+
+Phase 1 — handle_git_init():
+    Called immediately after uv init. Creates a local git repository in the
+    project directory. Depending on git_remote_mode:
+    - "local": also creates a bare repository (the "hub") and connects it
+      as the 'origin' remote.
+    - "github" or "none": only initializes the local repo (no bare repo).
+
+Phase 2 — finalize_git_setup():
+    Called after all project files and packages have been installed. Stages
+    everything and creates the initial commit. Then depending on git_remote_mode:
+    - "local": pushes to the local bare hub.
+    - "github": creates a GitHub repo via `gh repo create` and pushes.
+    - "none": commit only, no push.
+
+If the user opts out of git, handle_git_init() removes any pre-existing .git
+directory (e.g. one created by uv init) and finalize_git_setup() is a no-op.
+"""
+
+import shutil
+import subprocess
+from pathlib import Path
+
+from loguru import logger
+
+from uv_forger.core.constants import DEFAULT_GIT_HUB_ROOT
+
+
+def get_bare_repo_path(project_path: Path, github_root: Path | None = None) -> Path:
+    """Derive the bare hub repository path for a project.
+
+    Args:
+        project_path: Absolute path to the project directory.
+        github_root: Optional override for the hub directory. Falls back to
+            DEFAULT_GIT_HUB_ROOT when not provided.
+
+    Returns:
+        Path to the corresponding bare repo at <github_root>/<name>.git.
+    """
+    root = github_root if github_root is not None else DEFAULT_GIT_HUB_ROOT
+    return root / f"{project_path.name}.git"
+
+
+def _run_git(
+    cmd: list[str], cwd: Path, *, check: bool = True
+) -> subprocess.CompletedProcess:
+    """Run a git command as a subprocess.
+
+    Args:
+        cmd: Command and arguments to execute.
+        cwd: Working directory for the command.
+        check: Whether to raise CalledProcessError on non-zero exit (default True).
+
+    Returns:
+        CompletedProcess instance with stdout and stderr captured.
+    """
+    return subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, check=check)
+
+
+def check_gh_available() -> bool:
+    """Check whether the GitHub CLI (gh) is installed.
+
+    Returns:
+        True if ``gh --version`` exits successfully, False otherwise.
+    """
+    try:
+        subprocess.run(["gh", "--version"], capture_output=True, text=True, check=True)
+        return True
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return False
+
+
+def check_gh_authenticated() -> bool:
+    """Check whether the GitHub CLI is authenticated.
+
+    Returns:
+        True if ``gh auth status`` exits successfully, False otherwise.
+    """
+    try:
+        subprocess.run(
+            ["gh", "auth", "status"], capture_output=True, text=True, check=True
+        )
+        return True
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return False
+
+
+def handle_git_init(
+    project_path: Path,
+    use_git: bool,
+    github_root: Path | None = None,
+    git_remote_mode: str = "local",
+) -> None:
+    """Phase 1: Create local repository and optionally a bare hub.
+
+    If use_git is True:
+        - Initializes a local git repo in project_path (skipped if .git already
+            exists, e.g. created by uv init).
+        - When git_remote_mode is "local": creates a bare repository at
+            <github_root>/<name>.git and connects it as 'origin'.
+        - When git_remote_mode is "github" or "none": only the local repo
+            is created (no bare repo, no remote).
+
+    If use_git is False:
+        - Removes the .git directory if present and returns immediately.
+
+    Args:
+        project_path: Absolute path to the project directory.
+        use_git: Whether to set up git for this project.
+        github_root: Optional override for the hub directory.
+        git_remote_mode: One of "local", "github", or "none".
+
+    Raises:
+        subprocess.CalledProcessError: If any git command fails.
+    """
+    if not use_git:
+        git_dir = project_path / ".git"
+        if git_dir.exists():
+            logger.info("Removing .git directory (git disabled): {}", project_path)
+            shutil.rmtree(git_dir)
+        return
+
+    logger.info("Initializing git repositories for: {}", project_path.name)
+
+    # Initialize local repo (idempotent)
+    git_dir = project_path / ".git"
+    if not git_dir.exists():
+        result = _run_git(["git", "init", "--initial-branch=main"], cwd=project_path)
+        logger.debug("git init: {}", result.stdout.strip())
+    else:
+        logger.debug("Local .git already exists, skipping git init")
+
+    # Only create bare hub and remote for "local" mode
+    if git_remote_mode == "local":
+        bare_repo_path = get_bare_repo_path(project_path, github_root=github_root)
+        logger.debug("Bare repo path: {}", bare_repo_path)
+        bare_repo_path.mkdir(parents=True, exist_ok=True)
+        if not (bare_repo_path / "HEAD").exists():
+            result = _run_git(["git", "init", "--bare"], cwd=bare_repo_path)
+            logger.debug("git init --bare: {}", result.stdout.strip())
+        else:
+            logger.debug("Bare repo already exists, skipping bare init")
+
+        # Add remote origin (update URL if it already exists)
+        try:
+            _run_git(
+                ["git", "remote", "add", "origin", str(bare_repo_path)],
+                cwd=project_path,
+            )
+            logger.debug("Added remote origin: {}", bare_repo_path)
+        except subprocess.CalledProcessError:
+            logger.debug("Remote origin exists, updating URL to: {}", bare_repo_path)
+            _run_git(
+                ["git", "remote", "set-url", "origin", str(bare_repo_path)],
+                cwd=project_path,
+            )
+
+    logger.info("Git initialized successfully for: {}", project_path.name)
+
+
+def finalize_git_setup(
+    project_path: Path,
+    use_git: bool,
+    git_remote_mode: str = "local",
+    github_username: str = "",
+    github_repo_private: bool = True,
+) -> None:
+    """Phase 2: Stage, commit, and push all project files.
+
+    Called after the full project structure has been written to disk and all
+    packages have been installed. Stages every file in project_path, creates
+    an initial commit, and then:
+    - "local": pushes to the local bare hub.
+    - "github": creates a GitHub repo via ``gh repo create`` and pushes.
+    - "none": commit only, no push.
+
+    Skipped entirely if use_git is False or if there are no files to commit
+    (edge case where the project directory is empty).
+
+    Args:
+        project_path: Absolute path to the project directory.
+        use_git: Whether git was enabled for this project.
+        git_remote_mode: One of "local", "github", or "none".
+        github_username: GitHub username/org for repo creation (empty = gh default).
+        github_repo_private: Whether to create a private GitHub repo.
+
+    Raises:
+        subprocess.CalledProcessError: If git add, commit, or push fails.
+        RuntimeError: If gh is not installed or not authenticated.
+    """
+    if not use_git:
+        return
+
+    logger.info("Finalizing git setup for: {}", project_path.name)
+
+    # Stage all files created during the build process
+    _run_git(["git", "add", "."], cwd=project_path)
+
+    # Only commit if there are staged changes (prevents errors on empty projects)
+    status = _run_git(["git", "status", "--porcelain"], cwd=project_path, check=False)
+    if not status.stdout:
+        logger.warning("No files to commit for: {}", project_path.name)
+        return
+
+    # Verify git identity is configured before attempting to commit
+    identity = _run_git(["git", "config", "user.email"], cwd=project_path, check=False)
+    if not identity.stdout.strip():
+        raise RuntimeError(
+            "Git identity not configured — commit would fail.\n"
+            "Run these commands to fix it:\n"
+            '  git config --global user.name "Your Name"\n'
+            '  git config --global user.email "you@example.com"'
+        )
+
+    result = _run_git(
+        ["git", "commit", "-m", "Initial commit: Full project structure"],
+        cwd=project_path,
+    )
+    logger.debug("git commit: {}", result.stdout.strip())
+
+    if git_remote_mode == "local":
+        result = _run_git(["git", "push", "-u", "origin", "HEAD"], cwd=project_path)
+        logger.debug("git push: {}", result.stdout.strip())
+        logger.info("Initial commit pushed to hub for: {}", project_path.name)
+
+    elif git_remote_mode == "github":
+        # Build the repo name: "username/project" or just "project"
+        repo_name = project_path.name
+        if github_username:
+            repo_name = f"{github_username}/{repo_name}"
+
+        visibility = "--private" if github_repo_private else "--public"
+
+        cmd = [
+            "gh",
+            "repo",
+            "create",
+            repo_name,
+            visibility,
+            "--source=.",
+            "--remote=origin",
+            "--push",
+        ]
+        logger.info("Creating GitHub repo: {}", " ".join(cmd))
+        result = _run_git(cmd, cwd=project_path)
+        logger.debug("gh repo create: {}", result.stdout.strip())
+        logger.info("GitHub repo created and pushed for: {}", project_path.name)
+
+    else:
+        # "none" — commit only, no push
+        logger.info("Git commit complete (no remote push) for: {}", project_path.name)

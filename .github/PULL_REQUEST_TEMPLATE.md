@@ -23,5 +23,5 @@
 ## Checklist
 
 - [ ] Code follows project conventions
-- [ ] Linting passes (`uv run ruff check uv_forge`)
+- [ ] Linting passes (`uv run ruff check uv_forger`)
 - [ ] No new warnings introduced

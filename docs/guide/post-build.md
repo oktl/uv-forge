@@ -1,6 +1,6 @@
 # Post-Build Automation
 
-UV Forge can run a shell command automatically after each successful build. This is useful for setup steps that should happen in every new project.
+UV Forger can run a shell command automatically after each successful build. This is useful for setup steps that should happen in every new project.
 
 ## Common examples
 

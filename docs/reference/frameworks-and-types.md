@@ -2,32 +2,32 @@
 
 ## UI Frameworks
 
-UV Forge includes templates for 10 UI frameworks, organized by category.
+UV Forger includes templates for 10 UI frameworks, organized by category.
 
 ### Desktop GUI
 
-| Framework        | Package          | Description                                    |
-| ---------------- | ---------------- | ---------------------------------------------- |
-| **Flet**         | `flet`           | Cross-platform apps with Flutter, from Python  |
-| **PyQt6**        | `pyqt6`          | Python bindings for Qt 6                       |
-| **PySide6**      | `pyside6`        | Official Qt for Python bindings                |
-| **tkinter**      | *(stdlib)*       | Python's built-in GUI toolkit                  |
-| **customtkinter**| `customtkinter`  | Modern-looking tkinter widgets                 |
-| **Kivy**         | `kivy`           | Cross-platform NUI framework                   |
+| Framework         | Package         | Description                                   |
+| ----------------- | --------------- | --------------------------------------------- |
+| **Flet**          | `flet`          | Cross-platform apps with Flutter, from Python |
+| **PyQt6**         | `pyqt6`         | Python bindings for Qt 6                      |
+| **PySide6**       | `pyside6`       | Official Qt for Python bindings               |
+| **tkinter**       | *(stdlib)*      | Python's built-in GUI toolkit                 |
+| **customtkinter** | `customtkinter` | Modern-looking tkinter widgets                |
+| **Kivy**          | `kivy`          | Cross-platform NUI framework                  |
 
 ### Web & Data
 
-| Framework     | Package      | Description                          |
-| ------------- | ------------ | ------------------------------------ |
-| **NiceGUI**   | `nicegui`    | Web-based UI with Python             |
-| **Streamlit** | `streamlit`  | Data apps and dashboards             |
-| **Gradio**    | `gradio`     | ML model demos and interfaces        |
+| Framework     | Package     | Description                   |
+| ------------- | ----------- | ----------------------------- |
+| **NiceGUI**   | `nicegui`   | Web-based UI with Python      |
+| **Streamlit** | `streamlit` | Data apps and dashboards      |
+| **Gradio**    | `gradio`    | ML model demos and interfaces |
 
 ### Game & Multimedia
 
-| Framework  | Package    | Description                         |
-| ---------- | ---------- | ----------------------------------- |
-| **Pygame** | `pygame`   | Game and multimedia development     |
+| Framework  | Package  | Description                     |
+| ---------- | -------- | ------------------------------- |
+| **Pygame** | `pygame` | Game and multimedia development |
 
 ---
 
@@ -37,54 +37,54 @@ UV Forge includes templates for 10 UI frameworks, organized by category.
 
 ### Web Frameworks
 
-| Type        | Key Packages                | Description                     |
-| ----------- | --------------------------- | ------------------------------- |
-| **Django**  | `django`                    | Full-featured web framework     |
-| **FastAPI** | `fastapi`, `uvicorn`        | Modern async API framework      |
-| **Flask**   | `flask`                     | Lightweight web framework       |
-| **Bottle**  | `bottle`                    | Minimal single-file web framework |
+| Type        | Key Packages         | Description                       |
+| ----------- | -------------------- | --------------------------------- |
+| **Django**  | `django`             | Full-featured web framework       |
+| **FastAPI** | `fastapi`, `uvicorn` | Modern async API framework        |
+| **Flask**   | `flask`              | Lightweight web framework         |
+| **Bottle**  | `bottle`             | Minimal single-file web framework |
 
 ### Data Science & ML
 
-| Type                  | Key Packages                             | Description                      |
-| --------------------- | ---------------------------------------- | -------------------------------- |
-| **Data Analysis**     | `pandas`, `numpy`, `matplotlib`          | Data exploration and visualization |
-| **Machine Learning**  | `scikit-learn`, `pandas`, `numpy`        | Classical ML with scikit-learn   |
-| **Deep Learning (PyTorch)** | `torch`, `torchvision`            | Neural networks with PyTorch     |
-| **Deep Learning (TensorFlow)** | `tensorflow`                  | Neural networks with TensorFlow  |
-| **Computer Vision**   | `opencv-python`, `pillow`                | Image processing and CV          |
+| Type                           | Key Packages                      | Description                        |
+| ------------------------------ | --------------------------------- | ---------------------------------- |
+| **Data Analysis**              | `pandas`, `numpy`, `matplotlib`   | Data exploration and visualization |
+| **Machine Learning**           | `scikit-learn`, `pandas`, `numpy` | Classical ML with scikit-learn     |
+| **Deep Learning (PyTorch)**    | `torch`, `torchvision`            | Neural networks with PyTorch       |
+| **Deep Learning (TensorFlow)** | `tensorflow`                      | Neural networks with TensorFlow    |
+| **Computer Vision**            | `opencv-python`, `pillow`         | Image processing and CV            |
 
 ### CLI Tools
 
-| Type          | Key Packages         | Description                         |
-| ------------- | -------------------- | ----------------------------------- |
-| **Click CLI** | `click`              | CLI with Click                      |
-| **Typer CLI** | `typer[all]`         | CLI with Typer (Click-based, modern)|
-| **Rich CLI**  | `rich`               | Rich terminal output                |
+| Type          | Key Packages | Description                          |
+| ------------- | ------------ | ------------------------------------ |
+| **Click CLI** | `click`      | CLI with Click                       |
+| **Typer CLI** | `typer[all]` | CLI with Typer (Click-based, modern) |
+| **Rich CLI**  | `rich`       | Rich terminal output                 |
 
 ### API Development
 
-| Type            | Key Packages                     | Description                     |
-| --------------- | -------------------------------- | ------------------------------- |
-| **REST API**    | `fastapi`, `uvicorn`             | RESTful API with FastAPI        |
-| **GraphQL**     | `strawberry-graphql`             | GraphQL API with Strawberry     |
-| **gRPC**        | `grpcio`, `grpcio-tools`         | gRPC services                   |
+| Type         | Key Packages             | Description                 |
+| ------------ | ------------------------ | --------------------------- |
+| **REST API** | `fastapi`, `uvicorn`     | RESTful API with FastAPI    |
+| **GraphQL**  | `strawberry-graphql`     | GraphQL API with Strawberry |
+| **gRPC**     | `grpcio`, `grpcio-tools` | gRPC services               |
 
 ### Automation & Scraping
 
-| Type                  | Key Packages              | Description                      |
-| --------------------- | ------------------------- | -------------------------------- |
-| **Web Scraping**      | `beautifulsoup4`, `httpx` | Web scraping with BeautifulSoup  |
-| **Browser Automation**| `playwright`              | Browser automation with Playwright |
-| **Task Scheduling**   | `apscheduler`             | Scheduled tasks with APScheduler |
+| Type                   | Key Packages              | Description                        |
+| ---------------------- | ------------------------- | ---------------------------------- |
+| **Web Scraping**       | `beautifulsoup4`, `httpx` | Web scraping with BeautifulSoup    |
+| **Browser Automation** | `playwright`              | Browser automation with Playwright |
+| **Task Scheduling**    | `apscheduler`             | Scheduled tasks with APScheduler   |
 
 ### Other
 
-| Type                   | Key Packages        | Description                          |
-| ---------------------- | ------------------- | ------------------------------------ |
-| **Basic Python Package** | —                 | Minimal package structure            |
-| **Testing Framework**  | `pytest`            | Test suite setup                     |
-| **Async Applications** | `asyncio` *(stdlib)* | Async/await project structure       |
+| Type                     | Key Packages         | Description                   |
+| ------------------------ | -------------------- | ----------------------------- |
+| **Basic Python Package** | —                    | Minimal package structure     |
+| **Testing Framework**    | `pytest`             | Test suite setup              |
+| **Async Applications**   | `asyncio` *(stdlib)* | Async/await project structure |
 
 ---
 

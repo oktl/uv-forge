@@ -3,8 +3,8 @@
 
 import pytest
 
-from uv_forge.core.constants import DEFAULT_PROJECT_ROOT, DEFAULT_PYTHON_VERSION
-from uv_forge.core.state import AppState
+from uv_forger.core.constants import DEFAULT_PROJECT_ROOT, DEFAULT_PYTHON_VERSION
+from uv_forger.core.state import AppState
 
 
 def test_appstate_initialization():

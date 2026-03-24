@@ -1,9 +1,9 @@
-site_name: UV Forge
-site_url: https://oktl.github.io/uv-forge/
+site_name: UV Forger
+site_url: https://oktl.github.io/uv-forger/
 site_description: A desktop app for forging Python projects with UV — templates, frameworks, and smart scaffolding
 site_author: Tim Lang
-repo_url: https://github.com/oktl/uv-forge
-repo_name: oktl/uv-forge
+repo_url: https://github.com/oktl/uv-forger
+repo_name: oktl/uv-forger
 
 theme:
   name: material

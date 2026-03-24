@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Pytest tests for constants.py — structural consistency checks."""
 
-from uv_forge.core.constants import (
+from uv_forger.core.constants import (
     DEFAULT_FRAMEWORK,
     DEFAULT_PYTHON_VERSION,
     FRAMEWORK_ENTRY_POINT_MAP,

@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from uv_forge.core.validator import (
+from uv_forger.core.validator import (
     _MAX_NAME_LENGTH,
     validate_folder_name,
     validate_path,

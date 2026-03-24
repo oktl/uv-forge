@@ -6,8 +6,8 @@ from unittest.mock import Mock, patch
 import flet as ft
 import pytest
 
-from uv_forge.core.state import AppState
-from uv_forge.handlers.ui_handler import Handlers
+from uv_forger.core.state import AppState
+from uv_forger.handlers.ui_handler import Handlers
 
 
 class MockPage:
@@ -63,8 +63,8 @@ async def test_on_log_viewer_click(handler_setup, tmp_path):
     )
 
     with patch(
-        "uv_forge.handlers.feature_handlers.LOG_DIR", tmp_path / "logs"
-    ), patch("uv_forge.handlers.feature_handlers.date") as mock_date:
+        "uv_forger.handlers.feature_handlers.LOG_DIR", tmp_path / "logs"
+    ), patch("uv_forger.handlers.feature_handlers.date") as mock_date:
         mock_date.today.return_value = type(
             "D", (), {"__format__": lambda self, fmt: "2026-02-19"}
         )()
@@ -82,8 +82,8 @@ async def test_on_log_viewer_click_no_file(handler_setup, tmp_path):
     handlers, page, controls, state = handler_setup
 
     with patch(
-        "uv_forge.handlers.feature_handlers.LOG_DIR", tmp_path / "logs"
-    ), patch("uv_forge.handlers.feature_handlers.date") as mock_date:
+        "uv_forger.handlers.feature_handlers.LOG_DIR", tmp_path / "logs"
+    ), patch("uv_forger.handlers.feature_handlers.date") as mock_date:
         mock_date.today.return_value = type(
             "D", (), {"__format__": lambda self, fmt: "2026-02-19"}
         )()
@@ -101,14 +101,14 @@ def test_open_file_in_ide(handler_setup, tmp_path):
     state.settings.preferred_ide = "VS Code"
 
     # Create the target file
-    mod_dir = tmp_path / "uv_forge" / "core"
+    mod_dir = tmp_path / "uv_forger" / "core"
     mod_dir.mkdir(parents=True)
     (mod_dir / "state.py").write_text("# state")
 
     with patch(
-        "uv_forge.handlers.feature_handlers._APP_ROOT", tmp_path
-    ), patch("uv_forge.handlers.feature_handlers.subprocess") as mock_sub:
-        handlers._open_file_in_ide("uv_forge.core.state", 42)
+        "uv_forger.handlers.feature_handlers._APP_ROOT", tmp_path
+    ), patch("uv_forger.handlers.feature_handlers.subprocess") as mock_sub:
+        handlers._open_file_in_ide("uv_forger.core.state", 42)
 
     mock_sub.Popen.assert_called_once()
 
@@ -118,8 +118,8 @@ def test_open_file_in_ide_missing_file(handler_setup, tmp_path):
     handlers, page, controls, state = handler_setup
 
     with patch(
-        "uv_forge.handlers.feature_handlers._APP_ROOT", tmp_path
-    ), patch("uv_forge.handlers.feature_handlers.subprocess") as mock_sub:
+        "uv_forger.handlers.feature_handlers._APP_ROOT", tmp_path
+    ), patch("uv_forger.handlers.feature_handlers.subprocess") as mock_sub:
         handlers._open_file_in_ide("app.nonexistent.module", 1)
 
     mock_sub.Popen.assert_not_called()

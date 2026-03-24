@@ -7,9 +7,9 @@ from unittest.mock import Mock, call, patch
 
 import pytest
 
-from uv_forge.core.settings_manager import AppSettings
-from uv_forge.core.state import AppState
-from uv_forge.handlers.build_handlers import BuildHandlersMixin
+from uv_forger.core.settings_manager import AppSettings
+from uv_forger.core.state import AppState
+from uv_forger.handlers.build_handlers import BuildHandlersMixin
 
 
 class TestOpenInFileManager:
@@ -105,14 +105,14 @@ class TestRunPostBuildCommand:
 
     def test_empty_command_is_noop(self, tmp_path):
         mixin = self._make_mixin()
-        with patch("uv_forge.handlers.build_handlers.subprocess.run") as mock_run:
+        with patch("uv_forger.handlers.build_handlers.subprocess.run") as mock_run:
             mixin._run_post_build_command(tmp_path, "")
         mock_run.assert_not_called()
         mixin._show_snackbar.assert_not_called()
 
     def test_whitespace_only_command_is_noop(self, tmp_path):
         mixin = self._make_mixin()
-        with patch("uv_forge.handlers.build_handlers.subprocess.run") as mock_run:
+        with patch("uv_forger.handlers.build_handlers.subprocess.run") as mock_run:
             mixin._run_post_build_command(tmp_path, "   ")
         mock_run.assert_not_called()
 
@@ -120,7 +120,7 @@ class TestRunPostBuildCommand:
         mixin = self._make_mixin()
         mock_result = Mock(returncode=0, stdout="ok", stderr="")
         with patch(
-            "uv_forge.handlers.build_handlers.subprocess.run", return_value=mock_result
+            "uv_forger.handlers.build_handlers.subprocess.run", return_value=mock_result
         ) as mock_run:
             mixin._run_post_build_command(tmp_path, "echo hello")
         mock_run.assert_called_once_with(
@@ -137,7 +137,7 @@ class TestRunPostBuildCommand:
         mixin = self._make_mixin()
         mock_result = Mock(returncode=1, stdout="", stderr="bad input")
         with patch(
-            "uv_forge.handlers.build_handlers.subprocess.run", return_value=mock_result
+            "uv_forger.handlers.build_handlers.subprocess.run", return_value=mock_result
         ):
             mixin._run_post_build_command(tmp_path, "false")
         mixin._show_snackbar.assert_called_once_with(
@@ -147,7 +147,7 @@ class TestRunPostBuildCommand:
     def test_timeout_shows_error(self, tmp_path):
         mixin = self._make_mixin()
         with patch(
-            "uv_forge.handlers.build_handlers.subprocess.run",
+            "uv_forger.handlers.build_handlers.subprocess.run",
             side_effect=subprocess.TimeoutExpired("cmd", 30),
         ):
             mixin._run_post_build_command(tmp_path, "sleep 60")
@@ -158,7 +158,7 @@ class TestRunPostBuildCommand:
     def test_unexpected_exception_shows_error(self, tmp_path):
         mixin = self._make_mixin()
         with patch(
-            "uv_forge.handlers.build_handlers.subprocess.run",
+            "uv_forger.handlers.build_handlers.subprocess.run",
             side_effect=OSError("no such file"),
         ):
             mixin._run_post_build_command(tmp_path, "nonexistent")
@@ -172,7 +172,7 @@ class TestRunPostBuildCommand:
         project_dir.mkdir()
         mock_result = Mock(returncode=0, stdout="", stderr="")
         with patch(
-            "uv_forge.handlers.build_handlers.subprocess.run", return_value=mock_result
+            "uv_forger.handlers.build_handlers.subprocess.run", return_value=mock_result
         ) as mock_run:
             mixin._run_post_build_command(project_dir, "ls")
         assert mock_run.call_args[1]["cwd"] == str(project_dir)

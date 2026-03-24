@@ -29,9 +29,9 @@ Settings are stored as JSON in the platform-appropriate user data directory:
 
 | Platform | Path                                              |
 | -------- | ------------------------------------------------- |
-| macOS    | `~/Library/Application Support/UV Forge/`         |
-| Linux    | `~/.local/share/UV Forge/`                        |
-| Windows  | `%LOCALAPPDATA%/UV Forge/`                        |
+| macOS    | `~/Library/Application Support/UV Forger/`         |
+| Linux    | `~/.local/share/UV Forger/`                        |
+| Windows  | `%LOCALAPPDATA%/UV Forger/`                        |
 
 Three files are stored here:
 

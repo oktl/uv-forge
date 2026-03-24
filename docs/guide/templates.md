@@ -1,11 +1,11 @@
 # Templates
 
-UV Forge uses a JSON-based template system to define project structures. Templates live in `uv_forge/config/templates/` and determine which folders, files, and packages are created for each project.
+UV Forger uses a JSON-based template system to define project structures. Templates live in `uv_forger/config/templates/` and determine which folders, files, and packages are created for each project.
 
 ## Template directory layout
 
 ```
-uv_forge/config/templates/
+uv_forger/config/templates/
 ├── ui_frameworks/        # One JSON per UI framework
 │   ├── flet.json
 │   ├── pyqt6.json
@@ -69,7 +69,7 @@ The first one found is used. Project type templates follow the same pattern with
 
 ## Template merging
 
-When you select **both** a UI framework and a project type, UV Forge merges their templates:
+When you select **both** a UI framework and a project type, UV Forger merges their templates:
 
 - **Matching folders** (same name) are merged recursively — files are unioned, `create_init` and `root_level` are OR'd, subfolders are merged the same way
 - **Unmatched folders** from both templates are included as-is
@@ -79,7 +79,7 @@ This means selecting "Flet" + "FastAPI" gives you a project with the folder stru
 
 ## Smart scaffolding (boilerplate)
 
-When files are created during a build, UV Forge looks for starter content instead of creating empty files. The lookup follows a fallback chain:
+When files are created during a build, UV Forger looks for starter content instead of creating empty files. The lookup follows a fallback chain:
 
 ```mermaid
 flowchart TD
@@ -102,7 +102,7 @@ flowchart TD
 
 Boilerplate files can use `{{project_name}}` as a placeholder. At build time, it's replaced with a title-case version of the project name (e.g., `my_app` becomes `My App`).
 
-User templates are stored in the platform data directory by default (e.g., `~/.config/UV Forge/templates/boilerplate/` on Linux) or at a custom path configured in [Settings](settings.md).
+User templates are stored in the platform data directory by default (e.g., `~/.config/UV Forger/templates/boilerplate/` on Linux) or at a custom path configured in [Settings](settings.md).
 
 ## File content editing
 
@@ -174,27 +174,27 @@ Files with custom content (edited or imported) show a **✎** pencil indicator i
 When you save from the editor (++cmd+s++), your content is persisted to a user templates directory. These user templates sit at the **top** of the [boilerplate fallback chain](#smart-scaffolding-boilerplate), so they override built-in content for all future projects.
 
 - The default storage location is platform-dependent:
-    - `~/Library/Application Support/UV Forge/templates/boilerplate/` on macOS
-    - `%LOCALAPPDATA%/UV Forge/` on Windows
-    - `~/.config/UV Forge/templates/boilerplate/` on Linux 
+    - `~/Library/Application Support/UV Forger/templates/boilerplate/` on macOS
+    - `%LOCALAPPDATA%/UV Forger/` on Windows
+    - `~/.config/UV Forger/templates/boilerplate/` on Linux 
 - You can **set a custom path** in [Settings](settings.md).
 
 ## Adding a new template
 
 ### New UI framework
 
-1. Add the framework name to `UI_FRAMEWORKS` in `uv_forge/core/constants.py`
+1. Add the framework name to `UI_FRAMEWORKS` in `uv_forger/core/constants.py`
 2. Add its package to `FRAMEWORK_PACKAGE_MAP` in the same file
-3. Add a display entry to `UI_FRAMEWORK_CATEGORIES` in `uv_forge/ui/dialog_data.py`
-4. Create `uv_forge/config/templates/ui_frameworks/<name>.json`
-5. Optionally add boilerplate files to `uv_forge/config/templates/boilerplate/ui_frameworks/<name>/`
+3. Add a display entry to `UI_FRAMEWORK_CATEGORIES` in `uv_forger/ui/dialog_data.py`
+4. Create `uv_forger/config/templates/ui_frameworks/<name>.json`
+5. Optionally add boilerplate files to `uv_forger/config/templates/boilerplate/ui_frameworks/<name>/`
 
 ### New project type
 
-1. Add the type and its packages to `PROJECT_TYPE_PACKAGE_MAP` in `uv_forge/core/constants.py`
-2. Add a display entry to `PROJECT_TYPE_CATEGORIES` in `uv_forge/ui/dialog_data.py`
-3. Create `uv_forge/config/templates/project_types/<name>.json`
-4. Optionally add boilerplate files to `uv_forge/config/templates/boilerplate/project_types/<name>/`
+1. Add the type and its packages to `PROJECT_TYPE_PACKAGE_MAP` in `uv_forger/core/constants.py`
+2. Add a display entry to `PROJECT_TYPE_CATEGORIES` in `uv_forger/ui/dialog_data.py`
+3. Create `uv_forger/config/templates/project_types/<name>.json`
+4. Optionally add boilerplate files to `uv_forger/config/templates/boilerplate/project_types/<name>/`
 
 !!! tip
     Adding boilerplate is just dropping files into the right directory — no code changes needed. Look at existing templates for reference.

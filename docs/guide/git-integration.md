@@ -1,10 +1,10 @@
 # Git Integration
 
-When **Git Repository** is checked, UV Forge sets up a complete git workflow using a two-phase approach. The exact behaviour depends on the **Git Remote Mode** you choose.
+When **Git Repository** is checked, UV Forger sets up a complete git workflow using a two-phase approach. The exact behaviour depends on the **Git Remote Mode** you choose.
 
 ## Git remote modes
 
-UV Forge supports three remote modes, configurable in [Settings](settings.md) and overridable per-build in the Confirm dialog:
+UV Forger supports three remote modes, configurable in [Settings](settings.md) and overridable per-build in the Confirm dialog:
 
 | Mode                          | Remote created                        | Push after commit? |
 | ----------------------------- | ------------------------------------- | ------------------ |
@@ -83,7 +83,7 @@ These can also be overridden per-build in the Confirm dialog.
 
 ### Requirements
 
-GitHub mode requires the `gh` CLI to be installed and authenticated. UV Forge runs pre-flight checks before starting the build:
+GitHub mode requires the `gh` CLI to be installed and authenticated. UV Forger runs pre-flight checks before starting the build:
 
 1. **`gh` installed** — checks that `gh --version` succeeds
 2. **`gh` authenticated** — checks that `gh auth status` succeeds

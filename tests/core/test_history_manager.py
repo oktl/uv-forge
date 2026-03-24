@@ -5,7 +5,7 @@ from unittest.mock import patch
 
 import pytest
 
-from uv_forge.core.history_manager import (
+from uv_forger.core.history_manager import (
     HISTORY_FILE,
     MAX_HISTORY_ENTRIES,
     ProjectHistoryEntry,
@@ -41,8 +41,8 @@ def _make_entry(name: str = "my-project", path: str = "/tmp/projects", **kwargs)
 def _use_tmp_history(tmp_path, monkeypatch):
     """Redirect HISTORY_FILE to a temp directory for every test."""
     tmp_file = tmp_path / "recent_projects.json"
-    monkeypatch.setattr("uv_forge.core.history_manager.HISTORY_FILE", tmp_file)
-    monkeypatch.setattr("uv_forge.core.history_manager.SETTINGS_DIR", tmp_path)
+    monkeypatch.setattr("uv_forger.core.history_manager.HISTORY_FILE", tmp_file)
+    monkeypatch.setattr("uv_forger.core.history_manager.SETTINGS_DIR", tmp_path)
 
 
 def test_load_empty():
@@ -88,7 +88,7 @@ def test_deduplication():
 def test_corrupt_json_returns_empty(tmp_path, monkeypatch):
     """Gracefully returns empty list for corrupt JSON."""
     tmp_file = tmp_path / "recent_projects.json"
-    monkeypatch.setattr("uv_forge.core.history_manager.HISTORY_FILE", tmp_file)
+    monkeypatch.setattr("uv_forger.core.history_manager.HISTORY_FILE", tmp_file)
     tmp_file.write_text("{not valid json!!!", encoding="utf-8")
     assert load_history() == []
 
@@ -96,7 +96,7 @@ def test_corrupt_json_returns_empty(tmp_path, monkeypatch):
 def test_forward_compatible(tmp_path, monkeypatch):
     """Ignores unknown keys in stored JSON."""
     tmp_file = tmp_path / "recent_projects.json"
-    monkeypatch.setattr("uv_forge.core.history_manager.HISTORY_FILE", tmp_file)
+    monkeypatch.setattr("uv_forger.core.history_manager.HISTORY_FILE", tmp_file)
     data = [
         {
             "project_name": "test",
@@ -151,6 +151,6 @@ def test_make_history_entry_sets_timestamp():
 def test_non_list_json_returns_empty(tmp_path, monkeypatch):
     """Returns empty list if JSON root is not a list."""
     tmp_file = tmp_path / "recent_projects.json"
-    monkeypatch.setattr("uv_forge.core.history_manager.HISTORY_FILE", tmp_file)
+    monkeypatch.setattr("uv_forger.core.history_manager.HISTORY_FILE", tmp_file)
     tmp_file.write_text('{"key": "value"}', encoding="utf-8")
     assert load_history() == []

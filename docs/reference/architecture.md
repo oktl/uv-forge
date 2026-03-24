@@ -1,6 +1,6 @@
 # Architecture
 
-This page is a map of the UV Forge codebase for contributors.
+This page is a map of the UV Forger codebase for contributors.
 It covers module responsibilities, key patterns, and how data flows through the app.
 
 ---

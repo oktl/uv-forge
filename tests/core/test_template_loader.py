@@ -5,7 +5,7 @@ import tempfile
 from pathlib import Path
 from unittest.mock import patch
 
-from uv_forge.core.template_loader import TemplateLoader
+from uv_forger.core.template_loader import TemplateLoader
 
 
 class TestTemplateLoaderInit:
@@ -246,7 +246,7 @@ class TestLoadConfigProjectTypePath:
 
         assert "folders" in config
         # Should have fallen back to DEFAULT_FOLDERS
-        from uv_forge.core.constants import DEFAULT_FOLDERS
+        from uv_forger.core.constants import DEFAULT_FOLDERS
         assert config["folders"] == DEFAULT_FOLDERS.copy()
 
 

@@ -1,6 +1,6 @@
 # PyPI Name Checker
 
-UV Forge can check whether your chosen project name is available on PyPI before you build. This helps avoid naming conflicts with existing packages.
+UV Forger can check whether your chosen project name is available on PyPI before you build. This helps avoid naming conflicts with existing packages.
 
 ## How to use it
 
@@ -16,7 +16,7 @@ Results appear below the field:
 
 ## Name normalization
 
-PyPI uses [PEP 503](https://peps.python.org/pep-0503/) normalization, which means `my_app`, `my-app`, and `My.App` are all treated as the same package name. UV Forge applies the same normalization before checking, so you'll get an accurate result regardless of how you format the name.
+PyPI uses [PEP 503](https://peps.python.org/pep-0503/) normalization, which means `my_app`, `my-app`, and `My.App` are all treated as the same package name. UV Forger applies the same normalization before checking, so you'll get an accurate result regardless of how you format the name.
 
 ## Package validation in the Add Packages dialog
 

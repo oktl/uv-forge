@@ -7,9 +7,9 @@ from unittest.mock import Mock
 import flet as ft
 import pytest
 
-from uv_forge.core.state import AppState
-from uv_forge.handlers.folder_handlers import get_canonical_file_path
-from uv_forge.handlers.ui_handler import Handlers
+from uv_forger.core.state import AppState
+from uv_forger.handlers.folder_handlers import get_canonical_file_path
+from uv_forger.handlers.ui_handler import Handlers
 
 
 # --- Reuse mock classes from test_ui_handler ---
@@ -52,7 +52,7 @@ class MockPage:
         self.theme_mode = None
         self.window = Mock()
         self.opened_controls = []
-        self.title = "UV Forge"
+        self.title = "UV Forger"
         self.route = "/"
         self.views = [Mock()]  # simulate the default home view
 
@@ -200,7 +200,7 @@ class TestFileOverridesInBuild:
     """Tests that file_overrides take priority over boilerplate during build."""
 
     def test_override_wins_over_boilerplate(self):
-        from uv_forge.handlers.filesystem_handler import create_folders
+        from uv_forger.handlers.filesystem_handler import create_folders
 
         with tempfile.TemporaryDirectory() as tmpdir:
             folders = [
@@ -216,7 +216,7 @@ class TestFileOverridesInBuild:
             assert content == "# custom content here"
 
     def test_no_override_falls_through(self):
-        from uv_forge.handlers.filesystem_handler import create_folders
+        from uv_forger.handlers.filesystem_handler import create_folders
 
         with tempfile.TemporaryDirectory() as tmpdir:
             folders = [
@@ -228,7 +228,7 @@ class TestFileOverridesInBuild:
             assert (Path(tmpdir) / "core" / "state.py").read_text() == ""
 
     def test_nested_override(self):
-        from uv_forge.handlers.filesystem_handler import create_folders
+        from uv_forger.handlers.filesystem_handler import create_folders
 
         with tempfile.TemporaryDirectory() as tmpdir:
             folders = [
@@ -341,7 +341,7 @@ class TestCreateFileEditorView:
     """Tests for the create_file_editor_view function."""
 
     def test_returns_ft_view(self):
-        from uv_forge.ui.dialogs import create_file_editor_view
+        from uv_forger.ui.dialogs import create_file_editor_view
 
         view = create_file_editor_view(
             filename="main.py",
@@ -355,7 +355,7 @@ class TestCreateFileEditorView:
         assert view.route == "/editor"
 
     def test_view_has_editor_attribute(self):
-        from uv_forge.ui.dialogs import create_file_editor_view
+        from uv_forger.ui.dialogs import create_file_editor_view
 
         view = create_file_editor_view(
             filename="main.py",
@@ -369,7 +369,7 @@ class TestCreateFileEditorView:
         assert view.editor._current_path == "main.py"
 
     def test_bare_filename_without_user_template_path(self):
-        from uv_forge.ui.dialogs import create_file_editor_view
+        from uv_forger.ui.dialogs import create_file_editor_view
 
         view = create_file_editor_view(
             filename="main.py",
@@ -383,10 +383,10 @@ class TestCreateFileEditorView:
         assert view.editor._title_bar.value == "main.py"
 
     def test_user_template_path_sets_current_path(self):
-        from uv_forge.ui.dialogs import create_file_editor_view
+        from uv_forger.ui.dialogs import create_file_editor_view
 
         user_path = str(
-            Path.home() / "Library/Application Support/UV Forge/boilerplate/flet/main.py"
+            Path.home() / "Library/Application Support/UV Forger/boilerplate/flet/main.py"
         )
         view = create_file_editor_view(
             filename="main.py",
@@ -400,10 +400,10 @@ class TestCreateFileEditorView:
         assert view.editor._current_path == user_path
 
     def test_user_template_path_sets_tilde_display(self):
-        from uv_forge.ui.dialogs import create_file_editor_view
+        from uv_forger.ui.dialogs import create_file_editor_view
 
         user_path = str(
-            Path.home() / "Library/Application Support/UV Forge/boilerplate/flet/main.py"
+            Path.home() / "Library/Application Support/UV Forger/boilerplate/flet/main.py"
         )
         view = create_file_editor_view(
             filename="main.py",
@@ -418,7 +418,7 @@ class TestCreateFileEditorView:
         assert "main.py" in view.editor._title_bar.value
 
     def test_user_template_path_none_falls_back_to_filename(self):
-        from uv_forge.ui.dialogs import create_file_editor_view
+        from uv_forger.ui.dialogs import create_file_editor_view
 
         view = create_file_editor_view(
             filename="state.py",
@@ -434,7 +434,7 @@ class TestCreateFileEditorView:
 
     def test_editor_has_keyboard_shortcuts_disabled(self):
         """Editor should have register_keyboard_shortcuts=False so the app handles them."""
-        from uv_forge.ui.dialogs import create_file_editor_view
+        from uv_forger.ui.dialogs import create_file_editor_view
 
         view = create_file_editor_view(
             filename="main.py",
