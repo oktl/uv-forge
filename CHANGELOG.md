@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Renamed project and package to uv-forger and uv_forge to sync with PyPi release.
+- Renamed project and package to uv-forger and uv_forger to sync with PyPi release.
 
 ## [0.3.4]
 
